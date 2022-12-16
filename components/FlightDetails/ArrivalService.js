@@ -223,6 +223,25 @@ export default function ArrivalService({navigation}) {
     tarrival[arrayIndex].file.splice(index, 1);
     setArrival(tarrival);
   };
+
+  const [crewmove,setcrewmove]=useState(false);
+  const [crewmovenum,setcrewmovenum]=useState(0);
+  const addCrewMovement=()=>{
+    setcrewmove(true);
+    setcrewmovenum(crewmovenum+1);
+  }
+
+  const removeCrewMovement=()=>{
+    var x=crewmovenum;
+        x=x-1;
+        if(x==0){ 
+          setcrewmove(false);
+          setcrewmovenum(0)
+        }else{
+          setcrewmovenum(x);
+        }
+  }
+  
   return (
     <View>
       <View
@@ -665,7 +684,7 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={addMovement}
+                onPress={()=>addMovement(true)}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Movement
@@ -782,6 +801,7 @@ export default function ArrivalService({navigation}) {
                 </View>
               );
             })}
+            
           </View>
 
           {/* ---------------------------Catering-----------------------*/}
@@ -1879,6 +1899,45 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event => setArrivalcheck(9)}>
+                <Icons
+                  name={
+                    arrival[9].checked
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={arrival[9].checked ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Crew Visa on Arrival</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 20,
+              }}>
+              <TouchableOpacity onPress={event => setArrivalcheck(12)}>
+                <Icons
+                  name={
+                    arrival[12].checked
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={arrival[12].checked ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>VOA Not Required</Text>
+            </View>
           
             <Text style={styleSheet.label}>
               Crew Completed CIQ (Local Time)
@@ -2016,6 +2075,140 @@ export default function ArrivalService({navigation}) {
                 }}
               />
             </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={()=>addCrewMovement(true)}
+                style={[styleSheet.button]}>
+                <Text style={{color: 'white', textAlign: 'center'}}>
+                  Add Transport
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {
+              
+                crewmove && 
+                
+    
+                [...Array(crewmovenum)].map((data,index)=>{
+                  return(
+                    <View key={index} style={{marginTop: 20}}>
+                    <View
+                      style={{
+                        borderBottomWidth: 1,
+                        borderBottomColor: 'rgba(0,0,0,0.4)',
+                        marginBottom: 20,
+                      }}></View>
+                    <View style={{alignItems: 'flex-end'}}>
+                      <TouchableOpacity
+                        style={styleSheet.label}
+                        onPress={() => removeCrewMovement()}>
+                        <Icons name="minus-box-outline" color="red" size={30} />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styleSheet.label}>
+                      Actual Transport Arrival Time at Airport (Local Time)
+                    </Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TouchableOpacity
+                        style={styleSheet.picker}
+                        onPress={() =>
+                          showDatePicker('time', 60, index, 'arrival')
+                        }>
+                        <Text style={{fontSize: 20, color: 'black'}}>
+                          {'dd/mm/yy'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => setNow(60, index, 'arrival')}
+                        style={{padding: 10}}>
+                        <Text
+                          style={{
+                            fontSize: Dimensions.get('window').width / 25,
+                            color: 'green',
+                          }}>
+                          Time Now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styleSheet.label}>
+                      Time Pax Boarded Transport at Airport (Local Time)
+                    </Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TouchableOpacity
+                        style={styleSheet.picker}
+                        onPress={() =>
+                          showDatePicker('time', 60, index, 'boarded')
+                        }>
+                        <Text style={{fontSize: 20, color: 'black'}}>
+                          {'dd/mm/yy'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => setNow(60, index, 'boarded')}
+                        style={{padding: 10}}>
+                        <Text
+                          style={{
+                            fontSize: Dimensions.get('window').width / 25,
+                            color: 'green',
+                          }}>
+                          Time Now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styleSheet.label}>
+                      Pax Departed from Terminal (Local Time)
+                    </Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TouchableOpacity
+                        style={styleSheet.picker}
+                        onPress={() =>
+                          showDatePicker('time', 60, index, 'departed')
+                        }>
+                        <Text style={{fontSize: 20, color: 'black'}}>
+                          {'dd/mm/yy'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => setNow(60, index, 'departed')}
+                        style={{padding: 10}}>
+                        <Text
+                          style={{
+                            fontSize: Dimensions.get('window').width / 25,
+                            color: 'green',
+                          }}>
+                          Time Now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+  
+                    <Text style={styleSheet.label}>Remarks</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        multiline={true}
+                        placeholder="Pax Name"
+                        numberOfLines={2}
+                        //value={val.remarks}
+                        onChangeText={text => {
+                          var tarrival = [...arrival];
+                          tarrival[60][index].remarks = text;
+                          setArrival(tarrival);
+                        }}
+                      />
+                    </View>
+                  </View>
+                  )
+                })
+                  
+            }
+          </View>
+          {/** CREW MOVE END */}
             <Text style={styleSheet.label}>Driver Contact Number</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -2057,7 +2250,7 @@ export default function ArrivalService({navigation}) {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginVertical: 20,
+                marginVertical: 10,
               }}>
               <Text style={styleSheet.label}>Map of Route to Hotel</Text>
               <TouchableOpacity
@@ -2141,7 +2334,7 @@ export default function ArrivalService({navigation}) {
                 }}
               />
             </View>
-          </View>
+          
           <Text style={styleSheet.label}>Additional Remarks</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <TextInput
