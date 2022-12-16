@@ -232,6 +232,26 @@ export default function PreDepartureChecklist({navigation}) {
             />
           </View>
 
+          <Text style={styleSheet.label}>Crew  Transport :</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+              <Text style={styleSheet.label}>Crew Pickup Time (Local Time)</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <TouchableOpacity
+              style={styleSheet.picker}
+              onPress={() => showDatePickerDeparture('datetime', 3)}>
+              <Text style={{fontSize: 20, color: 'black'}}>
+                {pdeparturecheck[3] ? pdeparturecheck[3] : 'dd/mm/yy, -- : --'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
           <View
             style={{
               flexDirection: 'row',
@@ -293,16 +313,6 @@ export default function PreDepartureChecklist({navigation}) {
               })}
             </View>
           )}
-          <Text style={styleSheet.label}>Crew Pickup Time (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePickerDeparture('datetime', 3)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {pdeparturecheck[3] ? pdeparturecheck[3] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-          </View>
           <Text style={styleSheet.label}>Pax Pickup Time (Local Time)</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <TouchableOpacity
@@ -1125,6 +1135,7 @@ export default function PreDepartureChecklist({navigation}) {
             }) 
               
             }
+            </View>
 
 <RBSheet
         ref={refRBSheet}
