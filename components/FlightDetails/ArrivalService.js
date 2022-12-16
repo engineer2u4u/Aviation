@@ -1,5 +1,6 @@
 import {
   View,
+  Dimensions,
   StyleSheet,
   SafeAreaView,
   FlatList,
@@ -8,7 +9,6 @@ import {
   TextInput,
   Button,
   Switch,
-  Dimensions,
   ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -16,10 +16,15 @@ import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
+import RBSheet from "react-native-raw-bottom-sheet";
 import Loader from '../Loader';
+
+const {width,height} = Dimensions.get('window');
 
 export default function ArrivalService({navigation}) {
   const currentPicker = useRef(0);
+  const refRBSheet = useRef();
+
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
   const [disabled, setdisabled] = useState({
@@ -377,7 +382,8 @@ export default function ArrivalService({navigation}) {
                 }}
               />
               <TouchableOpacity
-                onPress={event => onPressDocPreA(6)}
+                //onPress={event => onPressDocPreA(6)}
+                onPress={() => refRBSheet.current.open()}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 10,
@@ -841,7 +847,8 @@ export default function ArrivalService({navigation}) {
                 Catering Equipment List / Photo
               </Text>
               <TouchableOpacity
-                onPress={event => onPressDocPreA(16)}
+                //onPress={event => onPressDocPreA(16)}
+                onPress={() => refRBSheet.current.open()}
                 disabled={arrival[20].checked}
                 style={{
                   marginLeft: 10,
@@ -1889,7 +1896,7 @@ export default function ArrivalService({navigation}) {
                   size={40}
                 />
               </TouchableOpacity>
-              <Text style={styleSheet.label}>Crew Visa on Arrival</Text>
+              <Text style={styleSheet.label}> Pax Notified on Meeting Point</Text>
             </View>
             <Text style={styleSheet.label}>
               Crew Completed CIQ (Local Time)
@@ -2005,7 +2012,8 @@ export default function ArrivalService({navigation}) {
               }}>
               <Text style={styleSheet.label}>Map of Route to Hotel</Text>
               <TouchableOpacity
-                onPress={event => onPressDocPreA(54)}
+                //onPress={event => onPressDocPreA(54)}
+                onPress={() => refRBSheet.current.open()}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
@@ -2107,6 +2115,36 @@ export default function ArrivalService({navigation}) {
           onCancel={hideDatePicker}
           is24Hour={true}
         />
+         <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={true}
+        closeOnPressMask={false}
+        height={height/4}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "#00000056"
+          },
+          draggableIcon: {
+            backgroundColor: "#000"
+          }
+        }}
+      >
+       <View style={{flex:1,paddingLeft:20}}>
+        <View style={{flex:1}}>
+          <Text style={{color:"black",fontSize:22}}>Upload Image</Text>
+        </View>
+        <View style={{flex:1.5,flexDirection:"column"}}>
+          <TouchableOpacity style={{flex:1,flexDirection:'row',justifyContent:'flex-start'}}>
+            <Icons name="camera-outline" size={25} color={"black"} />
+            <Text style={{color:"black",fontSize:18,paddingLeft:20}}>Camera</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={()=>onPressDocPreA(6)} style={{flex:1,flexDirection:'row',justifyContent:'flex-start'}}>
+            <Icons name="image-outline" size={25} color={"black"} />
+            <Text style={{color:"black",fontSize:18,paddingLeft:20}}>Gallery</Text>
+          </TouchableOpacity>
+        </View>
+       </View>
+      </RBSheet>
       </ScrollView>
     </View>
   );

@@ -6164,6 +6164,11 @@
     "color" "^3.1.2"
     "react-native-iphone-x-helper" "^1.3.1"
 
+"react-native-raw-bottom-sheet@^2.2.0":
+  "integrity" "sha512-qL4JKIqvbcVxbkKzeh51hjV7suoJN3ouxzvLmOg0FBUV1yiJAfEbacjQdtRCI6+OU5pyGFBIifLsTXcFDwHggg=="
+  "resolved" "https://registry.npmjs.org/react-native-raw-bottom-sheet/-/react-native-raw-bottom-sheet-2.2.0.tgz"
+  "version" "2.2.0"
+
 "react-native-reanimated@^2.12.0", "react-native-reanimated@>= 1.0.0":
   "integrity" "sha512-yUHyYVIegWWIza4+nVyS3CSmI/Mc8kLFVHw2c6gnSHaYhYA4LeEjH/jBkoMzHk9Xd0Ra3cwtjYKAMG8OTp6JVg=="
   "resolved" "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-2.13.0.tgz"
@@ -7462,9 +7467,9 @@
   "version" "1.1.2"
 
 "vision-camera-dynamsoft-label-recognizer@^0.3.1":
-  "integrity" "sha512-un5RveHSTKtIK0nDsECL7i9RmASnevD7an0WYLNAXJ4s5HDun5o2thIAFgRL9Ct1Ct6jrE22YsknOBgE/ly8eA=="
-  "resolved" "https://registry.npmjs.org/vision-camera-dynamsoft-label-recognizer/-/vision-camera-dynamsoft-label-recognizer-0.3.1.tgz"
-  "version" "0.3.1"
+  "integrity" "sha512-MDUJ1fUGtR8/9/x12SUKd++y4m4lJ492o65WkybvN6zi7UjJry7vfJ88psQAuyk9cMm38EmPaauQbRRAwJB31Q=="
+  "resolved" "https://registry.npmjs.org/vision-camera-dynamsoft-label-recognizer/-/vision-camera-dynamsoft-label-recognizer-0.3.3.tgz"
+  "version" "0.3.3"
 
 "vlq@^1.0.0":
   "integrity" "sha512-gQpnTgkubC6hQgdIcRdYGDSDc+SaujOdyesZQMv6JlfQee/9Mp0Qhnys6WxDWvQnL5WZdT7o2Ul187aSt0Rq+w=="
