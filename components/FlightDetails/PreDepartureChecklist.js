@@ -9,9 +9,10 @@ import {
 } from 'react-native';
 import React, {useState, useRef} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
-import RBSheet from "react-native-raw-bottom-sheet";
+import RBSheet from 'react-native-raw-bottom-sheet';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import DocumentPicker from 'react-native-document-picker';
+import * as ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import Feedback from '../Feedback';
 import Loader from '../Loader';
@@ -20,10 +21,10 @@ const {height} = Dimensions.get('window');
 export default function PreDepartureChecklist({navigation}) {
   const refRBSheet = useRef();
 
-  const [pdaddmovement,setpdaddmovement]=useState(false);
-  const [pdaddmovementnum,setpdaddmovementnum]=useState(0);
-  const [paxpdaddmovement,setpaxpdaddmovement]=useState(false);
-  const [paxpdaddmovementnum,setpaxpdaddmovementnum]=useState(0);
+  const [pdaddmovement, setpdaddmovement] = useState(false);
+  const [pdaddmovementnum, setpdaddmovementnum] = useState(0);
+  const [paxpdaddmovement, setpaxpdaddmovement] = useState(false);
+  const [paxpdaddmovementnum, setpaxpdaddmovementnum] = useState(0);
 
   const [vFeedback, setvFeedback] = useState(false);
   const currentFeedback = useRef(0);
@@ -162,45 +163,70 @@ export default function PreDepartureChecklist({navigation}) {
     setpdeparturecheck(tpdeparturecheck);
   };
 
-  const addMovement=(type) => {
+
+  const getImage=async (type)=>{
+    console.log("HERE")
+    var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
+    console.log(options);
     switch(type){
       case true:
-        setpdaddmovement(true)
-        setpdaddmovementnum(pdaddmovementnum+1);
+        try {
+          options.mediaType='photo';
+          const result = await ImagePicker.launchImageLibrary(options);  
+        } catch (error) {
+          console.log(error);
+        }
         break;
-      case false:
-        setpaxpdaddmovement(true)
-        setpaxpdaddmovementnum(paxpdaddmovementnum+1);
+        case false:
+          try {
+            const result = await ImagePicker.launchCamera(options);  
+          } catch (error) {
+            console.log(error);
+          }
+          break;
+          default:
+            break;
     }
       
+    
   }
 
-  const onRemoveMovement= (type) => {
-    switch(type){
+  const addMovement = type => {
+    switch (type) {
       case true:
-        var x=pdaddmovementnum;
-        x=x-1;
-        if(x==0){ 
+        setpdaddmovement(true);
+        setpdaddmovementnum(pdaddmovementnum + 1);
+        break;
+      case false:
+        setpaxpdaddmovement(true);
+        setpaxpdaddmovementnum(paxpdaddmovementnum + 1);
+    }
+  };
+
+  const onRemoveMovement = type => {
+    switch (type) {
+      case true:
+        var x = pdaddmovementnum;
+        x = x - 1;
+        if (x == 0) {
           setpdaddmovement(false);
-          setpdaddmovementnum(0)
-        }else{
+          setpdaddmovementnum(0);
+        } else {
           setpdaddmovementnum(x);
         }
         break;
       case false:
-        var x=paxpdaddmovementnum;
-        x=x-1;
-        if(x==0){ 
+        var x = paxpdaddmovementnum;
+        x = x - 1;
+        if (x == 0) {
           setpaxpdaddmovement(false);
-          setpaxpdaddmovementnum(0)
-        }else{
+          setpaxpdaddmovementnum(0);
+        } else {
           setpaxpdaddmovementnum(x);
         }
         break;
     }
-    
-  }
-  
+  };
 
   return (
     <View>
@@ -234,10 +260,8 @@ export default function PreDepartureChecklist({navigation}) {
         <Loader visible={loading} />
 
         <View style={{padding: 20, marginBottom: 80}}>
-       
-       
-{/** CREW TRANSPPORT */}
-          <Text style={styleSheet.label}>Crew  Transport :</Text>
+          {/** CREW TRANSPPORT */}
+          <Text style={styleSheet.label}>Crew Transport :</Text>
           <View
             style={{
               borderWidth: 1,
@@ -246,92 +270,97 @@ export default function PreDepartureChecklist({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-              <Text style={styleSheet.label}>Scheduled Pickup Time (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePickerDeparture('datetime', 3)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {pdeparturecheck[3] ? pdeparturecheck[3] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styleSheet.label}>Pickup Location</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              value={pdeparturecheck[0]}
-              onChangeText={text => {
-                var tpdeparturecheck = [...pdeparturecheck];
-                tpdeparturecheck[0] = text;
-                setpdeparturecheck(tpdeparturecheck);
-              }}
-            />
-          </View>
-          
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginVertical: 20,
-            }}>
-            <Text style={styleSheet.label}>Photo of Pickup Location</Text>
-            <TouchableOpacity
-              //onPress={event => onPressDocPreA(2)}
-              onPress={() => refRBSheet.current.open()}
-              style={{
-                marginLeft: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderRadius: 8,
-              }}>
-              <Text style={{color: 'green'}}>Take Camera</Text>
-            </TouchableOpacity>
-          </View>
-          {pdeparturecheck[2].file.length > 0 && (
-            <View style={{marginBottom: 20}}>
-              {pdeparturecheck[2].file.map((value, index) => {
-                return (
-                  <View
-                    key={index}
-                    style={{
-                      backgroundColor: 'white',
-                      borderRadius: 16,
-                      padding: 10,
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 20,
-                      marginHorizontal: 5,
-                      ...Platform.select({
-                        ios: {
-                          shadowColor: '#000',
-                          shadowOffset: {width: 0, height: 2},
-                          shadowOpacity: 0.8,
-                          shadowRadius: 2,
-                        },
-                        android: {
-                          elevation: 3,
-                        },
-                      }),
-                    }}>
-                    <Text style={{color: 'black'}}>{value.name}</Text>
-                    <TouchableOpacity onPress={() => removeFilePreA(2, index)}>
-                      <Icons
-                        style={{color: 'green', marginLeft: 10}}
-                        name="close"
-                        size={30}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                );
-              })}
+            <Text style={styleSheet.label}>
+              Scheduled Pickup Time (Local Time)
+            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TouchableOpacity
+                style={styleSheet.picker}
+                onPress={() => showDatePickerDeparture('datetime', 3)}>
+                <Text style={{fontSize: 20, color: 'black'}}>
+                  {pdeparturecheck[3]
+                    ? pdeparturecheck[3]
+                    : 'dd/mm/yy, -- : --'}
+                </Text>
+              </TouchableOpacity>
             </View>
-          )}
-          {/*   ------------------------------Transport Operator Reminder	 ----------- */}
-         
+            <Text style={styleSheet.label}>Pickup Location</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                value={pdeparturecheck[0]}
+                onChangeText={text => {
+                  var tpdeparturecheck = [...pdeparturecheck];
+                  tpdeparturecheck[0] = text;
+                  setpdeparturecheck(tpdeparturecheck);
+                }}
+              />
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
+              }}>
+              <Text style={styleSheet.label}>Photo of Pickup Location</Text>
+              <TouchableOpacity
+                //onPress={event => onPressDocPreA(2)}
+                onPress={() => refRBSheet.current.open()}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                }}>
+                <Text style={{color: 'green'}}>Take Camera</Text>
+              </TouchableOpacity>
+            </View>
+            {pdeparturecheck[2].file.length > 0 && (
+              <View style={{marginBottom: 20}}>
+                {pdeparturecheck[2].file.map((value, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 16,
+                        padding: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 20,
+                        marginHorizontal: 5,
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: '#000',
+                            shadowOffset: {width: 0, height: 2},
+                            shadowOpacity: 0.8,
+                            shadowRadius: 2,
+                          },
+                          android: {
+                            elevation: 3,
+                          },
+                        }),
+                      }}>
+                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <TouchableOpacity
+                        onPress={() => removeFilePreA(2, index)}>
+                        <Icons
+                          style={{color: 'green', marginLeft: 10}}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+            {/*   ------------------------------Transport Operator Reminder	 ----------- */}
+
             <Text style={styleSheet.label}>Driver Name</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -388,31 +417,30 @@ export default function PreDepartureChecklist({navigation}) {
               />
             </View>
 
+            {/*   ------------------------------Transport Operator Reminder	 End ----------- */}
+            <Text style={styleSheet.label}>Additional Remarks</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                multiline={true}
+                numberOfLines={2}
+                value={pdeparturecheck[24]}
+                onChangeText={text => {
+                  var tpdeparturecheck = [...pdeparturecheck];
+                  tpdeparturecheck[24] = text;
+                  setpdeparturecheck(tpdeparturecheck);
+                }}
+              />
+            </View>
 
-     {/*   ------------------------------Transport Operator Reminder	 End ----------- */}
-     <Text style={styleSheet.label}>Additional Remarks</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              multiline={true}
-              numberOfLines={2}
-              value={pdeparturecheck[24]}
-              onChangeText={text => {
-                var tpdeparturecheck = [...pdeparturecheck];
-                tpdeparturecheck[24] = text;
-                setpdeparturecheck(tpdeparturecheck);
-              }}
-            />
-          </View>
-
-          <View
+            <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={()=>addMovement(true)}
+                onPress={() => addMovement(true)}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
@@ -420,148 +448,141 @@ export default function PreDepartureChecklist({navigation}) {
               </TouchableOpacity>
             </View>
 
-
-
-            {
-            pdaddmovement && 
-            
-
-            [...Array(pdaddmovementnum)].map((data,index)=>{
-              return(
-
-
-               <View key={index} style={{marginTop: 20}}>
-                  <View
-                    style={{
-                      borderBottomWidth: 1,
-                      borderBottomColor: 'rgba(0,0,0,0.4)',
-                      marginBottom: 20,
-                    }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
-                    <TouchableOpacity
-                      style={styleSheet.label}
-                      onPress={() => {
-                        onRemoveMovement(true)
-                      }}>
-                      <Icons name="minus-box-outline" color="red" size={30} />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styleSheet.label}>
-                    Scheduled Transport Pickup Time (Local Time)
-                  </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TouchableOpacity
-                      style={styleSheet.picker}
-                      onPress={() =>
-                        showDatePicker('time', 60, index, 'arrival')
-                      }>
-                      <Text style={{fontSize: 20, color: 'black'}}>
-                        {
-                          pdeparturecheck[parseInt(14+index)] ? typeof pdeparturecheck[parseInt(14+index)]=='object' ? 'dd/mm/yy, -- : --' : pdeparturecheck[parseInt(14+index)] : 'dd/mm/yy, -- : --'
-                        }
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setNowDeparture(parseInt(14+index))}
-                      style={{padding: 10}}>
-                      <Text
-                        style={{
-                          fontSize: Dimensions.get('window').width / 25,
-                          color: 'green',
+            {pdaddmovement &&
+              [...Array(pdaddmovementnum)].map((data, index) => {
+                return (
+                  <View key={index} style={{marginTop: 20}}>
+                    <View
+                      style={{
+                        borderBottomWidth: 1,
+                        borderBottomColor: 'rgba(0,0,0,0.4)',
+                        marginBottom: 20,
+                      }}></View>
+                    <View style={{alignItems: 'flex-end'}}>
+                      <TouchableOpacity
+                        style={styleSheet.label}
+                        onPress={() => {
+                          onRemoveMovement(true);
                         }}>
-                        Time Now
+                        <Icons name="minus-box-outline" color="red" size={30} />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styleSheet.label}>
+                      Scheduled Transport Pickup Time (Local Time)
+                    </Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TouchableOpacity
+                        style={styleSheet.picker}
+                        onPress={() =>
+                          showDatePicker('time', 60, index, 'arrival')
+                        }>
+                        <Text style={{fontSize: 20, color: 'black'}}>
+                          {pdeparturecheck[parseInt(14 + index)]
+                            ? typeof pdeparturecheck[parseInt(14 + index)] ==
+                              'object'
+                              ? 'dd/mm/yy, -- : --'
+                              : pdeparturecheck[parseInt(14 + index)]
+                            : 'dd/mm/yy, -- : --'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => setNowDeparture(parseInt(14 + index))}
+                        style={{padding: 10}}>
+                        <Text
+                          style={{
+                            fontSize: Dimensions.get('window').width / 25,
+                            color: 'green',
+                          }}>
+                          Time Now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text style={styleSheet.label}>Pickup Location</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        value={pdeparturecheck[0]}
+                        onChangeText={text => {
+                          var tpdeparturecheck = [...pdeparturecheck];
+                          tpdeparturecheck[0] = text;
+                          setpdeparturecheck(tpdeparturecheck);
+                        }}
+                      />
+                    </View>
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginVertical: 20,
+                      }}>
+                      <Text style={styleSheet.label}>
+                        Photo of Pickup Location
                       </Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        //onPress={event => onPressDocPreA(2)}
+                        onPress={() => refRBSheet.current.open()}
+                        style={{
+                          marginLeft: 10,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                          borderWidth: 1,
+                          borderRadius: 8,
+                        }}>
+                        <Text style={{color: 'green'}}>Take Camera</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text style={styleSheet.label}>Driver Name</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        value={pdeparturecheck[0]}
+                        onChangeText={text => {
+                          var tpdeparturecheck = [...pdeparturecheck];
+                          tpdeparturecheck[0] = text;
+                          setpdeparturecheck(tpdeparturecheck);
+                        }}
+                      />
+                    </View>
+
+                    <Text style={styleSheet.label}>Driver Contact Number</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        value={pdeparturecheck[0]}
+                        onChangeText={text => {
+                          var tpdeparturecheck = [...pdeparturecheck];
+                          tpdeparturecheck[0] = text;
+                          setpdeparturecheck(tpdeparturecheck);
+                        }}
+                      />
+                    </View>
+
+                    <Text style={styleSheet.label}>Remarks</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        multiline={true}
+                        placeholder="Pax Name"
+                        numberOfLines={2}
+                        //value={remarks}
+                        onChangeText={text => {
+                          var tarrival = [...arrival];
+                          tarrival[60][index].remarks = text;
+                          setArrival(tarrival);
+                        }}
+                      />
+                    </View>
                   </View>
-
-                  <Text style={styleSheet.label}>Pickup Location</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
-
-
-                  <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginVertical: 20,
-            }}>
-            <Text style={styleSheet.label}>Photo of Meeting Location</Text>
-            <TouchableOpacity
-              //onPress={event => onPressDocPreA(2)}
-              onPress={() => refRBSheet.current.open()}
-              style={{
-                marginLeft: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderRadius: 8,
-              }}>
-              <Text style={{color: 'green'}}>Take Camera</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styleSheet.label}>Driver Name</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
-
-                  <Text style={styleSheet.label}>Driver COntact Number</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
-                
-
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      multiline={true}
-                      placeholder="Pax Name"
-                      numberOfLines={2}
-                      //value={remarks}
-                      onChangeText={text => {
-                        var tarrival = [...arrival];
-                        tarrival[60][index].remarks = text;
-                        setArrival(tarrival);
-                      }}
-                    />
-                  </View>
-                </View>
-              
-              )
-            }) 
-              
-            }
+                );
+              })}
           </View>
           {/**CREW END */}
           {/** PAX TRANSPort */}
-          <Text style={styleSheet.label}>Pax  Transport :</Text>
+          <Text style={styleSheet.label}>Pax Transport :</Text>
           <View
             style={{
               borderWidth: 1,
@@ -570,104 +591,105 @@ export default function PreDepartureChecklist({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
+            <Text style={styleSheet.label}>
+              Scheduled Pickup Time (Local Time)
+            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TouchableOpacity
+                style={styleSheet.picker}
+                onPress={() => showDatePickerDeparture('datetime', 3)}>
+                <Text style={{fontSize: 20, color: 'black'}}>
+                  {pdeparturecheck[3]
+                    ? pdeparturecheck[3]
+                    : 'dd/mm/yy, -- : --'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-<Text style={styleSheet.label}>Scheduled Pickup Time (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePickerDeparture('datetime', 3)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {pdeparturecheck[3] ? pdeparturecheck[3] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          
-          <Text style={styleSheet.label}>Pickup Location</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
+            <Text style={styleSheet.label}>Pickup Location</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                value={pdeparturecheck[0]}
+                onChangeText={text => {
+                  var tpdeparturecheck = [...pdeparturecheck];
+                  tpdeparturecheck[0] = text;
+                  setpdeparturecheck(tpdeparturecheck);
+                }}
+              />
+            </View>
 
-
-                  <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginVertical: 20,
-            }}>
-            <Text style={styleSheet.label}>Photo of Meeting Location</Text>
-            <TouchableOpacity
-              //onPress={event => onPressDocPreA(2)}
-              onPress={() => refRBSheet.current.open()}
+            <View
               style={{
-                marginLeft: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderRadius: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
               }}>
-              <Text style={{color: 'green'}}>Take Camera</Text>
-            </TouchableOpacity>
-          </View>
+              <Text style={styleSheet.label}>Photo of Pickup Location</Text>
+              <TouchableOpacity
+                //onPress={event => onPressDocPreA(2)}
+                onPress={() => refRBSheet.current.open()}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                }}>
+                <Text style={{color: 'green'}}>Take Camera</Text>
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styleSheet.label}>Driver Name</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
+            <Text style={styleSheet.label}>Driver Name</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                value={pdeparturecheck[0]}
+                onChangeText={text => {
+                  var tpdeparturecheck = [...pdeparturecheck];
+                  tpdeparturecheck[0] = text;
+                  setpdeparturecheck(tpdeparturecheck);
+                }}
+              />
+            </View>
 
-                  <Text style={styleSheet.label}>Driver COntact Number</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
-                
+            <Text style={styleSheet.label}>Driver Contact Number</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                value={pdeparturecheck[0]}
+                onChangeText={text => {
+                  var tpdeparturecheck = [...pdeparturecheck];
+                  tpdeparturecheck[0] = text;
+                  setpdeparturecheck(tpdeparturecheck);
+                }}
+              />
+            </View>
 
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      multiline={true}
-                      placeholder="Pax Name"
-                      numberOfLines={2}
-                      //value={remarks}
-                      onChangeText={text => {
-                        var tarrival = [...arrival];
-                        tarrival[60][index].remarks = text;
-                        setArrival(tarrival);
-                      }}
-                    />
-                </View>
-                <View
+            <Text style={styleSheet.label}>Remarks</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                multiline={true}
+                placeholder="Pax Name"
+                numberOfLines={2}
+                //value={remarks}
+                onChangeText={text => {
+                  var tarrival = [...arrival];
+                  tarrival[60][index].remarks = text;
+                  setArrival(tarrival);
+                }}
+              />
+            </View>
+            <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={()=>addMovement(false)}
+                onPress={() => addMovement(false)}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
@@ -675,146 +697,140 @@ export default function PreDepartureChecklist({navigation}) {
               </TouchableOpacity>
             </View>
 
-
-                {
-            paxpdaddmovement && 
-            
-
-            [...Array(paxpdaddmovementnum)].map((data,index)=>{
-              return(
-
-
-               <View key={index} style={{marginTop: 20}}>
-                  <View
-                    style={{
-                      borderBottomWidth: 1,
-                      borderBottomColor: 'rgba(0,0,0,0.4)',
-                      marginBottom: 20,
-                    }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
-                    <TouchableOpacity
-                      style={styleSheet.label}
-                      onPress={() => {
-                        onRemoveMovement(false)
-                      }}>
-                      <Icons name="minus-box-outline" color="red" size={30} />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styleSheet.label}>
-                    Scheduled Transport Pickup Time (Local Time)
-                  </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TouchableOpacity
-                      style={styleSheet.picker}
-                      onPress={() =>
-                        showDatePicker('time', 60, index, 'arrival')
-                      }>
-                      <Text style={{fontSize: 20, color: 'black'}}>
-                        {
-                          pdeparturecheck[parseInt(14+index)] ? typeof pdeparturecheck[parseInt(14+index)]=='object' ? 'dd/mm/yy, -- : --' : pdeparturecheck[parseInt(14+index)] : 'dd/mm/yy, -- : --'
-                        }
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setNowDeparture(parseInt(14+index))}
-                      style={{padding: 10}}>
-                      <Text
-                        style={{
-                          fontSize: Dimensions.get('window').width / 25,
-                          color: 'green',
+            {paxpdaddmovement &&
+              [...Array(paxpdaddmovementnum)].map((data, index) => {
+                return (
+                  <View key={index} style={{marginTop: 20}}>
+                    <View
+                      style={{
+                        borderBottomWidth: 1,
+                        borderBottomColor: 'rgba(0,0,0,0.4)',
+                        marginBottom: 20,
+                      }}></View>
+                    <View style={{alignItems: 'flex-end'}}>
+                      <TouchableOpacity
+                        style={styleSheet.label}
+                        onPress={() => {
+                          onRemoveMovement(false);
                         }}>
-                        Time Now
+                        <Icons name="minus-box-outline" color="red" size={30} />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styleSheet.label}>
+                      Scheduled Transport Pickup Time (Local Time)
+                    </Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TouchableOpacity
+                        style={styleSheet.picker}
+                        onPress={() =>
+                          showDatePicker('time', 60, index, 'arrival')
+                        }>
+                        <Text style={{fontSize: 20, color: 'black'}}>
+                          {pdeparturecheck[parseInt(14 + index)]
+                            ? typeof pdeparturecheck[parseInt(14 + index)] ==
+                              'object'
+                              ? 'dd/mm/yy, -- : --'
+                              : pdeparturecheck[parseInt(14 + index)]
+                            : 'dd/mm/yy, -- : --'}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => setNowDeparture(parseInt(14 + index))}
+                        style={{padding: 10}}>
+                        <Text
+                          style={{
+                            fontSize: Dimensions.get('window').width / 25,
+                            color: 'green',
+                          }}>
+                          Time Now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text style={styleSheet.label}>Pickup Location</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        value={pdeparturecheck[0]}
+                        onChangeText={text => {
+                          var tpdeparturecheck = [...pdeparturecheck];
+                          tpdeparturecheck[0] = text;
+                          setpaxpdeparturecheck(tpaxpdeparturecheck);
+                        }}
+                      />
+                    </View>
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginVertical: 20,
+                      }}>
+                      <Text style={styleSheet.label}>
+                        Photo of Pickup Location
                       </Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        //onPress={event => onPressDocPreA(2)}
+                        onPress={() => refRBSheet.current.open()}
+                        style={{
+                          marginLeft: 10,
+                          paddingVertical: 5,
+                          paddingHorizontal: 10,
+                          borderWidth: 1,
+                          borderRadius: 8,
+                        }}>
+                        <Text style={{color: 'green'}}>Take Camera</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text style={styleSheet.label}>Driver Name</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        value={pdeparturecheck[0]}
+                        onChangeText={text => {
+                          var tpdeparturecheck = [...pdeparturecheck];
+                          tpdeparturecheck[0] = text;
+                          setpdeparturecheck(tpdeparturecheck);
+                        }}
+                      />
+                    </View>
+
+                    <Text style={styleSheet.label}>Driver Contact Number</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        value={pdeparturecheck[0]}
+                        onChangeText={text => {
+                          var tpdeparturecheck = [...pdeparturecheck];
+                          tpdeparturecheck[0] = text;
+                          setpdeparturecheck(tpdeparturecheck);
+                        }}
+                      />
+                    </View>
+
+                    <Text style={styleSheet.label}>Remarks</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={styleSheet.input}
+                        multiline={true}
+                        placeholder="Pax Name"
+                        numberOfLines={2}
+                        //value={remarks}
+                        onChangeText={text => {
+                          var tarrival = [...arrival];
+                          tarrival[60][index].remarks = text;
+                          setArrival(tarrival);
+                        }}
+                      />
+                    </View>
                   </View>
-
-                  <Text style={styleSheet.label}>Pickup Location</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpaxpdeparturecheck(tpaxpdeparturecheck);
-                      }}
-                    />
-                  </View>
-
-
-                  <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginVertical: 20,
-            }}>
-            <Text style={styleSheet.label}>Photo of Meeting Location</Text>
-            <TouchableOpacity
-              //onPress={event => onPressDocPreA(2)}
-              onPress={() => refRBSheet.current.open()}
-              style={{
-                marginLeft: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderRadius: 8,
-              }}>
-              <Text style={{color: 'green'}}>Take Camera</Text>
-            </TouchableOpacity>
+                );
+              })}
           </View>
+          {/**PAX TRANS END */}
 
-          <Text style={styleSheet.label}>Driver Name</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
-
-                  <Text style={styleSheet.label}>Driver COntact Number</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={pdeparturecheck[0]}
-                      onChangeText={text => {
-                        var tpdeparturecheck = [...pdeparturecheck];
-                        tpdeparturecheck[0] = text;
-                        setpdeparturecheck(tpdeparturecheck);
-                      }}
-                    />
-                  </View>
-                
-
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      multiline={true}
-                      placeholder="Pax Name"
-                      numberOfLines={2}
-                      //value={remarks}
-                      onChangeText={text => {
-                        var tarrival = [...arrival];
-                        tarrival[60][index].remarks = text;
-                        setArrival(tarrival);
-                      }}
-                    />
-                  </View>
-                </View>
-              
-              )
-            }) 
-              
-            }
-            </View>
-            {/**PAX TRANS END */}
-       
           <Text style={styleSheet.label}>
             Confirm Catering Delivery Time (Local Time)
           </Text>
@@ -1389,40 +1405,53 @@ export default function PreDepartureChecklist({navigation}) {
               </TouchableOpacity>
             </View>
           )}
-          
-            
-            
 
-<RBSheet
-        ref={refRBSheet}
-        closeOnDragDown={true}
-        closeOnPressMask={false}
-        height={height/4}
-        customStyles={{
-          wrapper: {
-            backgroundColor: "#00000056"
-          },
-          draggableIcon: {
-            backgroundColor: "#000"
-          }
-        }}
-      >
-       <View style={{flex:1,paddingLeft:20}}>
-        <View style={{flex:1}}>
-          <Text style={{color:"black",fontSize:22}}>Upload Image</Text>
-        </View>
-        <View style={{flex:1.5,flexDirection:"column"}}>
-          <TouchableOpacity style={{flex:1,flexDirection:'row',justifyContent:'flex-start'}}>
-            <Icons name="camera-outline" size={25} color={"black"} />
-            <Text style={{color:"black",fontSize:18,paddingLeft:20}}>Camera</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={()=>onPressDocPreA(6)} style={{flex:1,flexDirection:'row',justifyContent:'flex-start'}}>
-            <Icons name="image-outline" size={25} color={"black"} />
-            <Text style={{color:"black",fontSize:18,paddingLeft:20}}>Gallery</Text>
-          </TouchableOpacity>
-        </View>
-       </View>
-      </RBSheet>
+          <RBSheet
+            ref={refRBSheet}
+            closeOnDragDown={true}
+            closeOnPressMask={false}
+            height={height / 4}
+            customStyles={{
+              wrapper: {
+                backgroundColor: '#00000056',
+              },
+              draggableIcon: {
+                backgroundColor: '#000',
+              },
+            }}>
+            <View style={{flex: 1, paddingLeft: 20}}>
+              <View style={{flex: 1}}>
+                <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
+              </View>
+              <View style={{flex: 1.5, flexDirection: 'column'}}>
+                <TouchableOpacity
+                onPress={()=>getImage(false)} 
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Icons name="camera-outline" size={25} color={'black'} />
+                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                   Upload from Camera
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  //onPress={() => onPressDocPreA(6)}
+                  onPress={()=>getImage(true)} 
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Icons name="image-outline" size={25} color={'black'} />
+                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                    Upload from Gallery
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </RBSheet>
         </View>
         <DateTimePickerModal
           isVisible={isDatePickerVisibleDeparture}

@@ -13,9 +13,13 @@ import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import Loader from '../Loader';
 import Feedback from '../Feedback';
+import * as ImagePicker from 'react-native-image-picker';
+import RBSheet from 'react-native-raw-bottom-sheet';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+const {height} = Dimensions.get('window');
 
 export default function PreArrival({navigation}) {
+  const refRBSheet = useRef();
   const [vFeedback, setvFeedback] = useState(false);
   const [loading, setloading] = useState(false);
   const currentFeedback = useRef(0);
@@ -243,6 +247,33 @@ export default function PreArrival({navigation}) {
     }
     setChecklist(tcheckList);
   };
+
+  const getImage=async (type)=>{
+    console.log("HERE")
+    var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
+    console.log(options);
+    switch(type){
+      case true:
+        try {
+          options.mediaType='photo';
+          const result = await ImagePicker.launchImageLibrary(options);  
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+        case false:
+          try {
+            const result = await ImagePicker.launchCamera(options);  
+          } catch (error) {
+            console.log(error);
+          }
+          break;
+          default:
+            break;
+    }
+    
+}
+
   return (
     <View>
       <View
@@ -754,6 +785,7 @@ export default function PreArrival({navigation}) {
             </View>
             <TouchableOpacity
               onPress={() => onPressDocPreA(10)}
+              //onPress={() => refRBSheet.current.open()}
               style={{
                 marginLeft: 10,
                 paddingVertical: 5,
@@ -1084,7 +1116,8 @@ export default function PreArrival({navigation}) {
               }}>
               <Text style={styleSheet.label}>Map of Route to Hotel</Text>
               <TouchableOpacity
-                onPress={event => onPressDocPreA(13, 0)}
+                //onPress={event => onPressDocPreA(13, 0)}
+                onPress={() => refRBSheet.current.open()}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
@@ -1236,7 +1269,8 @@ export default function PreArrival({navigation}) {
                         Map of Route to Hotel
                       </Text>
                       <TouchableOpacity
-                        onPress={event => onPressDocPreA(13, index)}
+                        //onPress={event => onPressDocPreA(13, index)}
+                        onPress={() => refRBSheet.current.open()}
                         style={{
                           marginLeft: 10,
                           paddingVertical: 5,
@@ -1546,7 +1580,8 @@ export default function PreArrival({navigation}) {
               }}>
               <Text style={styleSheet.label}>Map of Route to Hotel</Text>
               <TouchableOpacity
-                onPress={event => onPressDocPreA(15, 0)}
+                //onPress={event => onPressDocPreA(15, 0)}
+                onPress={() => refRBSheet.current.open()}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
@@ -1700,7 +1735,8 @@ export default function PreArrival({navigation}) {
                         Map of Route to Hotel
                       </Text>
                       <TouchableOpacity
-                        onPress={event => onPressDocPreA(15, index)}
+                        //onPress={event => onPressDocPreA(15, index)}
+                        onPress={() => refRBSheet.current.open()}
                         style={{
                           marginLeft: 10,
                           paddingVertical: 5,
@@ -1813,6 +1849,52 @@ export default function PreArrival({navigation}) {
         onCancel={hideDatePicker}
         is24Hour={true}
       />
+      <RBSheet
+          ref={refRBSheet}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          height={height / 4}
+          customStyles={{
+            wrapper: {
+              backgroundColor: '#00000056',
+            },
+            draggableIcon: {
+              backgroundColor: '#000',
+            },
+          }}>
+          <View style={{flex: 1, paddingLeft: 20}}>
+            <View style={{flex: 1}}>
+              <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+            </View>
+            <View style={{flex: 1.5, flexDirection: 'column'}}>
+              <TouchableOpacity
+                onPress={()=>getImage(false)}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}>
+                <Icons name="camera-outline" size={25} color={'black'} />
+                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  Upload from Camera
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                //onPress={() => onPressDocPreA(6)}
+                onPress={()=>getImage(true)}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}>
+                <Icons name="image-outline" size={25} color={'black'} />
+                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  Upload from Gallery
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </RBSheet>
     </View>
   );
 }

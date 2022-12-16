@@ -16,9 +16,14 @@ import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
 
+const {height} = Dimensions.get('window');
+
 export default function PostDeparture({navigation}) {
+  const refRBSheet = useRef();
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
   const [postdeparture, setpostdeparture] = useState([
@@ -107,6 +112,32 @@ export default function PostDeparture({navigation}) {
     tpostdeparture[arrayIndex].file.splice(index, 1);
     setpostdeparture(tpostdeparture);
   };
+
+  const getImage=async (type)=>{
+    console.log("HERE")
+    var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
+    console.log(options);
+    switch(type){
+      case true:
+        try {
+          options.mediaType='photo';
+          const result = await ImagePicker.launchImageLibrary(options);  
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+        case false:
+          try {
+            const result = await ImagePicker.launchCamera(options);  
+          } catch (error) {
+            console.log(error);
+          }
+          break;
+          default:
+            break;
+    }
+    
+}
   return (
     <ScrollView>
       <Loader visible={loading} />
@@ -141,7 +172,8 @@ export default function PostDeparture({navigation}) {
           }}>
           <Text style={styleSheet.label}>Stamped GenDec</Text>
           <TouchableOpacity
-            onPress={event => onPressDocPreA(0)}
+            //onPress={event => onPressDocPreA(0)}
+            onPress={() => refRBSheet.current.open()}
             style={{
               marginLeft: 10,
               paddingVertical: 5,
@@ -261,6 +293,52 @@ export default function PostDeparture({navigation}) {
         onCancel={hideDatePickerPostDepart}
         is24Hour={true}
       />
+      <RBSheet
+          ref={refRBSheet}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          height={height / 4}
+          customStyles={{
+            wrapper: {
+              backgroundColor: '#00000056',
+            },
+            draggableIcon: {
+              backgroundColor: '#000',
+            },
+          }}>
+          <View style={{flex: 1, paddingLeft: 20}}>
+            <View style={{flex: 1}}>
+              <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+            </View>
+            <View style={{flex: 1.5, flexDirection: 'column'}}>
+              <TouchableOpacity
+                onPress={()=>getImage(false)}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}>
+                <Icons name="camera-outline" size={25} color={'black'} />
+                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  Upload from Camera
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                //onPress={() => onPressDocPreA(6)}
+                onPress={()=>getImage(true)}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}>
+                <Icons name="image-outline" size={25} color={'black'} />
+                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  Upload from Gallery
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </RBSheet>
     </ScrollView>
   );
 }
