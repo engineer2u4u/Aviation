@@ -1,3 +1,4 @@
+
 import {
   View,
   StyleSheet,
@@ -96,6 +97,24 @@ export default function Departure({navigation}) {
     null,
     null,
     [],
+    [
+      {
+        name: null,
+        location: null,
+        hotelMap: {value: null, file: []},
+        time: null,
+        remarks: null,
+      },
+    ], //55
+    [
+      {
+        name: null,
+        location: null,
+        hotelMap: {value: null, file: []},
+        time: null,
+        remarks: null,
+      },
+    ], //56
   ]);
   const [isDatePickerVisibleDepart, setDatePickerVisibilityDepart] =
     useState(false);
@@ -327,19 +346,40 @@ export default function Departure({navigation}) {
     }
   };
 
+  const [uploadaddedsection,setuploadaddedsection]=useState(false);
+  const [addedpaxindex,setaddedpaxindex]=useState(0);
+
   const onPressDocPreA_New = async (index,res) => {
+    console.log('HEREEEE',uploadSection,index);
     setloading(false);
     RNFetchBlob.fs
   .readFile(res.uri, 'base64')
   .then(encoded => {
     // console.log(encoded, 'reports.base64');
     setloading(false);
-    var tdeparture = [...departure];
-    tdeparture[index].file.push({
-      name: res.fileName,
+    if(uploadaddedsection){
+      var tdeparture = [...crewTransport];
+      tdeparture[index].mapF.file.push({
+      name: res.fileName.replace('rn_image_picker_lib_temp_',''),
       base64: 'data:' + res.type + ';base64,' + encoded,
     });
-    setdeparture(tdeparture);
+    setcrewTransport(tdeparture);
+    }else if(index===55){
+      var tdeparture = [...departure];
+      tdeparture[55][addedpaxindex].hotelMap.file.push({
+        name: res.fileName,
+        base64: 'data:' + res.type + ';base64,' + encoded,
+      });
+      setdeparture(tdeparture);
+    }else{
+      var tdeparture = [...departure];
+      tdeparture[index].file.push({
+        name: res.fileName.replace('rn_image_picker_lib_temp_',''),
+        base64: 'data:' + res.type + ';base64,' + encoded,
+      });
+      setdeparture(tdeparture);
+    }
+    
     
   })
   .catch(error => {
@@ -348,7 +388,7 @@ export default function Departure({navigation}) {
   });
 
 }
-
+//mark
 const getImage=async (type)=>{
 console.log("HERE",uploadSection)
 var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
@@ -397,7 +437,15 @@ case true:
         remarks: null,
       },
     ];
-    console.log(tpaxTransport);
+    var x=tpaxTransport[55];
+    x.push({
+      name: null,
+      location: null,
+      hotelMap: {value: null, file: []},
+      time: null,
+      remarks: null,
+    });
+    setdeparture(x);
     setdeparture(tpaxTransport);
   };
   const onRemovePaxTransport = index => {
@@ -416,14 +464,7 @@ case true:
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => {
-            navigation.openDrawer();
-          }}>
-          <Icons name="menu" color="green" size={30} />
-        </TouchableOpacity>
-        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black'}}>
+        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
           Departure
         </Text>
         <TouchableOpacity style={{marginRight: 20}}>
@@ -527,6 +568,7 @@ case true:
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(3)}
                 onPress={() => {
+                  setuploadaddedsection(false);
                   setuploadSection(3)
                   refRBSheet.current.open()
                 }}
@@ -717,6 +759,7 @@ case true:
                     <TouchableOpacity
                       //onPress={event => onPressDocPreTrans(index)}
                       onPress={() => {
+                        setuploadaddedsection(true);
                         setuploadSection(index)
                         refRBSheet.current.open()
                       }}
@@ -1178,6 +1221,7 @@ case true:
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(17)}
                 onPress={() => {
+                  setuploadaddedsection(false);
                   setuploadSection(17)
                   refRBSheet.current.open()
                 }}
@@ -1560,6 +1604,7 @@ case true:
                 disabled={departure[32].checked}
                 //onPress={event => onPressDocPreA(29)}
                 onPress={() => {
+                  setuploadaddedsection(false);
                   setuploadSection(29)
                   refRBSheet.current.open()
                 }}
@@ -1742,6 +1787,7 @@ case true:
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(36)}
                 onPress={() => {
+                  setuploadaddedsection(false);
                   setuploadSection(36)
                   refRBSheet.current.open()
                 }}
@@ -2108,7 +2154,10 @@ case true:
                     <TouchableOpacity
                       //onPress={event => onPressDocPrePaxTrans(index)}
                       onPress={() => {
-                        setuploadSection(index)
+                        //mark
+                        setuploadaddedsection(false);
+                        setaddedpaxindex(index);
+                        setuploadSection(55)
                         refRBSheet.current.open()
                       }}
                       style={{
@@ -2121,10 +2170,9 @@ case true:
                       <Text style={{color: 'green'}}>Take Camera</Text>
                     </TouchableOpacity>
                   </View>
-                  {val.mapF && val.mapF.file.length > 0 && (
+                  {departure[55][index].hotelMap.file.length>0 && (
                     <View style={{marginBottom: 20}}>
-                      {val.mapF &&
-                        val.mapF.file.map((value, pos) => {
+                      { departure[55][index].hotelMap.file.map((value, pos) => {
                           return (
                             <View
                               key={pos}
@@ -2577,6 +2625,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
+  imgName:{color: 'black',fontSize:12,fontWeight:'600'},
   checkbox: {
     width: 40,
     height: 40,

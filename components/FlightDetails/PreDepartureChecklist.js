@@ -22,6 +22,9 @@ export default function PreDepartureChecklist({navigation}) {
   const refRBSheet = useRef();
 
   const [uploadSection,setuploadSection]=useState(0);
+  const [uploadaddedSection,setuploadAddedSection]=useState(false);
+  const [uploadaddedSectionindex,setuploadAddedSectionindex]=useState(false);
+
   const [pdaddmovement, setpdaddmovement] = useState(false);
   const [pdaddmovementnum, setpdaddmovementnum] = useState(0);
   const [paxpdaddmovement, setpaxpdaddmovement] = useState(false);
@@ -60,7 +63,23 @@ export default function PreDepartureChecklist({navigation}) {
     null,
     null,
     {value:null,file:[]},
-    {value:null,file:[]}
+    {value:null,file:[]},
+    [
+      {
+        name: null,
+        location: null,
+        hotelMap: {value: null, file: []},
+        time: null,
+        remarks: null,
+      },
+    ],, //27
+    [{
+      name: null,
+      location: null,
+      hotelMap: {value: null, file: []},
+      time: null,
+      remarks: null,
+    },]//28
   ]);
   const getFeedback = index => {
     setvFeedback(true);
@@ -168,24 +187,43 @@ export default function PreDepartureChecklist({navigation}) {
 
 
   const onPressDocPreA_New = async (index,res) => {
+
+
+    //console.log("HEREEE",index,uploadaddedSectionindex);
     setloading(false);
     RNFetchBlob.fs
   .readFile(res.uri, 'base64')
   .then(encoded => {
     // console.log(encoded, 'reports.base64');
     setloading(false);
-    var tpdeparturecheck = [...pdeparturecheck];
-    tpdeparturecheck[index].file.push({
-      name: res.fileName,
-      base64: 'data:' + res.type + ';base64,' + encoded,
-    });
-    setpdeparturecheck(tpdeparturecheck);
+    
+    
+    if(uploadaddedSection){
+      var tpdeparturecheck = [...pdeparturecheck];
+      tpdeparturecheck[index][uploadaddedSectionindex].hotelMap.file.push({
+        name: res.fileName.replace('rn_image_picker_lib_temp_',''),
+        base64: 'data:' + res.type + ';base64,' + encoded,
+      });
+      console.log(tpdeparturecheck[index][uploadaddedSectionindex]);
+      setpdeparturecheck(tpdeparturecheck);
+    }else{
+      var tpdeparturecheck = [...pdeparturecheck];
+      tpdeparturecheck[index].file.push({
+        name: res.fileName.replace('rn_image_picker_lib_temp_',''),
+        base64: 'data:' + res.type + ';base64,' + encoded,
+      });
+      setpdeparturecheck(tpdeparturecheck);
+    }
+      
+
     
   })
   .catch(error => {
     setloading(false);
     console.log(error);
   });
+
+  refRBSheet.current.close();
 
 }
 
@@ -199,6 +237,7 @@ case true:
     options.mediaType='photo';
     const result = await ImagePicker.launchImageLibrary(options);  
     const file=result.assets[0];
+    
     onPressDocPreA_New(uploadSection,file)
 
   } catch (error) {
@@ -220,7 +259,9 @@ case true:
 
 }
 
-  const addMovement = type => {
+  const addMovement = (type,index) => {
+    
+    // setpdeparturecheck(x);
     switch (type) {
       case true:
         setpdaddmovement(true);
@@ -230,6 +271,18 @@ case true:
         setpaxpdaddmovement(true);
         setpaxpdaddmovementnum(paxpdaddmovementnum + 1);
     }
+
+    var x=pdeparturecheck[index];
+    x.push({
+      name: null,
+      location: null,
+      hotelMap: {value: null, file: []},
+      time: null,
+      remarks: null,
+    });
+    console.log(index,x);
+    
+
   };
 
   const onRemoveMovement = type => {
@@ -266,14 +319,8 @@ case true:
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => {
-            navigation.openDrawer();
-          }}>
-          <Icons name="menu" color="green" size={30} />
-        </TouchableOpacity>
-        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black'}}>
+       
+        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
           Pre-Departure Checklist
         </Text>
         <TouchableOpacity style={{marginRight: 20}}>
@@ -337,6 +384,7 @@ case true:
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(2)}
                 onPress={() => {
+                  setuploadAddedSection(false);
                   setuploadSection(2)
                   refRBSheet.current.open()
                 }}
@@ -377,7 +425,7 @@ case true:
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(2, index)}>
                         <Icons
@@ -472,7 +520,7 @@ case true:
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={() => addMovement(true)}
+                onPress={() => addMovement(true,27)}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
@@ -555,8 +603,12 @@ case true:
                       </Text>
                       <TouchableOpacity
                         //onPress={event => onPressDocPreA(2)}
-                        onPress={() => {
-                          setuploadSection(25)
+                        onPress={async () => {
+                          //added section
+                          //mark
+                          setuploadAddedSection(true)
+                          setuploadAddedSectionindex(index)
+                          setuploadSection(27)
                           refRBSheet.current.open()
                         }}
                         style={{
@@ -569,9 +621,11 @@ case true:
                         <Text style={{color: 'green'}}>Take Camera</Text>
                       </TouchableOpacity>
                     </View>
-                    {pdeparturecheck[25].file.length > 0 && (
+                    {
+                      
+                    pdeparturecheck[27][index].hotelMap.file.length > 0  && (
               <View style={{marginBottom: 20}}>
-                {pdeparturecheck[25].file.map((value, index) => {
+                {pdeparturecheck[27][index].hotelMap.file.map((value, index) => {
                   return (
                     <View
                       key={index}
@@ -596,7 +650,7 @@ case true:
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(2, index)}>
                         <Icons
@@ -706,6 +760,7 @@ case true:
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(2)}
                 onPress={() => {
+                  setuploadAddedSection(false);
                   setuploadSection(26)
                   refRBSheet.current.open()
                 }}
@@ -746,7 +801,7 @@ case true:
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(2, index)}>
                         <Icons
@@ -809,7 +864,7 @@ case true:
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={() => addMovement(false)}
+                onPress={() => addMovement(false,28)}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
@@ -892,7 +947,12 @@ case true:
                       </Text>
                       <TouchableOpacity
                         //onPress={event => onPressDocPreA(2)}
-                        onPress={() => refRBSheet.current.open()}
+                        onPress={() => {
+                          setuploadAddedSection(true)
+                          setuploadAddedSectionindex(index)
+                          setuploadSection(28)
+                          refRBSheet.current.open()
+                        }}
                         style={{
                           marginLeft: 10,
                           paddingVertical: 5,
@@ -903,6 +963,49 @@ case true:
                         <Text style={{color: 'green'}}>Take Camera</Text>
                       </TouchableOpacity>
                     </View>
+                    {
+                      
+                      pdeparturecheck[28][index].hotelMap.file.length > 0  && (
+                <View style={{marginBottom: 20}}>
+                  {pdeparturecheck[28][index].hotelMap.file.map((value, index) => {
+                    return (
+                      <View
+                        key={index}
+                        style={{
+                          backgroundColor: 'white',
+                          borderRadius: 16,
+                          padding: 10,
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: 20,
+                          marginHorizontal: 5,
+                          ...Platform.select({
+                            ios: {
+                              shadowColor: '#000',
+                              shadowOffset: {width: 0, height: 2},
+                              shadowOpacity: 0.8,
+                              shadowRadius: 2,
+                            },
+                            android: {
+                              elevation: 3,
+                            },
+                          }),
+                        }}>
+                        <Text style={styleSheet.imgName}>{value.name}</Text>
+                        <TouchableOpacity
+                          onPress={() => removeFilePreA(2, index)}>
+                          <Icons
+                            style={{color: 'green', marginLeft: 10}}
+                            name="close"
+                            size={30}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
 
                     <Text style={styleSheet.label}>Driver Name</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1092,7 +1195,7 @@ case true:
                         },
                       }),
                     }}>
-                    <Text style={{color: 'black'}}>{value.name}</Text>
+                    <Text style={styleSheet.imgName}>{value.name}</Text>
                     <TouchableOpacity onPress={() => removeFilePreA(8, index)}>
                       <Icons
                         style={{color: 'green', marginLeft: 10}}
@@ -1594,6 +1697,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
+  imgName:{color: 'black',fontSize:12,fontWeight:'600'},
   checkbox: {
     width: 40,
     height: 40,

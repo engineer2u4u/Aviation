@@ -26,6 +26,9 @@ export default function PostDeparture({navigation}) {
   const refRBSheet = useRef();
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
+  
+  const [uploadSection,setuploadSection]=useState(0);
+
   const [postdeparture, setpostdeparture] = useState([
     {value: null, file: []},
     null,
@@ -113,6 +116,28 @@ export default function PostDeparture({navigation}) {
     setpostdeparture(tpostdeparture);
   };
 
+  const onPressDocPreA_New = async (index,res) => {
+    setloading(false);
+    RNFetchBlob.fs
+  .readFile(res.uri, 'base64')
+  .then(encoded => {
+    // console.log(encoded, 'reports.base64');
+    setloading(false);
+    var tpostdeparture = [...postdeparture];
+      tpostdeparture[index].file.push({
+      name: res.fileName.replace('rn_image_picker_lib_temp_',''),
+      base64: 'data:' + res.type + ';base64,' + encoded,
+    });
+    setpostdeparture(tpostdeparture);
+    
+  })
+  .catch(error => {
+    setloading(false);
+    console.log(error);
+  });
+  refRBSheet.current.close();
+}
+
   const getImage=async (type)=>{
     console.log("HERE")
     var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
@@ -122,6 +147,8 @@ export default function PostDeparture({navigation}) {
         try {
           options.mediaType='photo';
           const result = await ImagePicker.launchImageLibrary(options);  
+          const file=result.assets[0];
+          onPressDocPreA_New(uploadSection,file)
         } catch (error) {
           console.log(error);
         }
@@ -129,6 +156,8 @@ export default function PostDeparture({navigation}) {
         case false:
           try {
             const result = await ImagePicker.launchCamera(options);  
+            const file=result.assets[0];
+            onPressDocPreA_New(uploadSection,file)
           } catch (error) {
             console.log(error);
           }
@@ -148,14 +177,7 @@ export default function PostDeparture({navigation}) {
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => {
-            navigation.openDrawer();
-          }}>
-          <Icons name="menu" color="green" size={30} />
-        </TouchableOpacity>
-        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black'}}>
+        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
           Post-Departure
         </Text>
         <TouchableOpacity style={{marginRight: 20}}>
@@ -173,7 +195,10 @@ export default function PostDeparture({navigation}) {
           <Text style={styleSheet.label}>Stamped GenDec</Text>
           <TouchableOpacity
             //onPress={event => onPressDocPreA(0)}
-            onPress={() => refRBSheet.current.open()}
+            onPress={() => {
+              setuploadSection(0)
+              refRBSheet.current.open()
+            }}
             style={{
               marginLeft: 10,
               paddingVertical: 5,
@@ -211,7 +236,7 @@ export default function PostDeparture({navigation}) {
                       },
                     }),
                   }}>
-                  <Text style={{color: 'black'}}>{value.name}</Text>
+                  <Text style={styleSheet.imgName}>{value.name}</Text>
                   <TouchableOpacity onPress={() => removeFilePreA(0, index)}>
                     <Icons
                       style={{color: 'green', marginLeft: 10}}
@@ -348,6 +373,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
+  imgName:{color: 'black',fontSize:12,fontWeight:'600'},
   checkbox: {
     width: 40,
     height: 40,
