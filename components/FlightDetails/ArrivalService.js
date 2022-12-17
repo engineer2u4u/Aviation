@@ -232,7 +232,7 @@ export default function ArrivalService({navigation}) {
           setloading(false);
           var tarrival = [...arrival];
           tarrival[index].file.push({
-            name: res.fileName,
+            name: res.fileName.replace('rn_image_picker_lib_temp_',''),
             base64: 'data:' + res.type + ';base64,' + encoded,
           });
           setArrival(tarrival);
@@ -506,7 +506,7 @@ export default function ArrivalService({navigation}) {
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(6, index)}>
                         <Icons
@@ -947,7 +947,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
             </View>
             {arrival[16].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+              <View style={{marginBottom: 20,marginTop:10}}>
                 {arrival[16].file.map((value, index) => {
                   return (
                     <View
@@ -973,7 +973,7 @@ export default function ArrivalService({navigation}) {
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(16, index)}>
                         <Icons
@@ -1042,7 +1042,7 @@ export default function ArrivalService({navigation}) {
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(17, index)}>
                         <Icons
@@ -1604,7 +1604,7 @@ export default function ArrivalService({navigation}) {
                 disabled={arrival[37].checked}
                 onPress={event => {
                   //onPressDocPreA(35)
-                  setuploadSection(6)
+                  setuploadSection(35)
                   refRBSheet.current.open();
                 }}
                 
@@ -1648,7 +1648,7 @@ export default function ArrivalService({navigation}) {
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(35, index)}>
                         <Icons
@@ -1829,7 +1829,7 @@ export default function ArrivalService({navigation}) {
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(40, index)}>
                         <Icons
@@ -2335,7 +2335,7 @@ export default function ArrivalService({navigation}) {
             </TouchableOpacity>
           </View>
           {arrival[54].file.length > 0 && (
-            <View style={{marginBottom: 20}}>
+            <View style={{marginBottom: 20,marginTop:20}}>
               {arrival[54].file.map((value, index) => {
                 return (
                   <View
@@ -2361,7 +2361,7 @@ export default function ArrivalService({navigation}) {
                         },
                       }),
                     }}>
-                    <Text style={{color: 'black'}}>{value.name}</Text>
+                    <Text style={styleSheet.imgName}>{value.name}</Text>
                     <TouchableOpacity onPress={() => removeFilePreA(54, index)}>
                       <Icons
                         style={{color: 'green', marginLeft: 10}}
@@ -2480,6 +2480,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
+  imgName:{color: 'black',fontSize:12,fontWeight:'600'},
   checkbox: {
     width: 40,
     height: 40,
