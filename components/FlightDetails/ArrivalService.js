@@ -15,9 +15,9 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import React, {useRef, useState, useEffect} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
 
 const {width, height} = Dimensions.get('window');
@@ -25,6 +25,9 @@ const {width, height} = Dimensions.get('window');
 export default function ArrivalService({navigation}) {
   const currentPicker = useRef(0);
   const refRBSheet = useRef();
+
+  //upload funcs
+  const [uploadSection,setuploadSection]=useState(0);
 
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
@@ -219,15 +222,30 @@ export default function ArrivalService({navigation}) {
       }
     }
   };
-  const removeFilePreA = (arrayIndex, index) => {
-    var tarrival = [...arrival];
-    tarrival[arrayIndex].file.splice(index, 1);
-    setArrival(tarrival);
-  };
 
+  const onPressDocPreA_New = async (index,res) => {
+          setloading(false);
+          RNFetchBlob.fs
+        .readFile(res.uri, 'base64')
+        .then(encoded => {
+          // console.log(encoded, 'reports.base64');
+          setloading(false);
+          var tarrival = [...arrival];
+          tarrival[index].file.push({
+            name: res.fileName,
+            base64: 'data:' + res.type + ';base64,' + encoded,
+          });
+          setArrival(tarrival);
+        })
+        .catch(error => {
+          setloading(false);
+          console.log(error);
+        });
+
+  }
 
   const getImage=async (type)=>{
-    console.log("HERE")
+    console.log("HERE",uploadSection)
     var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
     console.log(options);
     switch(type){
@@ -235,6 +253,9 @@ export default function ArrivalService({navigation}) {
         try {
           options.mediaType='photo';
           const result = await ImagePicker.launchImageLibrary(options);  
+          const file=result.assets[0];
+          onPressDocPreA_New(uploadSection,file)
+
         } catch (error) {
           console.log(error);
         }
@@ -242,6 +263,8 @@ export default function ArrivalService({navigation}) {
         case false:
           try {
             const result = await ImagePicker.launchCamera(options);  
+            const file=result.assets[0];
+            onPressDocPreA_New(uploadSection,file)
           } catch (error) {
             console.log(error);
           }
@@ -251,6 +274,12 @@ export default function ArrivalService({navigation}) {
     }
     
 }
+
+  const removeFilePreA = (arrayIndex, index) => {
+    var tarrival = [...arrival];
+    tarrival[arrayIndex].file.splice(index, 1);
+    setArrival(tarrival);
+  };
 
 
   const [crewmove, setcrewmove] = useState(false);
@@ -431,7 +460,10 @@ export default function ArrivalService({navigation}) {
               />
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(6)}
-                onPress={() => refRBSheet.current.open()}
+                onPress={() => {
+                  setuploadSection(6)
+                  refRBSheet.current.open()
+                }}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 10,
@@ -896,7 +928,10 @@ export default function ArrivalService({navigation}) {
               </Text>
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(16)}
-                onPress={() => refRBSheet.current.open()}
+                onPress={() => {
+                  setuploadSection(16)
+                  refRBSheet.current.open()
+                }}
                 disabled={arrival[20].checked}
                 style={{
                   marginLeft: 10,
@@ -962,7 +997,10 @@ export default function ArrivalService({navigation}) {
               <Text style={styleSheet.label}>Next Catering Order</Text>
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(17)}
-                onPress={() => refRBSheet.current.open()}
+                onPress={() => {
+                  setuploadSection(17)
+                  refRBSheet.current.open()
+                }}
                 disabled={arrival[20].checked}
                 style={{
                   marginLeft: 10,
@@ -1564,7 +1602,11 @@ export default function ArrivalService({navigation}) {
               <Text style={styleSheet.label}>Fuel Receipt (signed)</Text>
               <TouchableOpacity
                 disabled={arrival[37].checked}
-                onPress={event => onPressDocPreA(35)}
+                onPress={event => {
+                  //onPressDocPreA(35)
+                  setuploadSection(6)
+                  refRBSheet.current.open();
+                }}
                 
                 style={{
                   marginLeft: 10,
@@ -1743,7 +1785,10 @@ export default function ArrivalService({navigation}) {
               <TouchableOpacity
                 disabled={arrival[42].checked}
                 //onPress={event => onPressDocPreA(40)}
-                onPress={() => refRBSheet.current.open()}
+                onPress={() => {
+                  setuploadSection(40)
+                  refRBSheet.current.open();
+                }}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
@@ -2275,7 +2320,10 @@ export default function ArrivalService({navigation}) {
             <Text style={styleSheet.label}>Map of Route to Hotel</Text>
             <TouchableOpacity
               //onPress={event => onPressDocPreA(54)}
-              onPress={() => refRBSheet.current.open()}
+              onPress={() => {
+                setuploadSection(54)
+                  refRBSheet.current.open();
+              }}
               style={{
                 marginLeft: 10,
                 paddingVertical: 5,

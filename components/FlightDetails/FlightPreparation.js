@@ -13,6 +13,11 @@ import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 export default function FlightPreparation({navigation}) {
+
+    //upload funcs
+    const [uploadSection,setuploadSection]=useState(0);
+
+
   const [loading, setloading] = useState(false);
   const [fpreparation, setfpreparation] = useState([
     null,
