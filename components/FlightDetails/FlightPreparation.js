@@ -7,13 +7,19 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState,useRef} from 'react';
 import Loader from '../Loader';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import * as ImagePicker from 'react-native-image-picker';
+
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
-export default function FlightPreparation({navigation}) {
 
+const {height} = Dimensions.get('window');
+
+export default function FlightPreparation({navigation}) {
+  const refRBSheet = useRef();
     //upload funcs
     const [uploadSection,setuploadSection]=useState(0);
 
@@ -68,6 +74,63 @@ export default function FlightPreparation({navigation}) {
     tfpreparation[arrayIndex].file.splice(index, 1);
     setfpreparation(tfpreparation);
   };
+
+  const onPressDocPreA_New = async (index,res) => {
+
+    setloading(false);
+    RNFetchBlob.fs
+  .readFile(res.uri, 'base64')
+  .then(encoded => {
+    // console.log(encoded, 'reports.base64');
+    setloading(false);
+    var tfpreparation = [...fpreparation];
+    tfpreparation[index].file.push({
+      name: res.fileName.replace('rn_image_picker_lib_temp_',''),
+      base64: 'data:' + res.type + ';base64,' + encoded,
+    });
+    setfpreparation(tfpreparation);
+})
+  .catch(error => {
+    setloading(false);
+    console.log(error);
+  });
+
+  refRBSheet.current.close();
+
+}
+
+const getImage=async (type)=>{
+console.log("HERE",uploadSection)
+var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
+console.log(options);
+switch(type){
+case true:
+  try {
+    options.mediaType='photo';
+    const result = await ImagePicker.launchImageLibrary(options);  
+    const file=result.assets[0];
+    
+    onPressDocPreA_New(uploadSection,file)
+
+  } catch (error) {
+    console.log(error);
+  }
+  break;
+  case false:
+    try {
+      const result = await ImagePicker.launchCamera(options);  
+      const file=result.assets[0];
+      onPressDocPreA_New(uploadSection,file)
+    } catch (error) {
+      console.log(error);
+    }
+    break;
+    default:
+      break;
+}
+
+}
+
   return (
     <ScrollView>
       <Loader visible={loading} />
@@ -78,18 +141,13 @@ export default function FlightPreparation({navigation}) {
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => {
-            navigation.openDrawer();
-          }}>
-          <Icons name="menu" color="green" size={30} />
-        </TouchableOpacity>
+       
         <Text
           style={{
             fontSize: Dimensions.get('window').width / 15,
             fontWeight: 'bold',
             color: 'black',
+            paddingLeft:20
           }}>
           Flight Preparation
         </Text>
@@ -147,7 +205,13 @@ export default function FlightPreparation({navigation}) {
               setfpreparation(tfpreparation);
             }}
           />
-          <TouchableOpacity onPress={() => onPressDocFPreparation(3)}>
+          <TouchableOpacity 
+            //onPress={() => onPressDocFPreparation(3)}
+            onPress={() => {
+              setuploadSection(3);
+              refRBSheet.current.open();
+            }}
+          >
             <Icons
               style={{color: 'green', marginLeft: 10}}
               name="upload"
@@ -209,7 +273,13 @@ export default function FlightPreparation({navigation}) {
               setfpreparation(tfpreparation);
             }}
           />
-          <TouchableOpacity onPress={() => onPressDocFPreparation(4)}>
+          <TouchableOpacity 
+            //onPress={() => onPressDocFPreparation(4)}
+            onPress={() => {
+              setuploadSection(4);
+              refRBSheet.current.open();
+            }}
+          >
             <Icons
               style={{color: 'green', marginLeft: 10}}
               name="upload"
@@ -269,7 +339,13 @@ export default function FlightPreparation({navigation}) {
               setfpreparation(tfpreparation);
             }}
           />
-          <TouchableOpacity onPress={() => onPressDocFPreparation(5)}>
+          <TouchableOpacity 
+            //onPress={() => onPressDocFPreparation(5)}
+            onPress={() => {
+              setuploadSection(5);
+              refRBSheet.current.open();
+            }}
+          >
             <Icons
               style={{color: 'green', marginLeft: 10}}
               name="upload"
@@ -326,6 +402,52 @@ export default function FlightPreparation({navigation}) {
             <Text style={{color: 'white', textAlign: 'center'}}>Submit</Text>
           </TouchableOpacity>
         </View> */}
+         <RBSheet
+          ref={refRBSheet}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          height={height / 4}
+          customStyles={{
+            wrapper: {
+              backgroundColor: '#00000056',
+            },
+            draggableIcon: {
+              backgroundColor: '#000',
+            },
+          }}>
+            <View style={{flex: 1, paddingLeft: 20}}>
+              <View style={{flex: 1}}>
+                <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
+              </View>
+              <View style={{flex: 1.5, flexDirection: 'column'}}>
+                <TouchableOpacity
+                onPress={()=>getImage(false)} 
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Icons name="camera-outline" size={25} color={'black'} />
+                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                   Upload from Camera
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  //onPress={() => onPressDocPreA(6)}
+                  onPress={()=>getImage(true)} 
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Icons name="image-outline" size={25} color={'black'} />
+                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                    Upload from Gallery
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </RBSheet>
       </View>
     </ScrollView>
   );

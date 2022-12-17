@@ -386,7 +386,7 @@ export default function Departure({navigation}) {
     setloading(false);
     console.log(error);
   });
-
+  refRBSheet.current.close();
 }
 //mark
 const getImage=async (type)=>{

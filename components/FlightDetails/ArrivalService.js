@@ -241,6 +241,7 @@ export default function ArrivalService({navigation}) {
           setloading(false);
           console.log(error);
         });
+        refRBSheet.current.close();
 
   }
 
@@ -309,18 +310,13 @@ export default function ArrivalService({navigation}) {
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => {
-            navigation.openDrawer();
-          }}>
-          <Icons name="menu" color="green" size={30} />
-        </TouchableOpacity>
+      
         <Text
           style={{
             fontSize: Dimensions.get('window').width / 15,
             fontWeight: 'bold',
             color: 'black',
+            paddingLeft:20
           }}>
           Arrival Services
         </Text>

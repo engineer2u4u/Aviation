@@ -35,14 +35,8 @@ export default function InterimService({navigation}) {
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => {
-            navigation.openDrawer();
-          }}>
-          <Icons name="menu" color="green" size={30} />
-        </TouchableOpacity>
-        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black'}}>
+      
+        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
           Interim Services
         </Text>
         <TouchableOpacity style={{marginRight: 20}}>

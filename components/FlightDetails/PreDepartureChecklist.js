@@ -79,7 +79,16 @@ export default function PreDepartureChecklist({navigation}) {
       hotelMap: {value: null, file: []},
       time: null,
       remarks: null,
-    },]//28
+    }],//28
+    [
+      {
+        name:null,
+        location:null,
+        hotelMap:{value:null,file:[]},
+        time:null,
+        remarks:null
+      }
+    ]
   ]);
   const getFeedback = index => {
     setvFeedback(true);
@@ -272,17 +281,17 @@ case true:
         setpaxpdaddmovementnum(paxpdaddmovementnum + 1);
     }
 
-    var x=pdeparturecheck[index];
-    x.push({
+    //console.log(index);
+    pdeparturecheck[index].push({
       name: null,
       location: null,
       hotelMap: {value: null, file: []},
       time: null,
       remarks: null,
     });
-    console.log(index,x);
+    setpdeparturecheck(pdeparturecheck);
     
-
+    
   };
 
   const onRemoveMovement = type => {
@@ -864,7 +873,7 @@ case true:
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                onPress={() => addMovement(false,28)}
+                onPress={() => addMovement(false,29)}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
@@ -950,7 +959,7 @@ case true:
                         onPress={() => {
                           setuploadAddedSection(true)
                           setuploadAddedSectionindex(index)
-                          setuploadSection(28)
+                          setuploadSection(29)
                           refRBSheet.current.open()
                         }}
                         style={{
@@ -964,10 +973,9 @@ case true:
                       </TouchableOpacity>
                     </View>
                     {
-                      
-                      pdeparturecheck[28][index].hotelMap.file.length > 0  && (
+                    pdeparturecheck[29][index].hotelMap.file.length > 0  && (
                 <View style={{marginBottom: 20}}>
-                  {pdeparturecheck[28][index].hotelMap.file.map((value, index) => {
+                  {pdeparturecheck[29][index].hotelMap.file.map((value, index) => {
                     return (
                       <View
                         key={index}
