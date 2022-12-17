@@ -21,6 +21,7 @@ import {
   Dimensions,
   ScrollView,
   TextInput,
+  PermissionsAndroid,
   StatusBar,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -32,9 +33,36 @@ const {width, height} = Dimensions.get('window');
 // );
 // const EventEmitter = new NativeEventEmitter(MrzScanner);
 
+
+const requestCameraPermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      {
+        title: "Cool Photo App Camera Permission",
+        message:
+          "Cool Photo App needs access to your camera " +
+          "so you can take awesome pictures.",
+        buttonNeutral: "Ask Me Later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
+      }
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("You can use the camera");
+    } else {
+      console.log("Camera permission denied");
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
+
 export default function Home({navigation}) {
   const [details, setdetails] = useState(null);
+  
   useEffect(() => {
+    requestCameraPermission();
     // var subscription;
     // subscription = EventEmitter.addListener(
     //   'successfulScanEmittedEvent',

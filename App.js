@@ -7,14 +7,6 @@
  */
 
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
 import Home from './components/Home';
 import GroundHandling from './components/GroundHandling';
 import FlightDetails from './components/FlightDetails';
@@ -24,7 +16,6 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
-
 const App = () => {
   return (
     <NavigationContainer>
