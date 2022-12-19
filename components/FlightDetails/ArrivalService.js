@@ -27,7 +27,7 @@ export default function ArrivalService({navigation}) {
   const refRBSheet = useRef();
 
   //upload funcs
-  const [uploadSection,setuploadSection]=useState(0);
+  const [uploadSection, setuploadSection] = useState(0);
 
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
@@ -102,6 +102,7 @@ export default function ArrivalService({navigation}) {
     null,
     null,
     [],
+    null,
   ]);
   const addMovement = () => {
     var tarrival = [...arrival];
@@ -223,65 +224,69 @@ export default function ArrivalService({navigation}) {
     }
   };
 
-  const onPressDocPreA_New = async (index,res) => {
-          setloading(false);
-          RNFetchBlob.fs
-        .readFile(res.uri, 'base64')
-        .then(encoded => {
-          // console.log(encoded, 'reports.base64');
-          setloading(false);
-          var tarrival = [...arrival];
-          tarrival[index].file.push({
-            name: res.fileName.replace('rn_image_picker_lib_temp_',''),
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setArrival(tarrival);
-        })
-        .catch(error => {
-          setloading(false);
-          console.log(error);
+  const onPressDocPreA_New = async (index, res) => {
+    setloading(false);
+    RNFetchBlob.fs
+      .readFile(res.uri, 'base64')
+      .then(encoded => {
+        // console.log(encoded, 'reports.base64');
+        setloading(false);
+        var tarrival = [...arrival];
+        tarrival[index].file.push({
+          name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
+          base64: 'data:' + res.type + ';base64,' + encoded,
         });
-        refRBSheet.current.close();
+        setArrival(tarrival);
+      })
+      .catch(error => {
+        setloading(false);
+        console.log(error);
+      });
+    refRBSheet.current.close();
+  };
 
-  }
-
-  const getImage=async (type)=>{
-    console.log("HERE",uploadSection)
-    var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
+  const getImage = async type => {
+    console.log('HERE', uploadSection);
+    var options = {
+      mediaType: 'image',
+      includeBase64: false,
+      maxHeight: 800,
+      maxWidth: 800,
+    };
     console.log(options);
-    switch(type){
+    switch (type) {
       case true:
         try {
-          options.mediaType='photo';
-          const result = await ImagePicker.launchImageLibrary(options);  
-          const file=result.assets[0];
-          onPressDocPreA_New(uploadSection,file)
-
+          options.mediaType = 'photo';
+          const result = await ImagePicker.launchImageLibrary(options);
+          console.log(result);
+          const file = result.assets[0];
+          onPressDocPreA_New(uploadSection, file);
         } catch (error) {
           console.log(error);
         }
         break;
-        case false:
-          try {
-            const result = await ImagePicker.launchCamera(options);  
-            const file=result.assets[0];
-            onPressDocPreA_New(uploadSection,file)
-          } catch (error) {
-            console.log(error);
-          }
-          break;
-          default:
-            break;
+      case false:
+        try {
+          const result = await ImagePicker.launchCamera(options);
+          console.log(result);
+
+          const file = result.assets[0];
+          onPressDocPreA_New(uploadSection, file);
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      default:
+        break;
     }
-    
-}
+  };
 
   const removeFilePreA = (arrayIndex, index) => {
     var tarrival = [...arrival];
     tarrival[arrayIndex].file.splice(index, 1);
     setArrival(tarrival);
   };
-
 
   const [crewmove, setcrewmove] = useState(false);
   const [crewmovenum, setcrewmovenum] = useState(0);
@@ -310,13 +315,12 @@ export default function ArrivalService({navigation}) {
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-      
         <Text
           style={{
             fontSize: Dimensions.get('window').width / 15,
             fontWeight: 'bold',
             color: 'black',
-            paddingLeft:20
+            paddingLeft: 20,
           }}>
           Arrival Services
         </Text>
@@ -457,8 +461,8 @@ export default function ArrivalService({navigation}) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(6)}
                 onPress={() => {
-                  setuploadSection(6)
-                  refRBSheet.current.open()
+                  setuploadSection(6);
+                  refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -925,8 +929,8 @@ export default function ArrivalService({navigation}) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(16)}
                 onPress={() => {
-                  setuploadSection(16)
-                  refRBSheet.current.open()
+                  setuploadSection(16);
+                  refRBSheet.current.open();
                 }}
                 disabled={arrival[20].checked}
                 style={{
@@ -943,7 +947,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
             </View>
             {arrival[16].file.length > 0 && (
-              <View style={{marginBottom: 20,marginTop:10}}>
+              <View style={{marginBottom: 20, marginTop: 10}}>
                 {arrival[16].file.map((value, index) => {
                   return (
                     <View
@@ -994,8 +998,8 @@ export default function ArrivalService({navigation}) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(17)}
                 onPress={() => {
-                  setuploadSection(17)
-                  refRBSheet.current.open()
+                  setuploadSection(17);
+                  refRBSheet.current.open();
                 }}
                 disabled={arrival[20].checked}
                 style={{
@@ -1600,10 +1604,9 @@ export default function ArrivalService({navigation}) {
                 disabled={arrival[37].checked}
                 onPress={event => {
                   //onPressDocPreA(35)
-                  setuploadSection(35)
+                  setuploadSection(35);
                   refRBSheet.current.open();
                 }}
-                
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
@@ -1782,7 +1785,7 @@ export default function ArrivalService({navigation}) {
                 disabled={arrival[42].checked}
                 //onPress={event => onPressDocPreA(40)}
                 onPress={() => {
-                  setuploadSection(40)
+                  setuploadSection(40);
                   refRBSheet.current.open();
                 }}
                 style={{
@@ -2087,13 +2090,13 @@ export default function ArrivalService({navigation}) {
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 49)}>
+                onPress={() => showDatePicker('time', 50)}>
                 <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[49] ? arrival[49] : 'dd/mm/yy, -- : --'}
+                  {arrival[50] ? arrival[50] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setNow(49)}
+                onPress={() => setNow(50)}
                 style={{padding: 10}}>
                 <Text
                   style={{
@@ -2111,13 +2114,13 @@ export default function ArrivalService({navigation}) {
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 49)}>
+                onPress={() => showDatePicker('time', 61)}>
                 <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[49] ? arrival[49] : 'dd/mm/yy, -- : --'}
+                  {arrival[61] ? arrival[61] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setNow(49)}
+                onPress={() => setNow(61)}
                 style={{padding: 10}}>
                 <Text
                   style={{
@@ -2317,8 +2320,8 @@ export default function ArrivalService({navigation}) {
             <TouchableOpacity
               //onPress={event => onPressDocPreA(54)}
               onPress={() => {
-                setuploadSection(54)
-                  refRBSheet.current.open();
+                setuploadSection(54);
+                refRBSheet.current.open();
               }}
               style={{
                 marginLeft: 10,
@@ -2331,7 +2334,7 @@ export default function ArrivalService({navigation}) {
             </TouchableOpacity>
           </View>
           {arrival[54].file.length > 0 && (
-            <View style={{marginBottom: 20,marginTop:20}}>
+            <View style={{marginBottom: 20, marginTop: 20}}>
               {arrival[54].file.map((value, index) => {
                 return (
                   <View
@@ -2439,7 +2442,7 @@ export default function ArrivalService({navigation}) {
             </View>
             <View style={{flex: 1.5, flexDirection: 'column'}}>
               <TouchableOpacity
-                onPress={()=>getImage(false)}
+                onPress={() => getImage(false)}
                 style={{
                   flex: 1,
                   flexDirection: 'row',
@@ -2452,7 +2455,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <TouchableOpacity
                 //onPress={() => onPressDocPreA(6)}
-                onPress={()=>getImage(true)}
+                onPress={() => getImage(true)}
                 style={{
                   flex: 1,
                   flexDirection: 'row',
@@ -2476,7 +2479,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName:{color: 'black',fontSize:12,fontWeight:'600'},
+  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
   checkbox: {
     width: 40,
     height: 40,

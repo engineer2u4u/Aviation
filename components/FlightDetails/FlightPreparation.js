@@ -1,73 +1,34 @@
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import { View,StyleSheet,Text,TouchableOpacity,ScrollView,Dimensions } from 'react-native';
 import React, {useState,useRef} from 'react';
 import Loader from '../Loader';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import * as ImagePicker from 'react-native-image-picker';
 
-import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
+import Header from '../subcomponents/Forms/Header';
+import BroadTextInput from '../subcomponents/Forms/FlightPreparation/broadTextInput';
+import BroadImageUpload from '../subcomponents/Forms/FlightPreparation/broadImageUpload';
 
-const {height} = Dimensions.get('window');
+const {width,height} = Dimensions.get('window');
 
+const HeadingTextSize=width / 15;
+const labelTextSize=width / 25;
+const uploadMenu=[
+  {id:0,name:"Slots",textId:3},
+  {id:1,name:"Parking",textId:4},
+  {id:2,name:"Landing Permit",textId:5}
+]
+        
 export default function FlightPreparation({navigation}) {
   const refRBSheet = useRef();
-    //upload funcs
-    const [uploadSection,setuploadSection]=useState(0);
-
-
+  const [uploadSection,setuploadSection]=useState(0);
   const [loading, setloading] = useState(false);
   const [fpreparation, setfpreparation] = useState([
-    null,
-    null,
-    null,
     {value: null, file: []},
     {value: null, file: []},
-    {value: null, file: []},
+    {value: null, file: []}
   ]);
-  const onPressDocFPreparation = async index => {
-    try {
-      setloading(true);
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.images],
-      });
-      // console.log(res);
-      RNFetchBlob.fs
-        .readFile(res.uri, 'base64')
-        .then(encoded => {
-          // console.log(encoded, 'reports.base64');
-          setloading(false);
-          var tfpreparation = [...fpreparation];
-          tfpreparation[index].file.push({
-            name: res.name,
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setfpreparation(tfpreparation);
-        })
-        .catch(error => {
-          setloading(false);
-          console.log(error);
-        });
-
-      // }
-    } catch (err) {
-      setloading(false);
-      console.log(JSON.stringify(err), 'Errorss');
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker, exit any dialogs or menus and move on
-      } else {
-        // throw err;
-      }
-    }
-  };
 
   const removeFileFP = (arrayIndex, index) => {
     var tfpreparation = [...fpreparation];
@@ -131,123 +92,120 @@ case true:
 
 }
 
+
+//NEW STRUCTURE
+
+const [airinfo,setAirInfo]=useState('');
+const [notams,setnotams]=useState('');
+const [specialproc,setspecialproc]=useState('');
+
+const [slot,setSlot]=useState('');
+const [parking,setParking]=useState('');
+const [landingperm,setlandingperm]=useState('');
+
+const [formReady,setformReady]=useState(true);
+
+const validate=()=>{
+  //console.log('called');
+  //lay validation rules
+  //setformReady(true)
+}
+
+const textSeeker=(type,event)=>{
+  validate();
+  switch(type){
+    case 0:
+      setAirInfo(event);
+      break;
+    case 1:
+      setnotams(event);
+      break;
+    case 2:
+      setspecialproc(event);
+      break;
+    case 3:
+      setSlot(event)
+      break;
+    case 4:
+      setParking(event)
+      break;
+    case 5:
+      setlandingperm(event);
+      break;
+    default:
+      return false;
+      break;
+  }
+};
+
+const uploadInitiator=(type)=>{
+  setuploadSection(type);
+  refRBSheet.current.open();
+}
+
+const sendForm=()=>{
+  var formFields={
+    textFields:{
+      Airport_Information:airinfo,
+      Notams:notams,
+      Special_Procedures:specialproc
+    },
+    uploadFields:{
+      Slots:{
+        text:slot,
+        files:fpreparation[0]
+      },
+      Parking:{
+        text:parking,
+        files:fpreparation[1]
+      },
+      LandingPermit:{
+        text:landingperm,
+        files:fpreparation[2]
+      }
+    }
+  }
+
+  console.log("READY TO BE SENT",formFields);
+}
+
+//NEW STRUCtURE ENDS
+
+
   return (
     <ScrollView>
       <Loader visible={loading} />
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginVertical: 20,
-        }}>
-       
-        <Text
-          style={{
-            fontSize: Dimensions.get('window').width / 15,
-            fontWeight: 'bold',
-            color: 'black',
-            paddingLeft:20
-          }}>
-          Flight Preparation
-        </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
-      </View>
+      <Header headingSize={HeadingTextSize} heading={"Flight Preparation"} sendForm={sendForm} Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} />
       <View style={{padding: 20}}>
-        <Text style={styleSheet.label}>Airport Information</Text>
-        <TextInput
-          style={styleSheet.input}
-          multiline={true}
-          numberOfLines={4}
-          value={fpreparation[0]}
-          onChangeText={text => {
-            var tfpreparation = [...fpreparation];
-            tfpreparation[0] = text;
-            setfpreparation(tfpreparation);
-          }}
-        />
-        <Text style={styleSheet.label}>NOTAMs</Text>
-        <TextInput
-          style={styleSheet.input}
-          multiline={true}
-          numberOfLines={4}
-          value={fpreparation[1]}
-          onChangeText={text => {
-            var tfpreparation = [...fpreparation];
-            tfpreparation[1] = text;
-            setfpreparation(tfpreparation);
-          }}
-        />
-        <Text style={styleSheet.label}>Special Procedures</Text>
-        <TextInput
-          style={styleSheet.input}
-          multiline={true}
-          numberOfLines={4}
-          value={fpreparation[2]}
-          onChangeText={text => {
-            var tfpreparation = [...fpreparation];
-            tfpreparation[2] = text;
-            setfpreparation(tfpreparation);
-          }}
-        />
-        <Text style={styleSheet.label}>Slots</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <TextInput
-            style={styleSheet.input}
-            multiline={true}
-            numberOfLines={2}
-            value={fpreparation[3].value}
-            onChangeText={text => {
-              var tfpreparation = [...fpreparation];
-              tfpreparation[3].value = text;
-              setfpreparation(tfpreparation);
-            }}
-          />
-          <TouchableOpacity 
-            //onPress={() => onPressDocFPreparation(3)}
-            onPress={() => {
-              setuploadSection(3);
-              refRBSheet.current.open();
-            }}
-          >
-            <Icons
-              style={{color: 'green', marginLeft: 10}}
-              name="upload"
-              size={40}
-            />
-          </TouchableOpacity>
-        </View>
+        
+        <BroadTextInput type={0} label={"Airport Information"} labelSize={labelTextSize} text={airinfo} textSeeker={textSeeker}/>
+        <BroadTextInput type={1} label={"NOTAMs"} labelSize={labelTextSize} text={notams} textSeeker={textSeeker}/>
+        <BroadTextInput type={2} label={"Special Procedures"} labelSize={labelTextSize} text={specialproc} textSeeker={textSeeker}/>
+       {
+        uploadMenu.map((data,index)=>{
+          return(
+            <BroadImageUpload 
+          key={index}
+          type={index}
+          textId={data.textId}
+          label={data.name}
+          text={(index===0)? slot : (index===1) ? parking : landingperm }
+          textSeeker={textSeeker}
+          uploadType={index}
+          uploadInitiator={uploadInitiator}
+          icon={ <Icons style={{marginLeft: 10}} color={"green"} name="upload" size={40} /> }
 
-        {fpreparation[3].file.length > 0 && (
+          attachMents={
+            <>
+             {fpreparation[data.id].file.length > 0 && (
           <View style={{marginBottom: 20}}>
-            {fpreparation[3].file.map((value, index) => {
+            {fpreparation[data.id].file.map((value, index) => {
               return (
                 <View
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: 16,
-                    padding: 10,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: 10,
-                    marginHorizontal: 5,
-                    ...Platform.select({
-                      ios: {
-                        shadowColor: '#000',
-                        shadowOffset: {width: 0, height: 2},
-                        shadowOpacity: 0.8,
-                        shadowRadius: 2,
-                      },
-                      android: {
-                        elevation: 3,
-                      },
-                    }),
-                  }}>
+                  key={index}
+                  style={styleSheet.attachment}>
                   <Text style={{color: 'black'}}>{value.name}</Text>
-                  <TouchableOpacity onPress={() => removeFileFP(3, index)}>
+                  <TouchableOpacity onPress={() => removeFileFP(data.id, index)}>
                     <Icons
                       style={{color: 'green', marginLeft: 10}}
                       name="close"
@@ -259,149 +217,14 @@ case true:
             })}
           </View>
         )}
-
-        <Text style={styleSheet.label}>Parking</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <TextInput
-            style={styleSheet.input}
-            multiline={true}
-            numberOfLines={2}
-            value={fpreparation[4].value}
-            onChangeText={text => {
-              var tfpreparation = [...fpreparation];
-              tfpreparation[4].value = text;
-              setfpreparation(tfpreparation);
-            }}
-          />
-          <TouchableOpacity 
-            //onPress={() => onPressDocFPreparation(4)}
-            onPress={() => {
-              setuploadSection(4);
-              refRBSheet.current.open();
-            }}
-          >
-            <Icons
-              style={{color: 'green', marginLeft: 10}}
-              name="upload"
-              size={40}
-            />
-          </TouchableOpacity>
-        </View>
-        {fpreparation[4].file.length > 0 && (
-          <View style={{marginBottom: 20}}>
-            {fpreparation[4].file.map((value, index) => {
-              return (
-                <View
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: 16,
-                    padding: 10,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: 10,
-                    marginHorizontal: 5,
-                    ...Platform.select({
-                      ios: {
-                        shadowColor: '#000',
-                        shadowOffset: {width: 0, height: 2},
-                        shadowOpacity: 0.8,
-                        shadowRadius: 2,
-                      },
-                      android: {
-                        elevation: 3,
-                      },
-                    }),
-                  }}>
-                  <Text style={{color: 'black'}}>{value.name}</Text>
-                  <TouchableOpacity onPress={() => removeFileFP(4, index)}>
-                    <Icons
-                      style={{color: 'green', marginLeft: 10}}
-                      name="close"
-                      size={30}
-                    />
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-        )}
-        <Text style={styleSheet.label}>Landing Permit</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <TextInput
-            style={styleSheet.input}
-            multiline={true}
-            numberOfLines={2}
-            value={fpreparation[5].value}
-            onChangeText={text => {
-              var tfpreparation = [...fpreparation];
-              tfpreparation[5].value = text;
-              setfpreparation(tfpreparation);
-            }}
-          />
-          <TouchableOpacity 
-            //onPress={() => onPressDocFPreparation(5)}
-            onPress={() => {
-              setuploadSection(5);
-              refRBSheet.current.open();
-            }}
-          >
-            <Icons
-              style={{color: 'green', marginLeft: 10}}
-              name="upload"
-              size={40}
-            />
-          </TouchableOpacity>
-        </View>
-        {fpreparation[5].file.length > 0 && (
-          <View style={{marginBottom: 20}}>
-            {fpreparation[5].file.map((value, index) => {
-              return (
-                <View
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: 16,
-                    padding: 10,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: 10,
-                    marginHorizontal: 5,
-                    ...Platform.select({
-                      ios: {
-                        shadowColor: '#000',
-                        shadowOffset: {width: 0, height: 2},
-                        shadowOpacity: 0.8,
-                        shadowRadius: 2,
-                      },
-                      android: {
-                        elevation: 3,
-                      },
-                    }),
-                  }}>
-                  <Text style={{color: 'black'}}>{value.name}</Text>
-                  <TouchableOpacity onPress={() => removeFileFP(5, index)}>
-                    <Icons
-                      style={{color: 'green', marginLeft: 10}}
-                      name="close"
-                      size={30}
-                    />
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </View>
-        )}
-        {/* <View style={{flexDirection: 'row', marginTop: 10}}>
-          <TouchableOpacity style={[styleSheet.button, {marginRight: 10}]}>
-            <Text style={{color: 'white', textAlign: 'center'}}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => console.log(fpreparation)}
-            style={[styleSheet.button, {marginLeft: 10}]}>
-            <Text style={{color: 'white', textAlign: 'center'}}>Submit</Text>
-          </TouchableOpacity>
-        </View> */}
+            </>
+          }
+        />
+          )
+        })
+       } 
+        
+        
          <RBSheet
           ref={refRBSheet}
           closeOnDragDown={true}
@@ -454,6 +277,27 @@ case true:
 }
 
 const styleSheet = StyleSheet.create({
+  attachment:{
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginHorizontal: 5,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
   label: {
     fontSize: Dimensions.get('window').width / 25,
     color: 'black',
