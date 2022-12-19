@@ -109,6 +109,8 @@ const validate=()=>{
   //console.log('called');
   //lay validation rules
   //setformReady(true)
+  //asd
+  //test
 }
 
 const textSeeker=(type,event)=>{
