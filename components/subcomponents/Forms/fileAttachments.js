@@ -1,18 +1,18 @@
 import React from "react";
 import {View,Text,TouchableOpacity,Platform, StyleSheet} from 'react-native'
 
-const FileAttachMents=(removeFile,index,type,filename,Icon)=>{
+const FileAttachMents=({removeFile,index,type,filename,Icon})=>{
+
     const removeFileBind=()=>removeFile(type,index);
     return(
-        <View
-                  style={styles.constainer}>
-                  <Text style={styles.label}>{JSON.stringify(filename)} {index}asd</Text>
-                  <TouchableOpacity //onPress={() => removeFileFP(0, index)}
-                  onPress={removeFileBind}
-                  >
-                    {Icon}
-                  </TouchableOpacity>
-                </View>
+      <View
+      key={index}
+      style={styles.constainer}>
+      <Text style={{color: 'black'}}>{filename}</Text>
+      <TouchableOpacity onPress={() => removeFileBind(type, index)}>
+        {Icon}
+      </TouchableOpacity>
+    </View>
     )
 }
 

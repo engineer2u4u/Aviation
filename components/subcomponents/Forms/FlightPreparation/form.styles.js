@@ -13,4 +13,21 @@ export default StyleSheet.create({
         backgroundColor: 'white',
         marginBottom: 20,
       },
+
+    takecamerabtn:{
+      marginLeft: 10,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderWidth: 1,
+      borderRadius: 8,
+    },
+    picker: {
+      flex: 1,
+      borderWidth: 1,
+      borderRadius: 8,
+      marginVertical: 10,
+      padding: 10,
+      backgroundColor: 'white',
+      marginBottom: 20,
+    },
 })
