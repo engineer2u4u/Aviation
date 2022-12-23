@@ -1,16 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Button,
-  Switch,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
+import { View,StyleSheet,Text,TouchableOpacity,Dimensions,ScrollView} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,8 +9,6 @@ import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
 import Header from '../subcomponents/Forms/Header';
 import TakeCamera from '../subcomponents/Forms/takecamera';
-import FileAttachMents from '../subcomponents/Forms/fileAttachments';
-import ServiceVerifiedSection from '../subcomponents/Forms/PostDepartures/serviceverified';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 
@@ -82,41 +68,7 @@ export default function PostDeparture({navigation}) {
     );
     setpostdeparture(tpostdeparture);
   };
-  const onPressDocPreA = async index => {
-    try {
-      setloading(true);
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.images],
-      });
-      // console.log(res);
-      RNFetchBlob.fs
-        .readFile(res.uri, 'base64')
-        .then(encoded => {
-          // console.log(encoded, 'reports.base64');
-          setloading(false);
-          var tpostdeparture = [...postdeparture];
-          tpostdeparture[index].file.push({
-            name: res.name,
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setpostdeparture(tpostdeparture);
-        })
-        .catch(error => {
-          setloading(false);
-          console.log(error);
-        });
 
-      // }
-    } catch (err) {
-      setloading(false);
-      console.log(JSON.stringify(err), 'Errorss');
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker, exit any dialogs or menus and move on
-      } else {
-        // throw err;
-      }
-    }
-  };
   const removeFilePreA = (arrayIndex, index) => {
     var tpostdeparture = [...postdeparture];
     tpostdeparture[arrayIndex].file.splice(index, 1);
@@ -211,7 +163,7 @@ const sendForm=()=>{
         Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} 
       />
       <View style={{padding: 20}}>
-        <TakeCamera label={"Stamped"} type={0} uploadInitiator={uploadInitiator} removeFilePreA={removeFilePreA} attachments={postdeparture[0]} 
+        <TakeCamera label={"Stamped GenDec"} type={0} uploadInitiator={uploadInitiator} removeFilePreA={removeFilePreA} attachments={postdeparture[0]} 
             Icon={
               <Icons
                 style={{color: 'green', marginLeft: 10}}
@@ -221,15 +173,6 @@ const sendForm=()=>{
             } 
         />
         
-        {/*   ------------------------------Services Verified ----------- */}
-        {/* <ServiceVerifiedSection 
-          showDatePickerPostDepart={showDatePickerPostDepart} 
-          setNowPostDepart={setNowPostDepart}
-          
-          data={postdeparture[1]}
-          timeTextSize={width / 25}
-
-        /> */}
           <Text style={[styleSheet.label, {marginTop: 10}]}>
             Services Verified:
           </Text>
@@ -243,6 +186,7 @@ const sendForm=()=>{
             }}>
 
               <DateTimeInput 
+                label={'Time Verified (Local Time)'}
                 showDatePickerPostDepart={showDatePickerPostDepart}
                 setNowPostDepart={setNowPostDepart}
                 data={postdeparture[1]}

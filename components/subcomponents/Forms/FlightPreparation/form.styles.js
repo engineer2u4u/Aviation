@@ -13,7 +13,7 @@ export default StyleSheet.create({
         backgroundColor: 'white',
         marginBottom: 20,
       },
-
+    imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
     takecamerabtn:{
       marginLeft: 10,
       paddingVertical: 5,

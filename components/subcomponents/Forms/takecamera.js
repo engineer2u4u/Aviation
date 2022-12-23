@@ -1,10 +1,14 @@
-import React from "react";
+import React,{useState} from "react";
 import {View,Text,TouchableOpacity} from 'react-native'
 import s from './FlightPreparation/form.styles';
 import FileAttachMents from "./fileAttachments";
 
-const TakeCamera=({label,type,uploadInitiator,attachments,removeFilePreA,Icon})=>{
-    const uploadInitiatorbind=()=>uploadInitiator(type);
+const TakeCamera=({label,type,uploadInitiator,init,attachments,removeFilePreA,Icon,sectionName='crew',addedsection=false})=>{
+    const [ini,setini]=useState(init);
+    const uploadInitiatorbind=()=>{
+      uploadInitiator(type,addedsection,sectionName);
+      setini(!ini)
+    };
     return(
         <>
         <View
@@ -21,15 +25,20 @@ const TakeCamera=({label,type,uploadInitiator,attachments,removeFilePreA,Icon})=
             style={s.takecamerabtn}>
             <Text style={{color: 'green'}}>Take Camera</Text>
           </TouchableOpacity>
+
         </View>
-        {attachments.file.length > 0 && (
+        {
+
+          attachments.file.length > 0 && (
           <View style={{marginBottom: 20}}>
             {attachments.file.map((value, index) => {
               return (
-                <FileAttachMents 
+              <FileAttachMents 
                 key={index}
+                ini={ini}
+                addedsection={addedsection}
                 removeFile={removeFilePreA}
-                type={0}
+                type={type}
                 index={index}
                 filename={value.name}
                 Icon={Icon}
