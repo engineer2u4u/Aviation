@@ -54,7 +54,7 @@ export default function ArrivalService({navigation}) {
     null,
     null,
     {checked: false},
-    null,
+    null,//10
     null,
     {checked: false},
     {checked: false},
@@ -105,8 +105,10 @@ export default function ArrivalService({navigation}) {
     null,
     null,
     [],
-    null, //61
-    {}
+    [], //61
+    [], //62
+    {},//63
+    null
   ]);
   const addMovement = () => {
     var tarrival = [...arrival];
@@ -175,8 +177,9 @@ export default function ArrivalService({navigation}) {
     );
   };
   const setNow = (index, pos, field) => {
+    console.log(field);
     var tarrival = [...arrival];
-
+    console.log(field);
     if (pos != undefined) {
       tarrival[index][pos][field] = tConvert(
         new Date().toLocaleString('en-US', {
@@ -728,27 +731,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View> */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(13)}>
-                <Icons
-                  name={
-                    arrival[13].checked
-                      ? 'checkbox-marked-outline'
-                      : 'checkbox-blank-outline'
-                  }
-                  color={arrival[13].checked ? 'green' : 'black'}
-                  size={40}
-                />
-              </TouchableOpacity>
-              <Text style={styleSheet.label}>
-                Pax Notified on Meeting Point
-              </Text>
-            </View>
+            
             <DateTimeInput 
                 label={'Actual Transport Arrival Time at Airport (Local Time)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 58)}}
@@ -781,15 +764,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View> */}
-            <DateTimeInput 
-                label={'Time Pax Boarded Transport at Airport (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 59)}}
-                setNowPostDepart={()=>setNow(59)}
-                size={12}
-                type={'time'}
-                data={arrival[59]}
-                index={12}
-              />
+            
             {/* <Text style={styleSheet.label}>
               Time Pax Boarded Transport at Airport (Local Time)
             </Text>
@@ -2190,15 +2165,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
             </View> */}
 
-<DateTimeInput 
-                label={'Time Crew Boarded Transport (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 50)}}
-                setNowPostDepart={()=>setNow(50)}
-                size={12}
-                type={'time'}
-                data={arrival[50]}
-                index={12}
-              />
+
             {/* <Text style={styleSheet.label}>
               Time Crew Boarded Transport (Local Time)
             </Text>
@@ -2310,7 +2277,24 @@ export default function ArrivalService({navigation}) {
                         <Icons name="minus-box-outline" color="red" size={30} />
                       </TouchableOpacity>
                     </View>
-                    <Text style={styleSheet.label}>
+                    
+                    <DateTimeInput 
+                label={'Actual Transport Arrival Time at Airport (Local Time)'}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 62, index, 'arrival')}}
+                setNowPostDepart={(a,time)=>{
+                  var options={
+                    arrival:time
+                  }
+                  var x=[...arrival];
+                  x[62][index]=options;
+                  setArrival(x);
+                }}
+                size={12}
+                type={'time'}
+                data={null}
+                index={index}
+              />
+                    {/* <Text style={styleSheet.label}>
                       Actual Transport Arrival Time at Terminal (Local Time)
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -2334,8 +2318,8 @@ export default function ArrivalService({navigation}) {
                           Time Now
                         </Text>
                       </TouchableOpacity>
-                    </View>
-                    <Text style={styleSheet.label}>
+                    </View> */}
+                    {/* <Text style={styleSheet.label}>
                       Crew Departed from Terminal (Local Time)
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -2345,7 +2329,8 @@ export default function ArrivalService({navigation}) {
                           showDatePicker('time', 61, index, 'arrival')
                         }>
                         <Text style={{fontSize: 20, color: 'black'}}>
-                          {arrival[61][index]!==null ? arrival[61][index] :'dd/mm/yy'}
+                          {//arrival[61][index]!==null 
+                          false? arrival[61][index] :'dd/mm/yy here'}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -2359,7 +2344,33 @@ export default function ArrivalService({navigation}) {
                           Time Now
                         </Text>
                       </TouchableOpacity>
-                    </View>
+                    </View> */}
+                    <DateTimeInput 
+                      label={'Crew Departed from Terminal (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePicker('time', 62, index, 'departed')}}
+                      setNowPostDepart={(a,time)=>{
+                        var options={
+                          departed:time
+                        }
+                        var x=[...arrival];
+                        x[62][index]=options;
+                        setArrival(x);
+                      }}
+                      size={12}
+                      type={'time'}
+                      data={null}
+                      index={index}
+                    />
+<LabelledInput
+              label={'Remarks'} //mark
+              data={arrival[64]}
+              datatype={'text'}
+              index={64}
+              setText={setArrivalData} 
+              multiline={true}
+              numberOfLines={2}
+            />
+                    
                     
                   </View>
                 );
@@ -2408,7 +2419,7 @@ export default function ArrivalService({navigation}) {
           </View> */}
          
 
-          <Text style={styleSheet.label}>Additional Remarks</Text>
+          {/* <Text style={styleSheet.label}>Additional Remarks</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <TextInput
               style={styleSheet.input}
@@ -2421,7 +2432,7 @@ export default function ArrivalService({navigation}) {
                 setArrival(tarrival);
               }}
             />
-          </View>
+          </View> */}
         </View>
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
