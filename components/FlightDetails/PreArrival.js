@@ -79,6 +79,12 @@ export default function PreArrival({navigation}) {
     );
     setChecklist(tcheckList);
   };
+
+  const [paxactivesections,setpaxactivesection]=useState(false)
+  const [paxhotelactivesections,setpaxhotelactivesections]=useState(false)
+  const [crewactivesections,setcrewactivesections]=useState(false)
+  const [crewhotelactivesections,setcrewhotelactivesections]=useState(false)
+
   const [checkList, setChecklist] = useState([
     {checked: false, remarks: null},
     {checked: false, remarks: null},
@@ -92,7 +98,7 @@ export default function PreArrival({navigation}) {
     {checked: false, remarks: null},
     {checked: false, file: [], remarks: null},
     {checked: false, remarks: null},
-    [{transportTime: null, name: null, number: null, remarks: null}],
+    [{transportTime: null, name: null, number: null, remarks: null}], //12
     [
       {
         name: null,
@@ -1077,42 +1083,45 @@ const sendForm=()=>{
               borderRadius: 10,
               marginVertical: 10,
             }}>
+              <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = paxactivesections;
+                setpaxactivesection(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    paxactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={paxactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
               <DateTimeInput 
                 label={'Scheduled Transport Arrival Time (Local Time)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 12, 0)}}
                 setNowPostDepart={()=>setNow(12, 0)}
+                disabled={paxactivesections}
                 size={12}
                 type={'time'}
                 data={checkList[12][0].transportTime}
                 index={12}
               />
-            {/* <Text style={styleSheet.label}>
-              Scheduled Transport Arrival time(Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 12, 0)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {checkList[12][0].transportTime
-                    ? checkList[12][0].transportTime
-                    : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(12, 0)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity> 
-            </View> asdasd */}
+           
             <LabelledInput
                 label={'Local Receiving Party / Driver Name'} //mark
+                disabled={paxactivesections}
                 data={checkList[12][0].name}
                 datatype={'text'}
                 index={12}
@@ -1138,6 +1147,7 @@ const sendForm=()=>{
             /> */}
             <LabelledInput
                 label={'Local Receiving Party / Driver Contact Name'} //mark
+                disabled={paxactivesections}
                 data={checkList[12][0].number}
                 datatype={'text'}
                 index={12}
@@ -1163,6 +1173,7 @@ const sendForm=()=>{
             /> */}
             <LabelledInput
                 label={'Remarks'} //mark
+                disabled={paxactivesections}
                 data={checkList[12][0].remarks}
                 datatype={'text'}
                 index={12}
@@ -1197,7 +1208,8 @@ const sendForm=()=>{
               }}>
               <TouchableOpacity
                 onPress={addTransport}
-                style={[styleSheet.button]}>
+                disabled={paxactivesections}
+                style={[styleSheet.button,{backgroundColor : paxactivesections ? '#80808080' : 'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
                 </Text>
@@ -1347,6 +1359,31 @@ const sendForm=()=>{
               borderRadius: 10,
               marginVertical: 10,
             }}>
+
+          <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = paxhotelactivesections;
+                setpaxhotelactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    paxhotelactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={paxhotelactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
               
             {/* <Text style={styleSheet.label}>Hotel Name</Text>
             <TextInput
@@ -1360,6 +1397,7 @@ const sendForm=()=>{
             /> */}
              <LabelledInput
                 label={'Hotel Name'} //mark
+                disabled={paxhotelactivesections}
                 data={checkList[13][0].name}
                 datatype={'text'}
                 index={13}
@@ -1372,6 +1410,7 @@ const sendForm=()=>{
                 numberOfLines={1}
               />
                <LabelledInput
+               disabled={paxhotelactivesections}
                 label={'Hotel Location'} //mark
                 data={checkList[13][0].location}
                 datatype={'text'}
@@ -1405,6 +1444,7 @@ const sendForm=()=>{
               <Text style={styleSheet.label}>Map of Route to Hotel</Text>
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(13, 0)}
+                disabled={paxhotelactivesections}
                 onPress={() =>{
                   setuploadAddedSection(false)
                   setuploadSection(13)
@@ -1417,7 +1457,7 @@ const sendForm=()=>{
                   borderWidth: 1,
                   borderRadius: 8,
                 }}>
-                <Text style={{color: 'green'}}>Upload</Text>
+                <Text style={{color:paxhotelactivesections? '#000000' : 'green'}}>Upload</Text>
               </TouchableOpacity>
             </View>
             {checkList[13][0].hotelMap.file.length > 0 && (
@@ -1465,6 +1505,7 @@ const sendForm=()=>{
 
 <DateTimeInput 
                 label={'Travel Time (Approximate)'}
+                disabled={paxhotelactivesections}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 13, 0)}}
                 setNowPostDepart={()=>setNow(13, 0)}
                 size={12}
@@ -1497,6 +1538,7 @@ const sendForm=()=>{
             </View> */}
             <LabelledInput
                 label={'Remarks'} //mark
+                disabled={paxhotelactivesections}
                 data={checkList[13][0].remarks}
                 datatype={'text'}
                 index={13}
@@ -1529,7 +1571,7 @@ const sendForm=()=>{
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <TouchableOpacity onPress={addHotel} style={[styleSheet.button]}>
+              <TouchableOpacity disabled={paxhotelactivesections} onPress={addHotel} style={[styleSheet.button,{backgroundColor : paxhotelactivesections? '#80808080' : 'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Hotel
                 </Text>
@@ -1576,9 +1618,9 @@ const sendForm=()=>{
                       }}
                     /> */}
                      <LabelledInput
-                label={'Driver Location'} //mark
+                label={'Hotel Location'} //mark
                 data={checkList[13][index].location}
-                datatype={'text'}
+                datatype={'location'}
                 index={13}
                 setText={(i,text,type,section)=>{
                   var tcheckList = [...checkList];
@@ -1756,7 +1798,33 @@ const sendForm=()=>{
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            {/* <Text style={styleSheet.label}>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = crewactivesections;
+                setcrewactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    crewactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={crewactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+          
+            {/* setcrewactivesections<Text style={styleSheet.label}>
               Scheduled Transport Arrival time(Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1783,6 +1851,7 @@ const sendForm=()=>{
             </View> //now */}
                <DateTimeInput 
                 label={'Scheduled Transport Arrival Time (Local Time)'}
+                disabled={crewactivesections}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 14, 0)}}
                 setNowPostDepart={()=>setNow(14, 0)}
                 size={12}
@@ -1792,6 +1861,7 @@ const sendForm=()=>{
               />
               <LabelledInput
                 label={'Driver Name'} //mark
+                disabled={crewactivesections}
                 data={checkList[14][0].name}
                 datatype={'text'}
                 index={14}
@@ -1815,6 +1885,7 @@ const sendForm=()=>{
             /> */}
             <LabelledInput
                 label={'Driver Contact Number'} //mark
+                disabled={crewactivesections}
                 data={checkList[14][0].number}
                 datatype={'text'}
                 index={14}
@@ -1838,6 +1909,7 @@ const sendForm=()=>{
             /> */}
             <LabelledInput
                 label={'Remarks'} //mark
+                disabled={crewactivesections}
                 data={checkList[14][0].remarks}
                 datatype={'text'}
                 index={14}
@@ -1872,7 +1944,8 @@ const sendForm=()=>{
               }}>
               <TouchableOpacity
                 onPress={addTransportCrew}
-                style={[styleSheet.button]}>
+                disabled={crewactivesections}
+                style={[styleSheet.button,{backgroundColor:crewactivesections? '#80808080' : 'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
                 </Text>
@@ -1905,7 +1978,7 @@ const sendForm=()=>{
                       index={15}
                     />
                      <LabelledInput
-                      label={'Driver Contact Name'} //mark
+                      label={'Driver Name'} //mark
                       data={checkList[14][index].name}
                       datatype={'text'}
                       
@@ -1997,8 +2070,35 @@ const sendForm=()=>{
               borderRadius: 10,
               marginVertical: 10,
             }}>
+
+<View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = crewhotelactivesections;
+                setcrewhotelactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    crewhotelactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={crewhotelactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
               <LabelledInput
-                label={'Hotel Name Child'} //mark
+                label={'Hotel Name'} //mark
+                disabled={crewhotelactivesections}
                 data={checkList[15][0].name}
                 datatype={'text'}
                 index={15}
@@ -2022,6 +2122,7 @@ const sendForm=()=>{
             /> */}
               <LabelledInput
                 label={'Hotel Location'} //mark
+                disabled={crewhotelactivesections}
                 data={checkList[15][0].location}
                 datatype={'text'}
                 index={15}
@@ -2114,9 +2215,9 @@ const sendForm=()=>{
             )} */}
 
 <TakeCamera 
-               label={"Photo of Pickup Location"} 
+               label={"Map of Route to Hotel"} 
                type={15} 
-                
+               disabled={crewhotelactivesections}
                uploadInitiator={()=>{
                 setuploadSection(15);
                 setuploadAddedSection(false);
@@ -2135,6 +2236,7 @@ const sendForm=()=>{
 
               <DateTimeInput 
                 label={'Travel Time (Approximate)'}
+                disabled={crewhotelactivesections}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 15, 0)}}
                 setNowPostDepart={()=>setNow(15, 0)}
                 size={12}
@@ -2167,6 +2269,7 @@ const sendForm=()=>{
             </View> */}
             <LabelledInput
                 label={'Remarks'} //mark
+                disabled={crewhotelactivesections}
                 data={checkList[15][0].remarks}
                 datatype={'remarks'}
                 index={15}
@@ -2200,8 +2303,9 @@ const sendForm=()=>{
                 alignItems: 'center',
               }}>
               <TouchableOpacity
+                disabled={crewhotelactivesections}
                 onPress={addHotelCrew}
-                style={[styleSheet.button]}>
+                style={[[styleSheet.button,{backgroundColor:crewhotelactivesections? '#80808080':'green'}]]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Hotel
                 </Text>

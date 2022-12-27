@@ -3,7 +3,7 @@ import {View,Text,TouchableOpacity} from 'react-native'
 import s from './FlightPreparation/form.styles';
 import FileAttachMents from "./fileAttachments";
 
-const TakeCamera=({label,type,uploadInitiator,init,attachments,removeFilePreA,Icon,sectionName='crew',addedsection=false})=>{
+const TakeCamera=({label,disabled=false,type,uploadInitiator,init,attachments,removeFilePreA,Icon,sectionName='crew',addedsection=false})=>{
     const [ini,setini]=useState(init);
     const uploadInitiatorbind=()=>{
       uploadInitiator(type,addedsection,sectionName);
@@ -21,9 +21,10 @@ const TakeCamera=({label,type,uploadInitiator,init,attachments,removeFilePreA,Ic
           <Text style={s.label}>{label}</Text>
           <TouchableOpacity
             //onPress={event => onPressDocPreA(0)}
+            disabled={disabled}
             onPress={uploadInitiatorbind}
             style={s.takecamerabtn}>
-            <Text style={{color: 'green'}}>Take Camera</Text>
+            <Text style={{color:disabled? '#000' : 'green'}}>Take Camera</Text>
           </TouchableOpacity>
 
         </View>

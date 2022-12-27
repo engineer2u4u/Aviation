@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {View,Text,TextInput,TouchableOpacity} from 'react-native'
 import s from '../FlightPreparation/form.styles'
 
-const LabelledInput=({label,multiline,numberOfLines,data,ini,index,setText,sectionName='crew',added=false,datatype='text'})=>{
+const LabelledInput=({label,disabled=false,multiline,numberOfLines,data,ini,index,setText,sectionName='crew',added=false,datatype='text'})=>{
     const [val,setval]=useState('');
 
     const sendText=()=>{
@@ -24,7 +24,8 @@ const LabelledInput=({label,multiline,numberOfLines,data,ini,index,setText,secti
         <Text style={s.label}>{label}</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <TextInput
-              style={s.input}
+              style={[s.input,{backgroundColor: disabled ? 'rgba(0,0,0,0.1)' : 'white'}]}
+              editable={!disabled}
               value={val}
               multiline={multiline}
               numberOfLines={numberOfLines}

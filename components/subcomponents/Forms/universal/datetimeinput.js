@@ -2,7 +2,7 @@ import React, { useEffect,useState } from "react";
 import {View,Text,TextInput,TouchableOpacity} from 'react-native'
 import s from '../FlightPreparation/form.styles'
 
-const DateTimeInput=({label,showDatePickerPostDepart,ini,setNowPostDepart,size,data,index,type='time',sectionName='crew',added=false})=>{
+const DateTimeInput=({label,disabled,showDatePickerPostDepart,ini,setNowPostDepart,size,data,index,type='time',sectionName='crew',added=false})=>{
 
     const [date,setdate]=useState(data);
 
@@ -24,13 +24,15 @@ const DateTimeInput=({label,showDatePickerPostDepart,ini,setNowPostDepart,size,d
         <Text style={s.label}>{label || 'Time Verified (Local Time)'}</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <TouchableOpacity
-              style={s.picker}
+              disabled={disabled}
+              style={[s.picker,{backgroundColor: disabled ? 'rgba(0,0,0,0.1)' : 'white'}]}
               onPress={() => showDatePickerPostDepart(type, index)}>
               <Text style={{fontSize: 20, color: 'black'}}>
                 {date!=null ? date : 'dd/mm/yy, -- : --'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              disabled={disabled}
               onPress={() => {
               setTime()//  :  setNowPostDepart(index)
               }}
