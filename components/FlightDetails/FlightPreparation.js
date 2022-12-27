@@ -109,6 +109,8 @@ const validate=()=>{
   //console.log('called');
   //lay validation rules
   //setformReady(true)
+  //asd
+  //test
 }
 
 const textSeeker=(type,event)=>{
@@ -144,6 +146,7 @@ const uploadInitiator=(type)=>{
 }
 
 const sendForm=()=>{
+  //fields
   var formFields={
     textFields:{
       Airport_Information:airinfo,

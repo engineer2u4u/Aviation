@@ -22,6 +22,6 @@ const styles=StyleSheet.create({
       headingText:{
         fontWeight: 'bold',
         color: 'black',
-        paddingLeft:20
+        paddingLeft:10
     }
 })

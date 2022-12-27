@@ -1,18 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {View,Text,TouchableOpacity,Platform, StyleSheet} from 'react-native'
 
-const FileAttachMents=(removeFile,index,type,filename,Icon)=>{
-    const removeFileBind=()=>removeFile(type,index);
+const FileAttachMents=({removeFile,ini,index,type,filename,Icon,addedsection})=>{
+    const [show,setShow]=useState(true);
+    const removeFileBind=()=>{
+      removeFile(type,index,addedsection)
+      setShow(false);
+    };
+
+    useEffect(()=>{
+      console.log("ini");
+      setShow(true);
+    },[ini])
+
     return(
+      <>
+        {show && 
         <View
-                  style={styles.constainer}>
-                  <Text style={styles.label}>{JSON.stringify(filename)} {index}asd</Text>
-                  <TouchableOpacity //onPress={() => removeFileFP(0, index)}
-                  onPress={removeFileBind}
-                  >
-                    {Icon}
-                  </TouchableOpacity>
-                </View>
+        key={index}
+        style={styles.constainer}>
+        <Text style={styles.imgName}>{filename}</Text>
+        <TouchableOpacity onPress={() => removeFileBind(type, index)}>
+          {Icon}
+        </TouchableOpacity>
+      </View>}
+      </>
     )
 }
 
@@ -40,5 +52,6 @@ const styles=StyleSheet.create({
           },
         }),
       },
+      imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
       label:{color: 'black'}
 })

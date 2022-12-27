@@ -6,6 +6,7 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  Touchable
 } from 'react-native';
 import React, {useState,useRef} from 'react';
 import Loader from '../Loader';

@@ -16,6 +16,9 @@ import Feedback from '../Feedback';
 import * as ImagePicker from 'react-native-image-picker';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
+import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
+import TakeCamera from '../subcomponents/Forms/takecamera';
 const {height} = Dimensions.get('window');
 
 export default function PreArrival({navigation}) {
@@ -76,6 +79,12 @@ export default function PreArrival({navigation}) {
     );
     setChecklist(tcheckList);
   };
+
+  const [paxactivesections,setpaxactivesection]=useState(false)
+  const [paxhotelactivesections,setpaxhotelactivesections]=useState(false)
+  const [crewactivesections,setcrewactivesections]=useState(false)
+  const [crewhotelactivesections,setcrewhotelactivesections]=useState(false)
+
   const [checkList, setChecklist] = useState([
     {checked: false, remarks: null},
     {checked: false, remarks: null},
@@ -89,7 +98,7 @@ export default function PreArrival({navigation}) {
     {checked: false, remarks: null},
     {checked: false, file: [], remarks: null},
     {checked: false, remarks: null},
-    [{transportTime: null, name: null, number: null, remarks: null}],
+    [{transportTime: null, name: null, number: null, remarks: null}], //12
     [
       {
         name: null,
@@ -109,7 +118,9 @@ export default function PreArrival({navigation}) {
         remarks: null,
       },
     ],
-    {checked: false, file: [], remarks: null},
+    {checked: false, remarks: null},//16
+    {checked: false, remarks: null},//17
+    
   ]);
 
   const setChecked = index => {
@@ -327,6 +338,19 @@ case true:
 
 }
 
+const sendForm=()=>{
+  //console.log(checkList);
+  var meta=checkList.splice(0,12);
+  var formFields={
+    meta,
+    pax_transport:checkList[12],
+    pax_hotel:checkList[13],
+    crew_transport:checkList[14],
+    crew_hotel:checkList[15],
+  }
+  console.log(formFields);
+}
+
   return (
     <View>
       <View
@@ -346,7 +370,7 @@ case true:
           }}>
           Pre-Arrival Checklist
         </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
+        <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
           <Icons name="content-save" color="green" size={30} />
         </TouchableOpacity>
       </View>
@@ -540,13 +564,107 @@ case true:
               </TouchableOpacity>
             </View>
           )}
+           <View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setChecked(16)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: checkList[16].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: checkList[16].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Crew Hotel Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(16)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {checkList[16].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{checkList[3].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(12)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+           <View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setChecked(17)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: checkList[17].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: checkList[17].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Pax Hotel Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(17)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {checkList[17].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{checkList[3].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(17)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+          {
+            //to be added
+
+            // crew hotel arranged ok
+            // pax hotel arranged ok
+          }
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
               onPress={event => setChecked(4)}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[4].checked ? 'green' : 'white',
+                  backgroundColor: checkList[4].checked ? 'green' : 'white', //checkList[4].checked 
                 },
               ]}>
               <Text
@@ -954,9 +1072,9 @@ case true:
               </TouchableOpacity>
             </View>
           )}
-          <Text style={[styleSheet.label, {marginTop: 20}]}>
-            Pax Transport:
-          </Text>
+
+
+          <Text style={[styleSheet.label, {marginTop: 20}]}>Pax Transport:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -965,32 +1083,57 @@ case true:
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <Text style={styleSheet.label}>
-              Scheduled Transport Arrival time(Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 12, 0)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {checkList[12][0].transportTime
-                    ? checkList[12][0].transportTime
-                    : 'dd/mm/yy, -- : --'}
-                </Text>
+              <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = paxactivesections;
+                setpaxactivesection(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    paxactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={paxactivesections ? 'green' : 'black'}
+                  size={40}
+                />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(12, 0)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>
+
+              <DateTimeInput 
+                label={'Scheduled Transport Arrival Time (Local Time)'}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 12, 0)}}
+                setNowPostDepart={()=>setNow(12, 0)}
+                disabled={paxactivesections}
+                size={12}
+                type={'time'}
+                data={checkList[12][0].transportTime}
+                index={12}
+              />
+           
+            <LabelledInput
+                label={'Local Receiving Party / Driver Name'} //mark
+                disabled={paxactivesections}
+                data={checkList[12][0].name}
+                datatype={'text'}
+                index={12}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>
               Local Receiving Party / Driver Name
             </Text>
             <TextInput
@@ -1001,8 +1144,22 @@ case true:
                 tcheckList[12][0].name = text;
                 setChecklist(tcheckList);
               }}
-            />
-            <Text style={styleSheet.label}>
+            /> */}
+            <LabelledInput
+                label={'Local Receiving Party / Driver Contact Name'} //mark
+                disabled={paxactivesections}
+                data={checkList[12][0].number}
+                datatype={'text'}
+                index={12}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].number = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>
               Local Receiving Party / Driver Contact Number
             </Text>
             <TextInput
@@ -1013,8 +1170,22 @@ case true:
                 tcheckList[12][0].number = text;
                 setChecklist(tcheckList);
               }}
-            />
-            <Text style={styleSheet.label}>Remarks</Text>
+            /> */}
+            <LabelledInput
+                label={'Remarks'} //mark
+                disabled={paxactivesections}
+                data={checkList[12][0].remarks}
+                datatype={'text'}
+                index={12}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].remarks = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 style={styleSheet.input}
@@ -1028,7 +1199,7 @@ case true:
                   setChecklist(tcheckList);
                 }}
               />
-            </View>
+            </View> */}
             <View
               style={{
                 flexDirection: 'row',
@@ -1037,7 +1208,8 @@ case true:
               }}>
               <TouchableOpacity
                 onPress={addTransport}
-                style={[styleSheet.button]}>
+                disabled={paxactivesections}
+                style={[styleSheet.button,{backgroundColor : paxactivesections ? '#80808080' : 'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
                 </Text>
@@ -1060,7 +1232,16 @@ case true:
                         <Icons name="minus-box-outline" color="red" size={30} />
                       </TouchableOpacity>
                     </View>
-                    <Text style={styleSheet.label}>
+                    <DateTimeInput 
+                      label={'Scheduled Transport Arrival Time (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePicker('time', 12, index)}}
+                      setNowPostDepart={()=>setNow(12, index)}
+                      size={12}
+                      type={'datetime'}
+                      data={checkList[12][index].transportTime}
+                      index={12}
+                    />
+                    {/* <Text style={styleSheet.label}>
                       Scheduled Transport Arrival time(Local Time)
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1084,8 +1265,22 @@ case true:
                           Time Now
                         </Text>
                       </TouchableOpacity>
-                    </View>
-                    <Text style={styleSheet.label}>
+                    </View> */}
+                    
+                    <LabelledInput
+                label={'Local Receiving Party / Driver Name'} //mark
+                data={checkList[12][index].name}
+                datatype={'text'}
+                index={12}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[i][index].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+                    {/* <Text style={styleSheet.label}>
                       Local Receiving Party / Driver Name
                     </Text>
                     <TextInput
@@ -1096,8 +1291,21 @@ case true:
                         tcheckList[12][index].name = text;
                         setChecklist(tcheckList);
                       }}
-                    />
-                    <Text style={styleSheet.label}>
+                    /> */}
+                    <LabelledInput
+                label={'Local Receiving Party / Driver Contact Number'} //mark
+                data={checkList[12][index].number}
+                datatype={'text'}
+                index={12}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[i][index].number = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+                    {/* <Text style={styleSheet.label}>
                       Local Receiving Party / Driver Contact Number
                     </Text>
                     <TextInput
@@ -1108,8 +1316,21 @@ case true:
                         tcheckList[12][index].number = text;
                         setChecklist(tcheckList);
                       }}
-                    />
-                    <Text style={styleSheet.label}>Remarks</Text>
+                    /> */}
+                    <LabelledInput
+                label={'Remarks'} //mark
+                data={checkList[12][index].remarks}
+                datatype={'text'}
+                index={12}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[i][index].remarks = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+                    {/* <Text style={styleSheet.label}>Remarks</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <TextInput
                         style={styleSheet.input}
@@ -1123,7 +1344,7 @@ case true:
                           setChecklist(tcheckList);
                         }}
                       />
-                    </View>
+                    </View> */}
                   </View>
                 );
               }
@@ -1138,7 +1359,33 @@ case true:
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <Text style={styleSheet.label}>Hotel Name</Text>
+
+          <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = paxhotelactivesections;
+                setpaxhotelactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    paxhotelactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={paxhotelactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+              
+            {/* <Text style={styleSheet.label}>Hotel Name</Text>
             <TextInput
               style={styleSheet.input}
               value={checkList[13][0].name}
@@ -1147,8 +1394,36 @@ case true:
                 tcheckList[13][0].name = text;
                 setChecklist(tcheckList);
               }}
-            />
-            <Text style={styleSheet.label}>Hotel Location</Text>
+            /> */}
+             <LabelledInput
+                label={'Hotel Name'} //mark
+                disabled={paxhotelactivesections}
+                data={checkList[13][0].name}
+                datatype={'text'}
+                index={13}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+               <LabelledInput
+               disabled={paxhotelactivesections}
+                label={'Hotel Location'} //mark
+                data={checkList[13][0].location}
+                datatype={'text'}
+                index={13}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>Hotel Location</Text>
             <TextInput
               style={styleSheet.input}
               value={checkList[13][0].location}
@@ -1157,7 +1432,7 @@ case true:
                 tcheckList[13][0].location = text;
                 setChecklist(tcheckList);
               }}
-            />
+            /> */}
 
             <View
               style={{
@@ -1169,6 +1444,7 @@ case true:
               <Text style={styleSheet.label}>Map of Route to Hotel</Text>
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(13, 0)}
+                disabled={paxhotelactivesections}
                 onPress={() =>{
                   setuploadAddedSection(false)
                   setuploadSection(13)
@@ -1181,7 +1457,7 @@ case true:
                   borderWidth: 1,
                   borderRadius: 8,
                 }}>
-                <Text style={{color: 'green'}}>Upload</Text>
+                <Text style={{color:paxhotelactivesections? '#000000' : 'green'}}>Upload</Text>
               </TouchableOpacity>
             </View>
             {checkList[13][0].hotelMap.file.length > 0 && (
@@ -1227,7 +1503,17 @@ case true:
               </View>
             )}
 
-            <Text style={styleSheet.label}>Travel Time( Approximate)</Text>
+<DateTimeInput 
+                label={'Travel Time (Approximate)'}
+                disabled={paxhotelactivesections}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 13, 0)}}
+                setNowPostDepart={()=>setNow(13, 0)}
+                size={12}
+                type={'datetime'}
+                data={checkList[13][0].transportTime}
+                index={13}
+              />
+            {/* <Text style={styleSheet.label}>Travel Time( Approximate)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
@@ -1249,8 +1535,22 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Remarks</Text>
+            </View> */}
+            <LabelledInput
+                label={'Remarks'} //mark
+                disabled={paxhotelactivesections}
+                data={checkList[13][0].remarks}
+                datatype={'text'}
+                index={13}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 style={styleSheet.input}
@@ -1264,14 +1564,14 @@ case true:
                   setChecklist(tcheckList);
                 }}
               />
-            </View>
+            </View> */}
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <TouchableOpacity onPress={addHotel} style={[styleSheet.button]}>
+              <TouchableOpacity disabled={paxhotelactivesections} onPress={addHotel} style={[styleSheet.button,{backgroundColor : paxhotelactivesections? '#80808080' : 'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Hotel
                 </Text>
@@ -1294,7 +1594,20 @@ case true:
                         <Icons name="minus-box-outline" color="red" size={30} />
                       </TouchableOpacity>
                     </View>
-                    <Text style={styleSheet.label}>Hotel Name</Text>
+                    <LabelledInput
+                label={'Hotel Name'} //mark
+                data={checkList[13][index].name}
+                datatype={'text'}
+                index={13}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[13][index].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+                    {/* <Text style={styleSheet.label}>Hotel Name</Text>
                     <TextInput
                       style={styleSheet.input}
                       value={checkList[13][index].name}
@@ -1303,8 +1616,21 @@ case true:
                         tcheckList[13][index].name = text;
                         setChecklist(tcheckList);
                       }}
-                    />
-                    <Text style={styleSheet.label}>Hotel Location</Text>
+                    /> */}
+                     <LabelledInput
+                label={'Hotel Location'} //mark
+                data={checkList[13][index].location}
+                datatype={'location'}
+                index={13}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[13][index].location = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+                    {/* <Text style={styleSheet.label}>Hotel Location</Text>
                     <TextInput
                       style={styleSheet.input}
                       value={checkList[13][index].location}
@@ -1313,7 +1639,7 @@ case true:
                         tcheckList[13][index].location = text;
                         setChecklist(tcheckList);
                       }}
-                    />
+                    /> */}
 
                     <View
                       style={{
@@ -1393,8 +1719,17 @@ case true:
                         )}
                       </View>
                     )}
+<DateTimeInput 
+                label={'Travel Time (Approximate)'}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 13, index)}}
+                setNowPostDepart={()=>setNow(13, index)}
+                size={12}
+                type={'time'}
+                data={checkList[13][index].transportTime}
+                index={13}
+              />
 
-                    <Text style={styleSheet.label}>
+                    {/* <Text style={styleSheet.label}>
                       Travel Time( Approximate)
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1418,8 +1753,21 @@ case true:
                           Time Now
                         </Text>
                       </TouchableOpacity>
-                    </View>
-                    <Text style={styleSheet.label}>Remarks</Text>
+                    </View> */}
+                    <LabelledInput
+                label={'Remarks'} //mark
+                data={checkList[13][index].remarks}
+                datatype={'text'}
+                index={13}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[13][index].remarks = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
+                    {/* <Text style={styleSheet.label}>Remarks</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <TextInput
                         style={styleSheet.input}
@@ -1433,7 +1781,7 @@ case true:
                           setChecklist(tcheckList);
                         }}
                       />
-                    </View>
+                    </View> */}
                   </View>
                 );
               }
@@ -1450,7 +1798,33 @@ case true:
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <Text style={styleSheet.label}>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = crewactivesections;
+                setcrewactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    crewactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={crewactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+          
+            {/* setcrewactivesections<Text style={styleSheet.label}>
               Scheduled Transport Arrival time(Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1474,8 +1848,32 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Driver Name</Text>
+            </View> //now */}
+               <DateTimeInput 
+                label={'Scheduled Transport Arrival Time (Local Time)'}
+                disabled={crewactivesections}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 14, 0)}}
+                setNowPostDepart={()=>setNow(14, 0)}
+                size={12}
+                type={'datetime'}
+                data={checkList[14][0].transportTime}
+                index={15}
+              />
+              <LabelledInput
+                label={'Driver Name'} //mark
+                disabled={crewactivesections}
+                data={checkList[14][0].name}
+                datatype={'text'}
+                index={14}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>Driver Name</Text>
             <TextInput
               style={styleSheet.input}
               value={checkList[14][0].name}
@@ -1484,8 +1882,22 @@ case true:
                 tcheckList[14][0].name = text;
                 setChecklist(tcheckList);
               }}
-            />
-            <Text style={styleSheet.label}>Driver Contact Number</Text>
+            /> */}
+            <LabelledInput
+                label={'Driver Contact Number'} //mark
+                disabled={crewactivesections}
+                data={checkList[14][0].number}
+                datatype={'text'}
+                index={14}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].number = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>Driver Contact Number</Text>
             <TextInput
               style={styleSheet.input}
               value={checkList[14][0].number}
@@ -1494,8 +1906,22 @@ case true:
                 tcheckList[14][0].number = text;
                 setChecklist(tcheckList);
               }}
-            />
-            <Text style={styleSheet.label}>Remarks</Text>
+            /> */}
+            <LabelledInput
+                label={'Remarks'} //mark
+                disabled={crewactivesections}
+                data={checkList[14][0].remarks}
+                datatype={'text'}
+                index={14}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].remarks = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 style={styleSheet.input}
@@ -1509,7 +1935,7 @@ case true:
                   setChecklist(tcheckList);
                 }}
               />
-            </View>
+            </View> */}
             <View
               style={{
                 flexDirection: 'row',
@@ -1518,7 +1944,8 @@ case true:
               }}>
               <TouchableOpacity
                 onPress={addTransportCrew}
-                style={[styleSheet.button]}>
+                disabled={crewactivesections}
+                style={[styleSheet.button,{backgroundColor:crewactivesections? '#80808080' : 'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
                 </Text>
@@ -1541,32 +1968,31 @@ case true:
                         <Icons name="minus-box-outline" color="red" size={30} />
                       </TouchableOpacity>
                     </View>
-                    <Text style={styleSheet.label}>
-                      Scheduled Transport Arrival time(Local Time)
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TouchableOpacity
-                        style={styleSheet.picker}
-                        onPress={() => showDatePicker('time', 14, index)}>
-                        <Text style={{fontSize: 20, color: 'black'}}>
-                          {checkList[14][index].transportTime
-                            ? checkList[14][index].transportTime
-                            : 'dd/mm/yy, -- : --'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setNow(14, index)}
-                        style={{padding: 10}}>
-                        <Text
-                          style={{
-                            fontSize: Dimensions.get('window').width / 25,
-                            color: 'green',
-                          }}>
-                          Time Now
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                    <Text style={styleSheet.label}>Driver Name</Text>
+                    <DateTimeInput 
+                      label={'Scheduled Transport Arrival Time (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePicker('time', 14, index)}}
+                      setNowPostDepart={()=>setNow(14, index)}
+                      size={12}
+                      type={'datetime'}
+                      data={checkList[14][index].transportTime}
+                      index={15}
+                    />
+                     <LabelledInput
+                      label={'Driver Name'} //mark
+                      data={checkList[14][index].name}
+                      datatype={'text'}
+                      
+                      index={14}
+                      setText={(x,text,type,section)=>{
+                        var tcheckList = [...checkList];
+                        //console.log(tcheckList[x][index].name);
+                        tcheckList[x][index].name=text;
+                        setChecklist(tcheckList);  
+                      }} 
+                      multiline={false}
+                      numberOfLines={1}
+                    />
+                    {/* <Text style={styleSheet.label}>Driver Name</Text>
                     <TextInput
                       style={styleSheet.input}
                       value={checkList[14][index].name}
@@ -1575,8 +2001,22 @@ case true:
                         tcheckList[14][index].name = text;
                         setChecklist(tcheckList);
                       }}
-                    />
-                    <Text style={styleSheet.label}>Driver Contact Number</Text>
+                    /> */}
+                     <LabelledInput
+                label={'Driver Contact Number'} //mark
+                data={checkList[14][index].number}
+                datatype={'text'}
+                
+                index={14}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[i][index].number = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+                    {/* <Text style={styleSheet.label}>Driver Contact Number</Text>
                     <TextInput
                       style={styleSheet.input}
                       value={checkList[14][index].number}
@@ -1585,8 +2025,22 @@ case true:
                         tcheckList[14][index].number = text;
                         setChecklist(tcheckList);
                       }}
-                    />
-                    <Text style={styleSheet.label}>Remarks</Text>
+                    /> */}
+                    <LabelledInput
+                label={'Remarks'} //mark
+                data={checkList[14][index].remarks}
+                datatype={'text'}
+                
+                index={14}
+                setText={(i,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[i][index].remarks = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
+                    {/* <Text style={styleSheet.label}>Remarks</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <TextInput
                         style={styleSheet.input}
@@ -1600,13 +2054,14 @@ case true:
                           setChecklist(tcheckList);
                         }}
                       />
-                    </View>
+                    </View> */}
                   </View>
                 );
               }
             })}
           </View>
           <Text style={[styleSheet.label, {marginTop: 20}]}>Crew Hotel:</Text>
+
           <View
             style={{
               borderWidth: 1,
@@ -1615,7 +2070,47 @@ case true:
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <Text style={styleSheet.label}>Hotel Name</Text>
+
+<View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = crewhotelactivesections;
+                setcrewhotelactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    crewhotelactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={crewhotelactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
+              <LabelledInput
+                label={'Hotel Name'} //mark
+                disabled={crewhotelactivesections}
+                data={checkList[15][0].name}
+                datatype={'text'}
+                index={15}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].name = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+            {/* <Text style={styleSheet.label}>Hotel Name</Text>
             <TextInput
               style={styleSheet.input}
               value={checkList[15][0].name}
@@ -1624,8 +2119,23 @@ case true:
                 tcheckList[15][0].name = text;
                 setChecklist(tcheckList);
               }}
-            />
-            <Text style={styleSheet.label}>Hotel Location</Text>
+            /> */}
+              <LabelledInput
+                label={'Hotel Location'} //mark
+                disabled={crewhotelactivesections}
+                data={checkList[15][0].location}
+                datatype={'text'}
+                index={15}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].location = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={false}
+                numberOfLines={1}
+              />
+
+            {/* <Text style={styleSheet.label}>Hotel Location</Text>
             <TextInput
               style={styleSheet.input}
               value={checkList[15][0].location}
@@ -1634,9 +2144,9 @@ case true:
                 tcheckList[15][0].location = text;
                 setChecklist(tcheckList);
               }}
-            />
+            /> */}
 
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -1702,9 +2212,39 @@ case true:
                   );
                 })}
               </View>
-            )}
+            )} */}
 
-            <Text style={styleSheet.label}>Travel Time( Approximate)</Text>
+<TakeCamera 
+               label={"Map of Route to Hotel"} 
+               type={15} 
+               disabled={crewhotelactivesections}
+               uploadInitiator={()=>{
+                setuploadSection(15);
+                setuploadAddedSection(false);
+                refRBSheet.current.open()
+               }} 
+               removeFilePreA={(type,index)=>removeFilePreA(15, index, 0)} 
+               attachments={checkList[15][0].hotelMap} 
+            Icon={
+              <Icons
+                style={{color: 'green', marginLeft: 10}}
+                name="close"
+                size={30}
+              /> 
+            } 
+        /> 
+
+              <DateTimeInput 
+                label={'Travel Time (Approximate)'}
+                disabled={crewhotelactivesections}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 15, 0)}}
+                setNowPostDepart={()=>setNow(15, 0)}
+                size={12}
+                type={'datetime'}
+                data={checkList[15][0].transportTime}
+                index={15}
+              />
+            {/* <Text style={styleSheet.label}>Travel Time( Approximate)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
@@ -1726,8 +2266,22 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Remarks</Text>
+            </View> */}
+            <LabelledInput
+                label={'Remarks'} //mark
+                disabled={crewhotelactivesections}
+                data={checkList[15][0].remarks}
+                datatype={'remarks'}
+                index={15}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...checkList];
+                  tcheckList[index][0].remarks = text;
+                  setChecklist(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 style={styleSheet.input}
@@ -1741,7 +2295,7 @@ case true:
                   setChecklist(tcheckList);
                 }}
               />
-            </View>
+            </View> */}
             <View
               style={{
                 flexDirection: 'row',
@@ -1749,8 +2303,9 @@ case true:
                 alignItems: 'center',
               }}>
               <TouchableOpacity
+                disabled={crewhotelactivesections}
                 onPress={addHotelCrew}
-                style={[styleSheet.button]}>
+                style={[[styleSheet.button,{backgroundColor:crewhotelactivesections? '#80808080':'green'}]]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Hotel
                 </Text>
@@ -1773,7 +2328,20 @@ case true:
                         <Icons name="minus-box-outline" color="red" size={30} />
                       </TouchableOpacity>
                     </View>
-                    <Text style={styleSheet.label}>Hotel Name</Text>
+                    <LabelledInput
+                      label={'Hotel Name'} 
+                      data={checkList[15][index].name}
+                      datatype={'text'}
+                      index={15}
+                      setText={text => {
+                        var tcheckList = [...checkList];
+                        tcheckList[15][index].name = text;
+                        setChecklist(tcheckList);
+                      }} 
+                      multiline={false}
+                      numberOfLines={1}
+                    />
+                    {/* <Text style={styleSheet.label}>Hotel Name</Text>
                     <TextInput
                       style={styleSheet.input}
                       value={checkList[15][index].name}
@@ -1782,8 +2350,21 @@ case true:
                         tcheckList[15][index].name = text;
                         setChecklist(tcheckList);
                       }}
+                    /> */}
+                    <LabelledInput
+                      label={'Hotel Location'} 
+                      data={checkList[15][index].name}
+                      datatype={'text'}
+                      index={15}
+                      setText={text => {
+                        var tcheckList = [...checkList];
+                        tcheckList[15][index].location = text;
+                        setChecklist(tcheckList);
+                      }} 
+                      multiline={false}
+                      numberOfLines={1}
                     />
-                    <Text style={styleSheet.label}>Hotel Location</Text>
+                    {/* <Text style={styleSheet.label}>Hotel Location</Text>
                     <TextInput
                       style={styleSheet.input}
                       value={checkList[15][index].location}
@@ -1792,7 +2373,7 @@ case true:
                         tcheckList[15][index].location = text;
                         setChecklist(tcheckList);
                       }}
-                    />
+                    /> */}
 
                     <View
                       style={{
@@ -1872,7 +2453,7 @@ case true:
                       </View>
                     )}
 
-                    <Text style={styleSheet.label}>
+                    {/* <Text style={styleSheet.label}>
                       Travel Time( Approximate)
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1896,8 +2477,30 @@ case true:
                           Time Now
                         </Text>
                       </TouchableOpacity>
-                    </View>
-                    <Text style={styleSheet.label}>Remarks</Text>
+                    </View> */}
+                     <DateTimeInput 
+                label={'Travel Time (Approximate)'}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 15, index)}}
+                setNowPostDepart={()=>setNow(15, index)}
+                size={12}
+                type={'datetime'}
+                data={checkList[15][index].transportTime}
+                index={15}
+              />
+               <LabelledInput
+                      label={'Remarks'} 
+                      data={checkList[15][index].remarks}
+                      datatype={'text'}
+                      index={15}
+                      setText={text => {
+                        var tcheckList = [...checkList];
+                        tcheckList[15][index].location = text;
+                        setChecklist(tcheckList);
+                      }} 
+                      multiline={true}
+                      numberOfLines={2}
+                    />
+                    {/* <Text style={styleSheet.label}>Remarks</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <TextInput
                         style={styleSheet.input}
@@ -1911,7 +2514,7 @@ case true:
                           setChecklist(tcheckList);
                         }}
                       />
-                    </View>
+                    </View> */}
                   </View>
                 );
               }

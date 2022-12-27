@@ -1,16 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Button,
-  Switch,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
+import { View,StyleSheet,Text,TouchableOpacity,Dimensions,ScrollView} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -19,8 +7,13 @@ import RNFetchBlob from 'rn-fetch-blob';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
+import Header from '../subcomponents/Forms/Header';
+import TakeCamera from '../subcomponents/Forms/takecamera';
+import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
+import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 
-const {height} = Dimensions.get('window');
+const {width,height} = Dimensions.get('window');
+const HeadingTextSize=width / 15;
 
 export default function PostDeparture({navigation}) {
   const refRBSheet = useRef();
@@ -75,41 +68,7 @@ export default function PostDeparture({navigation}) {
     );
     setpostdeparture(tpostdeparture);
   };
-  const onPressDocPreA = async index => {
-    try {
-      setloading(true);
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.images],
-      });
-      // console.log(res);
-      RNFetchBlob.fs
-        .readFile(res.uri, 'base64')
-        .then(encoded => {
-          // console.log(encoded, 'reports.base64');
-          setloading(false);
-          var tpostdeparture = [...postdeparture];
-          tpostdeparture[index].file.push({
-            name: res.name,
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setpostdeparture(tpostdeparture);
-        })
-        .catch(error => {
-          setloading(false);
-          console.log(error);
-        });
 
-      // }
-    } catch (err) {
-      setloading(false);
-      console.log(JSON.stringify(err), 'Errorss');
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker, exit any dialogs or menus and move on
-      } else {
-        // throw err;
-      }
-    }
-  };
   const removeFilePreA = (arrayIndex, index) => {
     var tpostdeparture = [...postdeparture];
     tpostdeparture[arrayIndex].file.splice(index, 1);
@@ -167,149 +126,92 @@ export default function PostDeparture({navigation}) {
     }
     
 }
+
+const [formReady,setformReady]=useState(true);
+
+const uploadInitiator=(type)=>{
+  setuploadSection(type)
+  refRBSheet.current.open()
+}
+
+const setText=(index,text)=>{
+    var tpostdeparture = [...postdeparture];
+    tpostdeparture[index] = text;
+    setpostdeparture(tpostdeparture);
+}
+
+const sendForm=()=>{
+  //
+  var formFields={
+    stamped_gendec:postdeparture[0],
+    service_verified:{
+     time_verified: postdeparture[1],
+     name_of_verifier:postdeparture[2]
+    },
+    remarks:postdeparture[3]
+
+  }
+  console.log(formFields)
+}
   return (
     <ScrollView>
       <Loader visible={loading} />
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginVertical: 20,
-        }}>
-        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
-          Post-Departure
-        </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
-      </View>
+      <Header 
+        headingSize={HeadingTextSize} 
+        heading={"Post-Departure"} 
+        sendForm={sendForm} 
+        Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} 
+      />
       <View style={{padding: 20}}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginVertical: 20,
-          }}>
-          <Text style={styleSheet.label}>Stamped GenDec</Text>
-          <TouchableOpacity
-            //onPress={event => onPressDocPreA(0)}
-            onPress={() => {
-              setuploadSection(0)
-              refRBSheet.current.open()
-            }}
+        <TakeCamera label={"Stamped GenDec"} type={0} uploadInitiator={uploadInitiator} removeFilePreA={removeFilePreA} attachments={postdeparture[0]} 
+            Icon={
+              <Icons
+                style={{color: 'green', marginLeft: 10}}
+                name="close"
+                size={30}
+              /> 
+            } 
+        />
+        
+          <Text style={[styleSheet.label, {marginTop: 10}]}>
+            Services Verified:
+          </Text>
+          <View
             style={{
-              marginLeft: 10,
-              paddingVertical: 5,
-              paddingHorizontal: 10,
               borderWidth: 1,
-              borderRadius: 8,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
             }}>
-            <Text style={{color: 'green'}}>Take Camera</Text>
-          </TouchableOpacity>
-        </View>
-        {postdeparture[0].file.length > 0 && (
-          <View style={{marginBottom: 20}}>
-            {postdeparture[0].file.map((value, index) => {
-              return (
-                <View
-                  key={index}
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: 16,
-                    padding: 10,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 20,
-                    marginHorizontal: 5,
-                    ...Platform.select({
-                      ios: {
-                        shadowColor: '#000',
-                        shadowOffset: {width: 0, height: 2},
-                        shadowOpacity: 0.8,
-                        shadowRadius: 2,
-                      },
-                      android: {
-                        elevation: 3,
-                      },
-                    }),
-                  }}>
-                  <Text style={styleSheet.imgName}>{value.name}</Text>
-                  <TouchableOpacity onPress={() => removeFilePreA(0, index)}>
-                    <Icons
-                      style={{color: 'green', marginLeft: 10}}
-                      name="close"
-                      size={30}
-                    />
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
+
+              <DateTimeInput 
+                label={'Time Verified (Local Time)'}
+                showDatePickerPostDepart={showDatePickerPostDepart}
+                setNowPostDepart={setNowPostDepart}
+                data={postdeparture[1]}
+                size={width / 25}
+                index={1}
+              />
+              <LabelledInput
+                label={'Name of Verifier'}
+                data={postdeparture[2]}
+                index={2}
+                setText={setText} 
+                multiline={false}
+                numberOfLines={1}
+              />
           </View>
-        )}
-        {/*   ------------------------------Services Verified ----------- */}
-        <Text style={[styleSheet.label, {marginTop: 10}]}>
-          Services Verified:
-        </Text>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: 'rgba(0,0,0,0.5)',
-            padding: 10,
-            borderRadius: 10,
-            marginVertical: 10,
-          }}>
-          <Text style={styleSheet.label}>Time Verified (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePickerPostDepart('time', 1)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {postdeparture[1] ? postdeparture[1] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setNowPostDepart(1)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styleSheet.label}>Name of Verifier</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              value={postdeparture[2]}
-              onChangeText={text => {
-                var tpostdeparture = [...postdeparture];
-                tpostdeparture[2] = text;
-                setpostdeparture(tpostdeparture);
-              }}
-            />
-          </View>
-        </View>
         {/*   ------------------------------Services Verified end ----------- */}
-        <Text style={styleSheet.label}>Additional Remarks</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <TextInput
-            style={styleSheet.input}
-            multiline={true}
-            numberOfLines={2}
-            value={postdeparture[3]}
-            onChangeText={text => {
-              var tpostdeparture = [...postdeparture];
-              tpostdeparture[3] = text;
-              setpostdeparture(tpostdeparture);
-            }}
-          />
-        </View>
+            <LabelledInput
+              label={'Additional Remarks'}
+              data={postdeparture[3]}
+              index={3}
+              setText={setText} 
+              multiline={true}
+              numberOfLines={2}
+            />
+        
       </View>
       <DateTimePickerModal
         isVisible={isDatePickerVisiblePostDepart}
