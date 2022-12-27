@@ -21,7 +21,7 @@ const DateTimeInput=({label,showDatePickerPostDepart,ini,setNowPostDepart,size,d
 
     return(
         <>
-        <Text style={s.label}>{label || 'Time Verified (Local Time)'} {JSON.stringify(data)}</Text>
+        <Text style={s.label}>{label || 'Time Verified (Local Time)'}</Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <TouchableOpacity
               style={s.picker}

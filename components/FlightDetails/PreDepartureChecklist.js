@@ -117,6 +117,10 @@ export default function PreDepartureChecklist({navigation}) {
     {checked: false, remarks: null}, //8 -> 8 Airport sec
     {checked: false, remarks: null}, //9 -> 9 Catering agent
     {checked: false, remarks: null}, //10 -> 10 Aircraft Fueller
+    {checked: false, remarks: null},//11
+    {checked: false, remarks: null},//12
+    {checked:false,remarks:null},
+    {checked:false,remarks:null}
   ]);
   const getFeedback = index => {
     setvFeedback(true);
@@ -595,10 +599,10 @@ export default function PreDepartureChecklist({navigation}) {
         <Feedback visible={vFeedback} onCloseFeedback={() => setvFeedback(false)} onSubmitFeedback={onSubmitFeedback} />
         <Loader visible={loading} />
 
-        <View style={{padding: 20, marginBottom: 80}}>
-          {/** CREW TRANSPPORT */}
+        {/* <View style={{padding: 20, marginBottom: 80}}> */
+          /** CREW TRANSPPORT */
           
-          <Text style={styleSheet.label}>Test Section :</Text>  
+          /* <Text style={styleSheet.label}>Test Section :</Text>  
 
           <View
               style={{
@@ -647,10 +651,10 @@ export default function PreDepartureChecklist({navigation}) {
 }}>
 <Text style={{color:"#000"}}>"ACASDads"</Text>
 </TouchableOpacity>
-        </View>
+        </View> */
+}
 
-
-        <View
+        {/* <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
@@ -710,9 +714,17 @@ export default function PreDepartureChecklist({navigation}) {
                   )
                 })
             }
+             */}
 
         <View style={{padding: 20, marginBottom: 80}}>
-          {/** CREW TRANSPPORT */}
+          {/** CREW TRANSPPORT 
+           * 
+           * ADD 
+           * CREW TRANSPORT ARRANGED - cheklist with remark
+           * CREW NOTIFIED ON MEETING LOCATION - checklist with remark
+           * 
+           * 
+          */}
           
           <Text style={styleSheet.label}>Crew Transport:</Text>
           <View
@@ -723,6 +735,98 @@ export default function PreDepartureChecklist({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
+
+<View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setCheckedDeparture(11)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: pdeparturecheck[11].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: pdeparturecheck[11].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Crew Transport Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(11)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {pdeparturecheck[11].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{pdeparturecheck[11].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(11)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+<View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setCheckedDeparture(12)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: pdeparturecheck[12].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: pdeparturecheck[12].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Crew Notified on Meeting
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(12)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {pdeparturecheck[12].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{pdeparturecheck[12].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(12)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+
               <DateTimeInput 
                 label={'Scheduled Pickup Time (Local Time)'}
                 showDatePickerPostDepart={showDatePickerDeparture}
@@ -1114,6 +1218,10 @@ export default function PreDepartureChecklist({navigation}) {
           {/**CREW END */}
           {/** PAX TRANSPort //mark */}
           <Text style={styleSheet.label}>Pax Transport :</Text>
+          {
+            // ADD
+            // SAME ADDITioN AS Crew section
+          }
           <View
             style={{
               borderWidth: 1,
@@ -1122,6 +1230,102 @@ export default function PreDepartureChecklist({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
+
+
+<View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setCheckedDeparture(13)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: pdeparturecheck[13].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: pdeparturecheck[13].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Pax Transport Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(13)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {pdeparturecheck[13].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{pdeparturecheck[13].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(13)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+
+
+<View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setCheckedDeparture(14)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: pdeparturecheck[14].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: pdeparturecheck[14].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Pax Transport Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(14)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {pdeparturecheck[14].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{pdeparturecheck[11].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(14)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+
+
              <DateTimeInput 
                 label={'Scheduled Pickup Time (Local Time)'}
                 showDatePickerPostDepart={showDatePickerDeparture}

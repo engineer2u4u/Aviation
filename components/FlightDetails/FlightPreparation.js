@@ -146,6 +146,7 @@ const uploadInitiator=(type)=>{
 }
 
 const sendForm=()=>{
+  //fields
   var formFields={
     textFields:{
       Airport_Information:airinfo,

@@ -112,6 +112,9 @@ export default function PreArrival({navigation}) {
         remarks: null,
       },
     ],
+    {checked: false, remarks: null},//16
+    {checked: false, remarks: null},//17
+    
   ]);
 
   const setChecked = index => {
@@ -555,6 +558,100 @@ const sendForm=()=>{
               </TouchableOpacity>
             </View>
           )}
+           <View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setChecked(16)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: checkList[16].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: checkList[16].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Crew Hotel Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(16)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {checkList[16].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{checkList[3].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(12)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+           <View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setChecked(17)}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: checkList[17].checked ? 'green' : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: checkList[17].checked ? 'white' : 'black',
+                  },
+                ]}>
+                Pax Hotel Arranged
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback(17)}>
+              <Icons
+                style={{marginLeft: 10}}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {checkList[17].remarks && (
+            <View style={{flexDirection: 'row', marginBottom: 20}}>
+              <View style={styleSheet.remarks}>
+                <Text>{checkList[3].remarks}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback(17)}>
+                <Icons
+                  style={{marginLeft: 10}}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+          {
+            //to be added
+
+            // crew hotel arranged ok
+            // pax hotel arranged ok
+          }
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
               onPress={event => setChecked(4)}
@@ -969,6 +1066,8 @@ const sendForm=()=>{
               </TouchableOpacity>
             </View>
           )}
+
+
           <Text style={[styleSheet.label, {marginTop: 20}]}>Pax Transport:</Text>
           <View
             style={{
@@ -1010,8 +1109,8 @@ const sendForm=()=>{
                   }}>
                   Time Now
                 </Text>
-              </TouchableOpacity>
-            </View> */}
+              </TouchableOpacity> 
+            </View> asdasd */}
             <LabelledInput
                 label={'Local Receiving Party / Driver Name'} //mark
                 data={checkList[12][0].name}
@@ -1455,12 +1554,12 @@ const sendForm=()=>{
                     </View>
                     <LabelledInput
                 label={'Hotel Name'} //mark
-                data={checkList[14][index].name}
+                data={checkList[13][index].name}
                 datatype={'text'}
-                index={14}
+                index={13}
                 setText={(i,text,type,section)=>{
                   var tcheckList = [...checkList];
-                  tcheckList[i][0].name = text;
+                  tcheckList[13][index].name = text;
                   setChecklist(tcheckList);  
                 }} 
                 multiline={false}
@@ -1483,7 +1582,7 @@ const sendForm=()=>{
                 index={13}
                 setText={(i,text,type,section)=>{
                   var tcheckList = [...checkList];
-                  tcheckList[i][0].location = text;
+                  tcheckList[13][index].location = text;
                   setChecklist(tcheckList);  
                 }} 
                 multiline={false}
@@ -1620,7 +1719,7 @@ const sendForm=()=>{
                 index={13}
                 setText={(i,text,type,section)=>{
                   var tcheckList = [...checkList];
-                  tcheckList[i][0].remarks = text;
+                  tcheckList[13][index].remarks = text;
                   setChecklist(tcheckList);  
                 }} 
                 multiline={true}
