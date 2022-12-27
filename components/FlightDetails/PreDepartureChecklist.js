@@ -44,6 +44,10 @@ export default function PreDepartureChecklist({navigation}) {
 
   const [mode, setMode] = useState('time');
   const currentDeparture = useRef(0);
+
+  const [paxhotelactivesections,setpaxhotelactivesections]=useState(false)
+  const [crewactivesections,setcrewactivesections]=useState(false)
+
   const [pdeparturecheck, setpdeparturecheck] = useState([
     //null,
     //null,
@@ -716,33 +720,13 @@ export default function PreDepartureChecklist({navigation}) {
             }
              */}
 
-        <View style={{padding: 20, marginBottom: 80}}>
-          {/** CREW TRANSPPORT 
-           * 
-           * ADD 
-           * CREW TRANSPORT ARRANGED - cheklist with remark
-           * CREW NOTIFIED ON MEETING LOCATION - checklist with remark
-           * 
-           * 
-          */}
-          
-          <Text style={styleSheet.label}>Crew Transport:</Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: 'rgba(0,0,0,0.5)',
-              padding: 10,
-              borderRadius: 10,
-              marginVertical: 10,
-            }}>
-
-<View style={styleSheet.toggleContainer}>
+<View style={[styleSheet.toggleContainer,{paddingHorizontal:20}]}>
             <TouchableOpacity
               onPress={event => setCheckedDeparture(11)}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[11].checked ? 'green' : 'white',
+                  backgroundColor:pdeparturecheck[11].checked ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -760,7 +744,7 @@ export default function PreDepartureChecklist({navigation}) {
               <Icons
                 style={{marginLeft: 10}}
                 name="comment-processing-outline"
-                color="green"
+                color={"green"}
                 size={30}
               />
             </TouchableOpacity>
@@ -781,7 +765,7 @@ export default function PreDepartureChecklist({navigation}) {
             </View>
           )}
 
-<View style={styleSheet.toggleContainer}>
+<View style={[styleSheet.toggleContainer,{paddingHorizontal:20}]}>
             <TouchableOpacity
               onPress={event => setCheckedDeparture(12)}
               style={[
@@ -805,7 +789,7 @@ export default function PreDepartureChecklist({navigation}) {
               <Icons
                 style={{marginLeft: 10}}
                 name="comment-processing-outline"
-                color="green"
+                color={"green"}
                 size={30}
               />
             </TouchableOpacity>
@@ -827,8 +811,55 @@ export default function PreDepartureChecklist({navigation}) {
           )}
 
 
+        <View style={{padding: 20, marginBottom: 80}}>
+          {/** CREW TRANSPPORT 
+           * 
+           * ADD 
+           * CREW TRANSPORT ARRANGED - cheklist with remark
+           * CREW NOTIFIED ON MEETING LOCATION - checklist with remark
+           * 
+           * 
+          */}
+          
+          <Text style={styleSheet.label}>Crew Transport:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+<View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = crewactivesections;
+                setcrewactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    crewactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={crewactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
+
+
               <DateTimeInput 
                 label={'Scheduled Pickup Time (Local Time)'}
+                disabled={crewactivesections}
                 showDatePickerPostDepart={showDatePickerDeparture}
                 setNowPostDepart={setNowDeparture}
                 size={12}
@@ -838,6 +869,7 @@ export default function PreDepartureChecklist({navigation}) {
               />
               <LabelledInput
                 label={'Pickup Location'} //mark
+                disabled={crewactivesections}
                 data={pdeparturecheck[0].location}
                 datatype={'location'}
                 index={0}
@@ -847,6 +879,7 @@ export default function PreDepartureChecklist({navigation}) {
               />
               <TakeCamera 
                label={"Photo of Pickup Location"} 
+               disabled={crewactivesections}
                type={0} 
                 
                uploadInitiator={uploadInitiator} 
@@ -864,6 +897,7 @@ export default function PreDepartureChecklist({navigation}) {
 
             <LabelledInput
                 label={'Driver Name'}
+                disabled={crewactivesections}
                 data={pdeparturecheck[0].name}
                 datatype={'text'}
                 index={0}
@@ -874,6 +908,7 @@ export default function PreDepartureChecklist({navigation}) {
 
               <LabelledInput
                 label={'Driver Contact Number'}
+                disabled={crewactivesections}
                 data={pdeparturecheck[0].contact}
                 datatype={'contact'}
                 index={0}
@@ -883,6 +918,7 @@ export default function PreDepartureChecklist({navigation}) {
               />
               <LabelledInput
                 label={'Remarks'}
+                disabled={crewactivesections}
                 data={pdeparturecheck[0].remarks}
                 datatype={'remarks'}
                 index={0}
@@ -909,8 +945,9 @@ export default function PreDepartureChecklist({navigation}) {
               }}>
               <TouchableOpacity
                 //onPress={() => addMovement(true, 27)}
+                disabled={crewactivesections}
                 onPress={addnewcrewSection}
-                style={[styleSheet.button]}>
+                style={[styleSheet.button,{backgroundColor: crewactivesections? '#80808080':'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
                 </Text>
@@ -949,7 +986,7 @@ export default function PreDepartureChecklist({navigation}) {
   />
 
                       <LabelledInput
-                        label={'Added Pickup Location'}
+                        label={'Pickup Location'}
                         data={addedcrewSectionval[i].location}
                         index={i}
                         ini={ini}
@@ -1217,22 +1254,10 @@ export default function PreDepartureChecklist({navigation}) {
           </View>
           {/**CREW END */}
           {/** PAX TRANSPort //mark */}
-          <Text style={styleSheet.label}>Pax Transport :</Text>
-          {
-            // ADD
-            // SAME ADDITioN AS Crew section
-          }
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: 'rgba(0,0,0,0.5)',
-              padding: 10,
-              borderRadius: 10,
-              marginVertical: 10,
-            }}>
 
 
-<View style={styleSheet.toggleContainer}>
+
+          <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
               onPress={event => setCheckedDeparture(13)}
               style={[
@@ -1326,8 +1351,51 @@ export default function PreDepartureChecklist({navigation}) {
 
 
 
+
+          <Text style={styleSheet.label}>Pax Transport :</Text>
+
+          
+          {
+            // ADD
+            // SAME ADDITioN AS Crew section
+          }
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity onPress={event =>{
+                var x = paxhotelactivesections;
+                setpaxhotelactivesections(!x);
+                console.log(x);
+                }}>
+                <Icons
+                  name={
+                    paxhotelactivesections
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={paxhotelactivesections ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
              <DateTimeInput 
                 label={'Scheduled Pickup Time (Local Time)'}
+                disabled={paxhotelactivesections}
                 showDatePickerPostDepart={showDatePickerDeparture}
                 setNowPostDepart={setNowDeparture}
                 size={12}
@@ -1338,6 +1406,7 @@ export default function PreDepartureChecklist({navigation}) {
 
               <LabelledInput
                 label={'Pickup Location'} //mark
+                disabled={paxhotelactivesections}
                 data={pdeparturecheck[1].location}
                 datatype={'location'}
                 index={1}
@@ -1348,6 +1417,7 @@ export default function PreDepartureChecklist({navigation}) {
 
             <TakeCamera 
                label={"Photo of Pickup Location"} 
+               disabled={paxhotelactivesections}
                type={1} 
                 
                uploadInitiator={uploadInitiator} 
@@ -1449,6 +1519,7 @@ export default function PreDepartureChecklist({navigation}) {
 
               <LabelledInput
                 label={'Driver Name'} //mark
+                disabled={paxhotelactivesections}
                 data={pdeparturecheck[1].name}
                 datatype={'text'}
                 index={1}
@@ -1460,6 +1531,7 @@ export default function PreDepartureChecklist({navigation}) {
 
 <LabelledInput
                 label={'Driver Contact Number'} //mark
+                disabled={paxhotelactivesections}
                 data={pdeparturecheck[1].contact}
                 datatype={'contact'}
                 index={1}
@@ -1471,6 +1543,7 @@ export default function PreDepartureChecklist({navigation}) {
 
 <LabelledInput
                 label={'Remarks'} //mark
+                disabled={paxhotelactivesections}
                 data={pdeparturecheck[1].remarks}
                 datatype={'remarks'}
                 index={1}
@@ -1487,8 +1560,9 @@ export default function PreDepartureChecklist({navigation}) {
               <TouchableOpacity
                 //onPress={() => addMovement(false, 29)}
                 //mark
+                disabled={paxhotelactivesections}
                 onPress={addnewpaxSection}
-                style={[styleSheet.button]}>
+                style={[styleSheet.button,{backgroundColor: paxhotelactivesections? '#80808080':'green'}]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
                   Add Transport
                 </Text>
@@ -1523,6 +1597,22 @@ export default function PreDepartureChecklist({navigation}) {
                     />
 
 
+
+
+
+                      <LabelledInput
+                        label={'Pickup Location'}
+                        data={addedpaxSectionval[i].location}
+                        index={i}
+                        ini={ini}
+                        added={true}
+                        sectionName={'pax'}
+                        datatype={'location'}
+                        setText={setAddedcrewData} 
+                        multiline={false}
+                        numberOfLines={1}
+                      />
+
 <TakeCamera 
                label={"Photo of Pickup Location"} 
                type={i} 
@@ -1539,20 +1629,6 @@ export default function PreDepartureChecklist({navigation}) {
                 size={30}
               /> 
             } />
-
-
-                      <LabelledInput
-                        label={'Added Pickup Location'}
-                        data={addedpaxSectionval[i].location}
-                        index={i}
-                        ini={ini}
-                        added={true}
-                        sectionName={'pax'}
-                        datatype={'location'}
-                        setText={setAddedcrewData} 
-                        multiline={false}
-                        numberOfLines={1}
-                      />
 
 <LabelledInput
                         label={'Driver Name'}
@@ -1785,7 +1861,7 @@ export default function PreDepartureChecklist({navigation}) {
 
 
           <DateTimeInput 
-                      label={'Catering Delivery Time (Local Time)'}
+                      label={'Confirm Catering Delivery Time (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
                       size={12}
