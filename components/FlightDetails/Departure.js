@@ -20,6 +20,8 @@ import * as ImagePicker from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Loader from '../Loader';
+import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
+import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 const {height} = Dimensions.get('window');
 
 export default function Departure({navigation}) {
@@ -31,6 +33,11 @@ export default function Departure({navigation}) {
   const [loading, setloading] = useState(false);
   const [crewTransport, setcrewTransport] = useState([]);
   const [paxTransport, setpaxTransport] = useState([]);
+
+
+  const [paxarrivaltimeactive,setpaxarrivaltimeactive]=useState(false);
+  const [paxboardedtimeactive,setpaxboardedtimeactive]=useState(false);
+  const [paxarrivaltimeaddedactive,setpaxarrivaltimeaddedactive]=useState([]);
 
   const [mode, setMode] = useState('time');
   const tConvert = datetime => {
@@ -115,9 +122,20 @@ export default function Departure({navigation}) {
         remarks: null,
       },
     ], //56
+    {checked: false, remarks: null}, //57
+    {checked: false, remarks: null}, //58
+    null, //59
+    null, //60
+
+    //Pax Movement
+    //- from Pickup location to airport
+    null, //61
+    null, //..2
+    null, //..3
+    {checked: false, remarks: null}, //..4
+
   ]);
-  const [isDatePickerVisibleDepart, setDatePickerVisibilityDepart] =
-    useState(false);
+  const [isDatePickerVisibleDepart, setDatePickerVisibilityDepart] =useState(false);
   const showDatePickerDepart = (type, index) => {
     currentDepart.current = [index];
     setMode(type);
@@ -429,6 +447,7 @@ case true:
     tpaxTransport[54] = [
       ...tpaxTransport[54],
       {
+        arrivaActive:true,
         arrival: null,
         boarded: null,
         mapF: {value: null, file: []},
@@ -831,6 +850,20 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
+            <LabelledInput
+                label={'Remarks'} //mark
+                
+                data={departure[57].remarks}
+                datatype={'text'}
+                index={57}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...departure];
+                  tcheckList[index].remarks = text;
+                  setdeparture(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
           </View>
           {/*   ------------------------------Crew Movement	 End ----------- */}
 
@@ -1079,6 +1112,7 @@ case true:
                 }}>
                 <Text style={{color: 'green'}}>Take Camera</Text>
               </TouchableOpacity>
+              
             </View>
             {departure[17].file.length > 0 && (
               <View style={{marginBottom: 20}}>
@@ -1121,6 +1155,20 @@ case true:
                 })}
               </View>
             )}
+            <LabelledInput
+                label={'Remarks'} //mark
+                disabled={departure[18].checked}
+                data={departure[58].remarks}
+                datatype={'text'}
+                index={57}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...departure];
+                  tcheckList[index].remarks = text;
+                  setdeparture(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
           </View>
           {/*   ------------------------------Fuel on Departure end ----------- */}
 
@@ -1155,7 +1203,7 @@ case true:
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={departure[21].checked}
@@ -1175,6 +1223,36 @@ case true:
               <TouchableOpacity
                 disabled={departure[21].checked}
                 onPress={() => setNowDepart(19)}
+                style={{padding: 10}}>
+                <Text
+                  style={{
+                    fontSize: Dimensions.get('window').width / 25,
+                    color: 'green',
+                  }}>
+                  Time Now
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styleSheet.label}>End Time (Local Time)</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TouchableOpacity
+                disabled={departure[21].checked}
+                style={[
+                  styleSheet.picker,
+                  {
+                    backgroundColor: departure[21].checked
+                      ? 'rgba(0,0,0,0.1)'
+                      : 'white',
+                  },
+                ]}
+                onPress={() => showDatePickerDepart('time', 19)}>
+                <Text style={{fontSize: 20, color: 'black'}}>
+                  {departure[59] ? departure[59] : 'dd/mm/yy, -- : --'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={departure[21].checked}
+                onPress={() => setNowDepart(59)}
                 style={{padding: 10}}>
                 <Text
                   style={{
@@ -1241,7 +1319,7 @@ case true:
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={departure[24].checked}
@@ -1261,6 +1339,36 @@ case true:
               <TouchableOpacity
                 disabled={departure[24].checked}
                 onPress={() => setNowDepart(22)}
+                style={{padding: 10}}>
+                <Text
+                  style={{
+                    fontSize: Dimensions.get('window').width / 25,
+                    color: 'green',
+                  }}>
+                  Time Now
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TouchableOpacity
+                disabled={departure[24].checked}
+                style={[
+                  styleSheet.picker,
+                  {
+                    backgroundColor: departure[24].checked
+                      ? 'rgba(0,0,0,0.1)'
+                      : 'white',
+                  },
+                ]}
+                onPress={() => showDatePickerDepart('time', 22)}>
+                <Text style={{fontSize: 20, color: 'black'}}>
+                  {departure[60] ? departure[60] : 'dd/mm/yy, -- : --'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={departure[24].checked}
+                onPress={() => setNowDepart(60)}
                 style={{padding: 10}}>
                 <Text
                   style={{
@@ -1686,7 +1794,7 @@ case true:
           </View>
           {/*   ------------------------------Baggage end ----------- */}
 
-          {/*   ------------------------------Pax Movement ----------- */}
+          {/*   ------------------------------Pax Movement //here ----------- */}
           <Text style={[styleSheet.label, {marginTop: 10}]}>Pax Movement:</Text>
           <View
             style={{
@@ -1696,28 +1804,9 @@ case true:
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(38)}>
-                <Icons
-                  name={
-                    departure[38].checked
-                      ? 'checkbox-marked-outline'
-                      : 'checkbox-blank-outline'
-                  }
-                  color={departure[38].checked ? 'green' : 'black'}
-                  size={40}
-                />
-              </TouchableOpacity>
-              <Text style={styleSheet.label}>Not Required</Text>
-            </View>
             
             
-            <Text style={styleSheet.label}>Time Pax Arrived at Terminal</Text>
+            {/* <Text style={styleSheet.label}>Time Pax Arrived at Terminal</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
@@ -1737,7 +1826,114 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
+
+
+
+
+          <Text style={styleSheet.label}>Actual Transport Arrival Time at Pickup Location (Local Time)</Text>
+          
+
+
+              <TouchableOpacity onPress={event =>{
+                // var x = paxhotelactivesections;
+                // setpaxhotelactivesections(!x);
+                // console.log(x);
+                //setpaxboardedtimeactive
+                setpaxarrivaltimeaddedactive
+                //come here
+                var x=!paxarrivaltimeactive;
+                setpaxarrivaltimeactive(x);
+                }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent:'flex-start',
+                  marginBottom: 5,
+                  marginTop:10
+                }} >
+                <Icons
+                  name={
+                   // paxhotelactivesections
+                   paxarrivaltimeactive
+                    
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={paxarrivaltimeactive ? 'green' : 'black'}
+                  size={35}
+                />
+                <Text style={[styleSheet.label,{fontSize:15,paddingLeft:10}]}>Not Required</Text>
+              </TouchableOpacity>
+            <DateTimeInput 
+                label={'Actual Transport Arrival Time at Pickup Location (Local Time)'}
+                showLabel={false}
+                disabled={paxarrivaltimeactive}
+                showDatePickerPostDepart={()=>showDatePickerDepart('time', 52)}
+                setNowPostDepart={()=>setNowDepart(52)}
+                size={12}
+                type={'datetime'}
+                data={departure[52]}
+                index={52}
+              />
+
+
+<Text style={styleSheet.label}>Time Pax Boarded Transport at Pickup Location (Local Time)</Text>
+          
+
+
+          <TouchableOpacity onPress={event =>{
+            // var x = paxhotelactivesections;
+            // setpaxhotelactivesections(!x);
+            // console.log(x);
+            //setpaxboardedtimeactive
+            //come here
+            var x=!paxboardedtimeactive;
+              setpaxboardedtimeactive(x);
+            }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent:'flex-start',
+              marginBottom: 5,
+              marginTop:10
+            }} >
+            <Icons
+              name={
+               // paxhotelactivesections
+               paxboardedtimeactive
+                
+                  ? 'checkbox-marked-outline'
+                  : 'checkbox-blank-outline'
+              }
+              color={paxboardedtimeactive ? 'green' : 'black'}
+              size={35}
+            />
+            <Text style={[styleSheet.label,{fontSize:15,paddingLeft:10}]}>Not Required</Text>
+          </TouchableOpacity>
+            
+            <DateTimeInput 
+                label={null}
+                showLabel={false}
+                
+                disabled={paxboardedtimeactive}
+                showDatePickerPostDepart={()=>showDatePickerDepart('time', 61)}
+                setNowPostDepart={()=>setNowDepart(61)}
+                size={12}
+                type={'datetime'}
+                data={departure[61]}
+                index={61}
+              />
+            <DateTimeInput 
+                label={'Time Pax Arrived at Terminal (Local Time)'}
+                disabled={false}
+                showDatePickerPostDepart={()=>showDatePickerDepart('time', 62)}
+                setNowPostDepart={()=>setNowDepart(62)}
+                size={12}
+                type={'datetime'}
+                data={departure[62]}
+                index={62}
+              />
             <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -1756,13 +1952,14 @@ case true:
                 onPress={addpaxTransport}
                 style={[styleSheet.button]}>
                 <Text style={{color: 'white', textAlign: 'center'}}>
-                  Add Transport
+                  Add Movement
                 </Text>
               </TouchableOpacity>
             </View>
             {departure[54].map((val, index) => {
+              var arr=[];
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={val} style={{marginTop: 20}}>
                   <View
                     style={{
                       borderBottomWidth: 1,
@@ -1777,7 +1974,7 @@ case true:
                     </TouchableOpacity>
                   </View>
                   
-                  <Text style={styleSheet.label}>
+                  {/* <Text style={styleSheet.label}>
                     Time Pax Arrived at Terminal
                   </Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1801,7 +1998,47 @@ case true:
                         Time Now
                       </Text>
                     </TouchableOpacity>
-                  </View>
+                  </View> */}
+
+
+          
+                  <DateTimeInput 
+                    label={'Actual Transport Arrival Time at Pickup Location (Local Time)'}
+                    notrequiredSection={true}
+                    showLabel={true}
+                    disabled={paxarrivaltimeaddedactive.includes(index)}
+                    showDatePickerPostDepart={()=>showDatePickerPaxTrans('time', index, 'timeCrew')}
+                    setNowPostDepart={()=>setNowPaxTrans(index, 'timeCrew')}
+                    added={true}
+                    size={12}
+                    type={'datetime'}
+                    data={null}
+                    index={index}
+                  />
+
+                  <DateTimeInput 
+                    label={'Time Pax Boarded Transport at Terminal (Local Time)'}
+                    notrequiredSection={true}
+                    disabled={false}
+                    showDatePickerPostDepart={()=>showDatePickerPaxTrans('time', index, 'timeCrew')}
+                    setNowPostDepart={()=>setNowPaxTrans(index, 'timeCrew')}
+                    size={12}
+                    type={'datetime'}
+                    data={null}
+                    index={index}
+                  />
+
+                  <DateTimeInput 
+                    label={'Time Pax Arrived at Terminal (Local Time)'}
+                    disabled={false}
+                    showDatePickerPostDepart={()=>showDatePickerPaxTrans('time', index, 'timeCrew')}
+                    setNowPostDepart={()=>setNowPaxTrans(index, 'timeCrew')}
+                    size={12}
+                    type={'datetime'}
+                    data={null}
+                    index={index}
+                  />
+
                   <Text style={styleSheet.label}>Remarks</Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <TextInput
