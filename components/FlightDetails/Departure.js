@@ -1725,28 +1725,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                editable={!departure[32].checked}
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: departure[32].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                multiline={true}
-                numberOfLines={2}
-                value={departure[31]}
-                onChangeText={text => {
-                  var tdeparture = [...departure];
-                  tdeparture[31] = text;
-                  setdeparture(tdeparture);
-                }}
-              />
-            </View> */}
+       
               <LabelledInput
                 label={'Remarks'} //mark
                 disabled={departure[32].checked}

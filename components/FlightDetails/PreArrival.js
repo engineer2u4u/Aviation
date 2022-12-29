@@ -98,6 +98,7 @@ export default function PreArrival({navigation}) {
     {checked: false, remarks: null},
     {checked: false, file: [], remarks: null},
     {checked: false, remarks: null},
+    
     [{transportTime: null, name: null, number: null, remarks: null}], //12
     [
       {
@@ -1099,7 +1100,11 @@ const sendForm=()=>{
               }}>
               <TouchableOpacity onPress={event =>{
                 var x = paxactivesections;
+                //come here
                 setpaxactivesection(!x);
+                var x=[...checkList]
+                x[12]=[{transportTime: null, name: null, number: null, remarks: null}]; //12
+                setChecklist(x);
                 console.log(x);
                 }}>
                 <Icons
@@ -1141,18 +1146,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-            {/* <Text style={styleSheet.label}>
-              Local Receiving Party / Driver Name
-            </Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[12][0].name}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[12][0].name = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
+  
             <LabelledInput
                 label={'Local Receiving Party / Driver Contact Name'} //mark
                 disabled={paxactivesections}
@@ -1167,18 +1161,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-            {/* <Text style={styleSheet.label}>
-              Local Receiving Party / Driver Contact Number
-            </Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[12][0].number}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[12][0].number = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
+     
             <LabelledInput
                 label={'Remarks'} //mark
                 disabled={paxactivesections}
@@ -1193,21 +1176,7 @@ const sendForm=()=>{
                 multiline={true}
                 numberOfLines={2}
               />
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={styleSheet.input}
-                multiline={true}
-                placeholder="Vehicle Number, Vehicle Type, Pax Name"
-                numberOfLines={2}
-                value={checkList[12][0].remarks}
-                onChangeText={text => {
-                  var tcheckList = [...checkList];
-                  tcheckList[12][0].remarks = text;
-                  setChecklist(tcheckList);
-                }}
-              />
-            </View> */}
+     
             <View
               style={{
                 flexDirection: 'row',
@@ -1249,31 +1218,7 @@ const sendForm=()=>{
                       data={checkList[12][index].transportTime}
                       index={12}
                     />
-                    {/* <Text style={styleSheet.label}>
-                      Scheduled Transport Arrival time(Local Time)
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TouchableOpacity
-                        style={styleSheet.picker}
-                        onPress={() => showDatePicker('time', 12, index)}>
-                        <Text style={{fontSize: 20, color: 'black'}}>
-                          {checkList[12][index].transportTime
-                            ? checkList[12][index].transportTime
-                            : 'dd/mm/yy, -- : --'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setNow(12, index)}
-                        style={{padding: 10}}>
-                        <Text
-                          style={{
-                            fontSize: Dimensions.get('window').width / 25,
-                            color: 'green',
-                          }}>
-                          Time Now
-                        </Text>
-                      </TouchableOpacity>
-                    </View> */}
+             
                     
                     <LabelledInput
                 label={'Local Receiving Party / Driver Name'} //mark
@@ -1288,18 +1233,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-                    {/* <Text style={styleSheet.label}>
-                      Local Receiving Party / Driver Name
-                    </Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[12][index].name}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[12][index].name = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+  
                     <LabelledInput
                 label={'Local Receiving Party / Driver Contact Number'} //mark
                 data={checkList[12][index].number}
@@ -1313,18 +1247,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-                    {/* <Text style={styleSheet.label}>
-                      Local Receiving Party / Driver Contact Number
-                    </Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[12][index].number}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[12][index].number = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+               
                     <LabelledInput
                 label={'Remarks'} //mark
                 data={checkList[12][index].remarks}
@@ -1338,21 +1261,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-                    {/* <Text style={styleSheet.label}>Remarks</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TextInput
-                        style={styleSheet.input}
-                        multiline={true}
-                        placeholder="Vehicle Number, Vehicle Type, Pax Name"
-                        numberOfLines={2}
-                        value={checkList[12][index].remarks}
-                        onChangeText={text => {
-                          var tcheckList = [...checkList];
-                          tcheckList[12][index].remarks = text;
-                          setChecklist(tcheckList);
-                        }}
-                      />
-                    </View> */}
+      
                   </View>
                 );
               }
@@ -1377,7 +1286,23 @@ const sendForm=()=>{
               <TouchableOpacity onPress={event =>{
                 var x = paxhotelactivesections;
                 setpaxhotelactivesections(!x);
-                console.log(x);
+                var y=[...checkList];
+                //come here
+                y[13]= [
+                  {
+                    name: null,
+                    location: null,
+                    hotelMap: {value: null, file: []},
+                    time: null,
+                    remarks: null,
+                  },
+                ],
+                //y[13][0].hotelMap = {value: null, file: []};
+                //y=checkList[13]=[];
+
+                setChecklist(y);
+
+               // console.log(x);
                 }}>
                 <Icons
                   name={
@@ -1521,29 +1446,7 @@ const sendForm=()=>{
                 data={checkList[13][0].transportTime}
                 index={13}
               />
-            {/* <Text style={styleSheet.label}>Travel Time( Approximate)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 13, 0)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {checkList[13][0].transportTime
-                    ? checkList[13][0].transportTime
-                    : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(13, 0)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
+        
             <LabelledInput
                 label={'Remarks'} //mark
                 disabled={paxhotelactivesections}
@@ -1558,21 +1461,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={styleSheet.input}
-                multiline={true}
-                placeholder="Pax Name"
-                numberOfLines={2}
-                value={checkList[13][0].remarks}
-                onChangeText={text => {
-                  var tcheckList = [...checkList];
-                  tcheckList[13][0].remarks = text;
-                  setChecklist(tcheckList);
-                }}
-              />
-            </View> */}
+      
             <View
               style={{
                 flexDirection: 'row',
@@ -1615,16 +1504,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-                    {/* <Text style={styleSheet.label}>Hotel Name</Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[13][index].name}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[13][index].name = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+                    
                      <LabelledInput
                 label={'Hotel Location'} //mark
                 data={checkList[13][index].location}
@@ -1675,95 +1555,7 @@ const sendForm=()=>{
             } 
         /> 
 
-                    {/* <Text style={styleSheet.label}>Hotel Location</Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[13][index].location}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[13][index].location = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
-
-                    {/* <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginVertical: 20,
-                      }}>
-                      <Text style={styleSheet.label}>
-                        Map of Route to Hotel
-                      </Text>
-                      <TouchableOpacity
-                        //onPress={event => onPressDocPreA(13, index)}
-                        onPress={() => {
-                          
-                          setuploadAddedSection(true)
-                          setuploadAddedSectionindex(index)
-                          setuploadSection(13)
-                          ////ok
-                          refRBSheet.current.open()
-                        }}
-                        style={{
-                          marginLeft: 10,
-                          paddingVertical: 5,
-                          paddingHorizontal: 10,
-                          borderWidth: 1,
-                          borderRadius: 8,
-                        }}>
-                        <Text style={{color: 'green'}}>Upload</Text>
-                      </TouchableOpacity>
-                    </View>
-                    {checkList[13][index].hotelMap.file.length > 0 && (
-                      <View style={{marginBottom: 20}}>
-                        {checkList[13][index].hotelMap.file.map(
-                          (value, index) => {
-                            return (
-                              <View
-                                key={index}
-                                style={{
-                                  backgroundColor: 'white',
-                                  borderRadius: 16,
-                                  padding: 10,
-                                  flexDirection: 'row',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                  marginBottom: 20,
-                                  marginHorizontal: 5,
-                                  ...Platform.select({
-                                    ios: {
-                                      shadowColor: '#000',
-                                      shadowOffset: {width: 0, height: 2},
-                                      shadowOpacity: 0.8,
-                                      shadowRadius: 2,
-                                    },
-                                    android: {
-                                      elevation: 3,
-                                    },
-                                  }),
-                                }}>
-
-                                  <Text style={styleSheet.imgName}>
-                                    {value.name}
-                                  </Text>
-                                <TouchableOpacity
-                                  onPress={() =>
-                                    removeFilePreA(13, index, index)
-                                  }>
-                                  <Icons
-                                    style={{color: 'green', marginLeft: 10}}
-                                    name="close"
-                                    size={30}
-                                  />
-                                </TouchableOpacity>
-                              </View>
-                            );
-                          },
-                        )}
-                      </View>
-                    )} */}
+                
 <DateTimeInput 
                 label={'Travel Time (Approximate)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 13, index)}}
@@ -1774,31 +1566,7 @@ const sendForm=()=>{
                 index={13}
               />
 
-                    {/* <Text style={styleSheet.label}>
-                      Travel Time( Approximate)
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TouchableOpacity
-                        style={styleSheet.picker}
-                        onPress={() => showDatePicker('time', 13, index)}>
-                        <Text style={{fontSize: 20, color: 'black'}}>
-                          {checkList[13][index].transportTime
-                            ? checkList[13][index].transportTime
-                            : 'dd/mm/yy, -- : --'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setNow(13, index)}
-                        style={{padding: 10}}>
-                        <Text
-                          style={{
-                            fontSize: Dimensions.get('window').width / 25,
-                            color: 'green',
-                          }}>
-                          Time Now
-                        </Text>
-                      </TouchableOpacity>
-                    </View> */}
+               
                     <LabelledInput
                 label={'Remarks'} //mark
                 data={checkList[13][index].remarks}
@@ -1812,21 +1580,7 @@ const sendForm=()=>{
                 multiline={true}
                 numberOfLines={2}
               />
-                    {/* <Text style={styleSheet.label}>Remarks</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TextInput
-                        style={styleSheet.input}
-                        multiline={true}
-                        placeholder="Pax Name"
-                        numberOfLines={2}
-                        value={checkList[13][index].remarks}
-                        onChangeText={text => {
-                          var tcheckList = [...checkList];
-                          tcheckList[13][index].remarks = text;
-                          setChecklist(tcheckList);
-                        }}
-                      />
-                    </View> */}
+                  
                   </View>
                 );
               }
@@ -1853,7 +1607,9 @@ const sendForm=()=>{
               <TouchableOpacity onPress={event =>{
                 var x = crewactivesections;
                 setcrewactivesections(!x);
-                console.log(x);
+                var y=[...checkList];
+                y[14]=[{transportTime: null, name: null, number: null, remarks: null}];
+                setChecklist(y);
                 }}>
                 <Icons
                   name={
@@ -1869,31 +1625,7 @@ const sendForm=()=>{
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
           
-            {/* setcrewactivesections<Text style={styleSheet.label}>
-              Scheduled Transport Arrival time(Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 14, 0)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {checkList[14][0].transportTime
-                    ? checkList[14][0].transportTime
-                    : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(14, 0)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> //now */}
+        
                <DateTimeInput 
                 label={'Scheduled Transport Arrival Time (Local Time)'}
                 disabled={crewactivesections}
@@ -1918,16 +1650,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-            {/* <Text style={styleSheet.label}>Driver Name</Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[14][0].name}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[14][0].name = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
+           
             <LabelledInput
                 label={'Driver Contact Number'} //mark
                 disabled={crewactivesections}
@@ -1942,16 +1665,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-            {/* <Text style={styleSheet.label}>Driver Contact Number</Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[14][0].number}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[14][0].number = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
+           
             <LabelledInput
                 label={'Remarks'} //mark
                 disabled={crewactivesections}
@@ -1966,21 +1680,7 @@ const sendForm=()=>{
                 multiline={true}
                 numberOfLines={2}
               />
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={styleSheet.input}
-                multiline={true}
-                placeholder="Vehicle Number, Vehicle Type, Pax Name"
-                numberOfLines={2}
-                value={checkList[14][0].remarks}
-                onChangeText={text => {
-                  var tcheckList = [...checkList];
-                  tcheckList[14][0].remarks = text;
-                  setChecklist(tcheckList);
-                }}
-              />
-            </View> */}
+ 
             <View
               style={{
                 flexDirection: 'row',
@@ -2037,16 +1737,7 @@ const sendForm=()=>{
                       multiline={false}
                       numberOfLines={1}
                     />
-                    {/* <Text style={styleSheet.label}>Driver Name</Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[14][index].name}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[14][index].name = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+                  
                      <LabelledInput
                 label={'Driver Contact Number'} //mark
                 data={checkList[14][index].number}
@@ -2061,16 +1752,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-                    {/* <Text style={styleSheet.label}>Driver Contact Number</Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[14][index].number}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[14][index].number = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+                 
                     <LabelledInput
                 label={'Remarks'} //mark
                 data={checkList[14][index].remarks}
@@ -2085,21 +1767,7 @@ const sendForm=()=>{
                 multiline={true}
                 numberOfLines={2}
               />
-                    {/* <Text style={styleSheet.label}>Remarks</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TextInput
-                        style={styleSheet.input}
-                        multiline={true}
-                        placeholder="Vehicle Number, Vehicle Type, Pax Name"
-                        numberOfLines={2}
-                        value={checkList[14][index].remarks}
-                        onChangeText={text => {
-                          var tcheckList = [...checkList];
-                          tcheckList[14][index].remarks = text;
-                          setChecklist(tcheckList);
-                        }}
-                      />
-                    </View> */}
+                
                   </View>
                 );
               }
@@ -2125,7 +1793,18 @@ const sendForm=()=>{
               <TouchableOpacity onPress={event =>{
                 var x = crewhotelactivesections;
                 setcrewhotelactivesections(!x);
-                console.log(x);
+                var y=[...checkList];
+                
+                y[15]= [
+                  {
+                    name: null,
+                    location: null,
+                    hotelMap: {value: null, file: []},
+                    time: null,
+                    remarks: null,
+                  },
+                ];
+                setChecklist(y);
                 }}>
                 <Icons
                   name={
@@ -2155,16 +1834,7 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
-            {/* <Text style={styleSheet.label}>Hotel Name</Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[15][0].name}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[15][0].name = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
+           
               <LabelledInput
                 label={'Hotel Location'} //mark
                 disabled={crewhotelactivesections}
@@ -2180,85 +1850,7 @@ const sendForm=()=>{
                 numberOfLines={1}
               />
 
-            {/* <Text style={styleSheet.label}>Hotel Location</Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[15][0].location}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[15][0].location = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
-
-            {/* <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginVertical: 20,
-              }}>
-              <Text style={styleSheet.label}>Map of Route to Hotel</Text>
-              <TouchableOpacity
-                //onPress={event => onPressDocPreA(15, 0)}
-                onPress={() =>{ 
-                  //okok
-                  setuploadSection(15);
-                  setuploadAddedSection(false);
-                  refRBSheet.current.open()
-                }}
-                style={{
-                  marginLeft: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  borderWidth: 1,
-                  borderRadius: 8,
-                }}>
-                <Text style={{color: 'green'}}>Upload</Text>
-              </TouchableOpacity>
-            </View>
-            {checkList[15][0].hotelMap.file.length > 0 && (
-              <View style={{marginBottom: 20}}>
-                {checkList[15][0].hotelMap.file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(15, index, 0)}>
-                        <Icons
-                          style={{color: 'green', marginLeft: 10}}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
-
+         
 <View
               style={{
                 flexDirection: 'row',
@@ -2328,28 +1920,7 @@ const sendForm=()=>{
               </View>
             )}
 
-{/* <TakeCamera 
-               label={"Map of Route to Hotel"} 
-               type={15} 
-               disabled={crewhotelactivesections}
-               uploadInitiator={()=>{
-                setuploadSection(15);
-                setuploadAddedSection(false);
-                refRBSheet.current.open()
-               }} 
-               removeFilePreA={(type,i)=>{removeFilePreA(15, 0, i)
-                
 
-              }} 
-               attachments={checkList[15][0].hotelMap} 
-            Icon={
-              <Icons
-                style={{color: 'green', marginLeft: 10}}
-                name="close"
-                size={30}
-              /> 
-            } 
-        />  */}
 
               <DateTimeInput 
                 label={'Travel Time (Approximate)'}
@@ -2361,29 +1932,7 @@ const sendForm=()=>{
                 data={checkList[15][0].transportTime}
                 index={15}
               />
-            {/* <Text style={styleSheet.label}>Travel Time( Approximate)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 15, 0)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {checkList[15][0].transportTime
-                    ? checkList[15][0].transportTime
-                    : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(15, 0)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
+         
             <LabelledInput
                 label={'Remarks'} //mark
                 disabled={crewhotelactivesections}
@@ -2398,21 +1947,7 @@ const sendForm=()=>{
                 multiline={true}
                 numberOfLines={2}
               />
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={styleSheet.input}
-                multiline={true}
-                placeholder="Pax Name"
-                numberOfLines={2}
-                value={checkList[15][0].remarks}
-                onChangeText={text => {
-                  var tcheckList = [...checkList];
-                  tcheckList[15][0].remarks = text;
-                  setChecklist(tcheckList);
-                }}
-              />
-            </View> */}
+           
             <View
               style={{
                 flexDirection: 'row',
@@ -2458,16 +1993,7 @@ const sendForm=()=>{
                       multiline={false}
                       numberOfLines={1}
                     />
-                    {/* <Text style={styleSheet.label}>Hotel Name</Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[15][index].name}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[15][index].name = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+                   
                     <LabelledInput
                       label={'Hotel Location'} 
                       data={checkList[15][index].name}
@@ -2481,94 +2007,9 @@ const sendForm=()=>{
                       multiline={false}
                       numberOfLines={1}
                     />
-                    {/* <Text style={styleSheet.label}>Hotel Location</Text>
-                    <TextInput
-                      style={styleSheet.input}
-                      value={checkList[15][index].location}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[15][index].location = text;
-                        setChecklist(tcheckList);
-                      }}
-                    /> */}
+                    
 
-                    {/* <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginVertical: 20,
-                      }}>
-                      <Text style={styleSheet.label}>
-                        Map of Route to Hotel
-                      </Text>
-                      <TouchableOpacity
-                        //onPress={event => onPressDocPreA(15, index)}
-                        onPress={() => {
-                          //refRBSheet.current.open()
-                          setuploadAddedSection(true)
-                          setuploadAddedSectionindex(index)
-                          setuploadSection(15)
-                          ////ok
-                          refRBSheet.current.open()
-                        }}
-                        style={{
-                          marginLeft: 10,
-                          paddingVertical: 5,
-                          paddingHorizontal: 10,
-                          borderWidth: 1,
-                          borderRadius: 8,
-                        }}>
-                        <Text style={{color: 'green'}}>Upload</Text>
-                      </TouchableOpacity>
-                    </View>
-                    {checkList[15][index].hotelMap.file.length > 0 && (
-                      <View style={{marginBottom: 20}}>
-                        {checkList[15][index].hotelMap.file.map(
-                          (value, index) => {
-                            return (
-                              <View
-                                key={index}
-                                style={{
-                                  backgroundColor: 'white',
-                                  borderRadius: 16,
-                                  padding: 10,
-                                  flexDirection: 'row',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                  marginBottom: 20,
-                                  marginHorizontal: 5,
-                                  ...Platform.select({
-                                    ios: {
-                                      shadowColor: '#000',
-                                      shadowOffset: {width: 0, height: 2},
-                                      shadowOpacity: 0.8,
-                                      shadowRadius: 2,
-                                    },
-                                    android: {
-                                      elevation: 3,
-                                    },
-                                  }),
-                                }}>
-                                  <Text style={styleSheet.imgName}>
-                                    {value.name}
-                                  </Text>
-                                  <TouchableOpacity
-                                    onPress={() =>
-                                      removeFilePreA(15, index, index)
-                                    }>
-                                    <Icons
-                                      style={{color: 'green', marginLeft: 10}}
-                                      name="close"
-                                      size={30}
-                                    />
-                                  </TouchableOpacity>
-                              </View>
-                            );
-                          },
-                        )}
-                      </View>
-                    )} */}
+            
 
                     <TakeCamera 
                label={"Map of Route to Hotel here"} 
@@ -2607,31 +2048,7 @@ const sendForm=()=>{
         /> 
 
 
-                    {/* <Text style={styleSheet.label}>
-                      Travel Time( Approximate)
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TouchableOpacity
-                        style={styleSheet.picker}
-                        onPress={() => showDatePicker('time', 15, index)}>
-                        <Text style={{fontSize: 20, color: 'black'}}>
-                          {checkList[15][index].transportTime
-                            ? checkList[15][index].transportTime
-                            : 'dd/mm/yy, -- : --'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setNow(15, index)}
-                        style={{padding: 10}}>
-                        <Text
-                          style={{
-                            fontSize: Dimensions.get('window').width / 25,
-                            color: 'green',
-                          }}>
-                          Time Now
-                        </Text>
-                      </TouchableOpacity>
-                    </View> */}
+                   
                      <DateTimeInput 
                 label={'Travel Time (Approximate)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 15, index)}}
@@ -2654,21 +2071,7 @@ const sendForm=()=>{
                       multiline={true}
                       numberOfLines={2}
                     />
-                    {/* <Text style={styleSheet.label}>Remarks</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TextInput
-                        style={styleSheet.input}
-                        multiline={true}
-                        placeholder="Pax Name"
-                        numberOfLines={2}
-                        value={checkList[15][index].remarks}
-                        onChangeText={text => {
-                          var tcheckList = [...checkList];
-                          tcheckList[15][index].remarks = text;
-                          setChecklist(tcheckList);
-                        }}
-                      />
-                    </View> */}
+                  
                   </View>
                 );
               }
