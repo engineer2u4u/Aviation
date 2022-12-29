@@ -947,7 +947,17 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(20)}>
+              <TouchableOpacity onPress={event => {
+                  setArrivalcheck(20);
+                  var x=[...arrival];
+                  //come here
+                  x[15]=null;
+                  x[16]={value: null, file: []};
+                  x[17]={value: null, file: []};
+                  x[18]=null;
+                  x[19]=null;
+                  setArrival(x); 
+                }}>
                 <Icons
                   name={
                     arrival[20].checked
@@ -1190,7 +1200,14 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(24)}>
+              <TouchableOpacity onPress={event =>{
+                 setArrivalcheck(24)
+                 var x=[...arrival];
+                 x[21]=null;
+                 x[22]=null;
+                 x[23]=null;
+                 setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[24].checked
@@ -1263,36 +1280,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* <Text style={styleSheet.label}>Completion Time</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              disabled={arrival[24].checked}
-              style={[
-                styleSheet.picker,
-                {
-                  backgroundColor: arrival[24].checked
-                    ? 'rgba(0,0,0,0.1)'
-                    : 'white',
-                },
-              ]}
-              onPress={() => showDatePicker('time', 21)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[21] ? arrival[21] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={arrival[24].checked}
-              onPress={() => setNow(21)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+          
             <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -1331,7 +1319,14 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(28)}>
+              <TouchableOpacity onPress={event =>{
+                 setArrivalcheck(28)
+                  var x= [...arrival];
+                  x[25]=null;
+                  x[26]=null;
+                  x[27]=null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[28].checked
@@ -1404,36 +1399,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* <Text style={styleSheet.label}>Completion Time</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              disabled={arrival[26].checked}
-              style={[
-                styleSheet.picker,
-                {
-                  backgroundColor: arrival[26].checked
-                    ? 'rgba(0,0,0,0.1)'
-                    : 'white',
-                },
-              ]}
-              onPress={() => showDatePicker('time', 25)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[25] ? arrival[25] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={arrival[26].checked}
-              onPress={() => setNow(25)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+          
             <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -1472,7 +1438,13 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(31)}>
+              <TouchableOpacity onPress={event =>{
+                  setArrivalcheck(31)
+                  var x=[...arrival];
+                  x[29]=null;
+                  x[30]=null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[31].checked
@@ -1555,7 +1527,16 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(37)}>
+              <TouchableOpacity onPress={event =>{ 
+                  setArrivalcheck(37)
+                  var x=[...arrival];
+                  x[32]=null;
+                  x[33]=null;
+                  x[34]=null;
+                  x[35]={value:false,file:[]};
+                  x[36]=null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[37].checked
@@ -1766,7 +1747,16 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(42)}>
+              <TouchableOpacity onPress={event =>{
+                  setArrivalcheck(42)
+                  var x=[...arrival];
+                  x[38]=null;
+                  x[39]=null;
+                  //x[34]=null;
+                  x[40]={value:false,file:[]};
+                  x[41]=null;
+                  setArrival(x);
+                 }}>
                 <Icons
                   name={
                     arrival[42].checked
@@ -1948,7 +1938,13 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(44)}>
+              <TouchableOpacity onPress={event =>{
+                  setArrivalcheck(44)
+                  var x=[...arrival];
+                  x[43]=null;
+                  setArrival(x)
+                }}>
+
                 <Icons
                   name={
                     arrival[44].checked

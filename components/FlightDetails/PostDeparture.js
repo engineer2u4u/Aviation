@@ -163,7 +163,14 @@ const sendForm=()=>{
         Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} 
       />
       <View style={{padding: 20}}>
-        <TakeCamera label={"Stamped GenDec"} type={0} uploadInitiator={uploadInitiator} removeFilePreA={removeFilePreA} attachments={postdeparture[0]} 
+        <TakeCamera label={"Stamped GenDec"} type={0} uploadInitiator={uploadInitiator} 
+        removeFilePreA={(a,b,c)=>{
+          console.log(a,b,c)
+          if(postdeparture[0].file.length===1) postdeparture[0].file=[]
+          else postdeparture[0].file.splice(b,1);
+          //removeFilePreA
+        }} 
+        attachments={postdeparture[0]} 
             Icon={
               <Icons
                 style={{color: 'green', marginLeft: 10}}

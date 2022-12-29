@@ -207,6 +207,14 @@ export default function PreArrival({navigation}) {
     ];
     setChecklist(tcheckList);
   };
+
+
+  //here
+  const [addedimagepaxhotel,setaddedimagepaxhotel]=useState([]);
+
+
+
+
   const addHotel = () => {
     var tcheckList = [...checkList];
     tcheckList[13] = [
@@ -596,9 +604,9 @@ const sendForm=()=>{
           {checkList[16].remarks && (
             <View style={{flexDirection: 'row', marginBottom: 20}}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[3].remarks}</Text>
+                <Text>{checkList[16].remarks}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(12)}>
+              <TouchableOpacity onPress={() => removeFeedback(16)}>
                 <Icons
                   style={{marginLeft: 10}}
                   name="delete-circle-outline"
@@ -640,7 +648,7 @@ const sendForm=()=>{
           {checkList[17].remarks && (
             <View style={{flexDirection: 'row', marginBottom: 20}}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[3].remarks}</Text>
+                <Text>{checkList[17].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(17)}>
                 <Icons
@@ -1630,6 +1638,43 @@ const sendForm=()=>{
                 multiline={false}
                 numberOfLines={1}
               />
+
+<TakeCamera 
+               label={"Map of Route to Hotel here"} 
+               type={13} 
+               uploadInitiator={()=>{
+                setuploadAddedSection(true)
+                setuploadAddedSectionindex(index)
+                setuploadSection(13);
+                refRBSheet.current.open()
+               }} 
+               removeFilePreA={(type,i)=>{
+                //console.log(type,i);
+                var x=[...checkList];
+                //console.log(x[13][index].hotelMap.file.length);
+                //x[13][index].hotelMap.splice(i, 1);
+                if(x[13][index].hotelMap.file.length===1){
+                  x[13][index].hotelMap.file=[];
+                }else{
+                  x[13][index].hotelMap.file.splice(i,1);
+                }
+                
+                //console.log(x[13][index].hotelMap.file.length);
+                
+                /**
+                 * NEW STRUCTURE REQ
+                 *  NEW ARRAY FOR ATTACHED FILES
+              */}} 
+               attachments={checkList[13][index].hotelMap} 
+            Icon={
+              <Icons
+                style={{color: 'green', marginLeft: 10}}
+                name="close"
+                size={30}
+              /> 
+            } 
+        /> 
+
                     {/* <Text style={styleSheet.label}>Hotel Location</Text>
                     <TextInput
                       style={styleSheet.input}
@@ -1641,7 +1686,7 @@ const sendForm=()=>{
                       }}
                     /> */}
 
-                    <View
+                    {/* <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -1718,7 +1763,7 @@ const sendForm=()=>{
                           },
                         )}
                       </View>
-                    )}
+                    )} */}
 <DateTimeInput 
                 label={'Travel Time (Approximate)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 13, index)}}
@@ -2214,7 +2259,76 @@ const sendForm=()=>{
               </View>
             )} */}
 
-<TakeCamera 
+<View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
+              }}>
+              <Text style={styleSheet.label}>Map of Route to Hotel</Text>
+              <TouchableOpacity
+                //onPress={event => onPressDocPreA(13, 0)}
+                disabled={crewhotelactivesections}
+                onPress={() =>{
+                  setuploadAddedSection(false)
+                  setuploadSection(15)
+                  refRBSheet.current.open();
+                }}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                }}>
+                <Text style={{color: crewhotelactivesections ? '#000000' : 'green'}}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+            {checkList[15][0].hotelMap.file.length > 0 && (
+              <View style={{marginBottom: 20}}>
+                {checkList[15][0].hotelMap.file.map((value, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 16,
+                        padding: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 20,
+                        marginHorizontal: 5,
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: '#000',
+                            shadowOffset: {width: 0, height: 2},
+                            shadowOpacity: 0.8,
+                            shadowRadius: 2,
+                          },
+                          android: {
+                            elevation: 3,
+                          },
+                        }),
+                      }}>
+                       
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
+                      <TouchableOpacity
+                        onPress={() => removeFilePreA(15, index, 0)}>
+                        <Icons
+                          style={{color: 'green', marginLeft: 10}}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+{/* <TakeCamera 
                label={"Map of Route to Hotel"} 
                type={15} 
                disabled={crewhotelactivesections}
@@ -2223,7 +2337,10 @@ const sendForm=()=>{
                 setuploadAddedSection(false);
                 refRBSheet.current.open()
                }} 
-               removeFilePreA={(type,index)=>removeFilePreA(15, index, 0)} 
+               removeFilePreA={(type,i)=>{removeFilePreA(15, 0, i)
+                
+
+              }} 
                attachments={checkList[15][0].hotelMap} 
             Icon={
               <Icons
@@ -2232,7 +2349,7 @@ const sendForm=()=>{
                 size={30}
               /> 
             } 
-        /> 
+        />  */}
 
               <DateTimeInput 
                 label={'Travel Time (Approximate)'}
@@ -2375,7 +2492,7 @@ const sendForm=()=>{
                       }}
                     /> */}
 
-                    <View
+                    {/* <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -2451,7 +2568,44 @@ const sendForm=()=>{
                           },
                         )}
                       </View>
-                    )}
+                    )} */}
+
+                    <TakeCamera 
+               label={"Map of Route to Hotel here"} 
+               type={15} 
+               uploadInitiator={()=>{
+                setuploadAddedSection(true)
+                setuploadAddedSectionindex(index)
+                setuploadSection(15);
+                refRBSheet.current.open()
+               }} 
+               removeFilePreA={(type,i)=>{
+                //console.log(type,i);
+                var x=[...checkList];
+                //console.log(x[13][index].hotelMap.file.length);
+                //x[13][index].hotelMap.splice(i, 1);
+                if(x[15][index].hotelMap.file.length===1){
+                  x[15][index].hotelMap.file=[];
+                }else{
+                  x[15][index].hotelMap.file.splice(i,1);
+                }
+                
+                //console.log(x[13][index].hotelMap.file.length);
+                
+                /**
+                 * NEW STRUCTURE REQ
+                 *  NEW ARRAY FOR ATTACHED FILES
+              */}} 
+               attachments={checkList[15][index].hotelMap} 
+            Icon={
+              <Icons
+                style={{color: 'green', marginLeft: 10}}
+                name="close"
+                size={30}
+              /> 
+            } 
+        /> 
+
 
                     {/* <Text style={styleSheet.label}>
                       Travel Time( Approximate)

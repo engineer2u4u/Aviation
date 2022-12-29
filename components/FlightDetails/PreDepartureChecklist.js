@@ -226,7 +226,7 @@ export default function PreDepartureChecklist({navigation}) {
     // console.log('triggered', tcheckList);
   };
   const removeFilePreA = (arrayIndex, index, added=false) => {
-    console.log('REMOVER',added);
+    console.log('REMOVER',added, arrayIndex, index);
     if(added){
       var tpdeparturecheck = addedcrewSectionval;
       tpdeparturecheck[arrayIndex].hotelMap.file.splice(index, 1);
@@ -234,7 +234,11 @@ export default function PreDepartureChecklist({navigation}) {
       return;
     }
     var tpdeparturecheck = [...pdeparturecheck];
-    tpdeparturecheck[arrayIndex].hotelMap.file.splice(index, 1);
+    console.log(tpdeparturecheck[arrayIndex].hotelMap.file.length)
+    if(tpdeparturecheck[arrayIndex].hotelMap.file.length===1) tpdeparturecheck[arrayIndex].hotelMap.file=[]
+    else tpdeparturecheck[arrayIndex].hotelMap.file.splice(index, 1);
+    console.log(tpdeparturecheck[arrayIndex].hotelMap.file.length)
+    //console.log(tpdeparturecheck[arrayIndex].hotelMap.file)
     setpdeparturecheck(tpdeparturecheck);
   };
 
@@ -878,12 +882,20 @@ export default function PreDepartureChecklist({navigation}) {
                 numberOfLines={1}
               />
               <TakeCamera 
-               label={"Photo of Pickup Location"} 
+               label={"Photo of Pickup Location s"} 
                disabled={crewactivesections}
                type={0} 
                 
                uploadInitiator={uploadInitiator} 
-               removeFilePreA={removeFilePreA} 
+               removeFilePreA={(arrayIndex, index)=>{
+                //removeFilePreA(arrayIndex, index, added)
+                var x=[...pdeparturecheck]
+                if(x[0].hotelMap.file.length===1) x[0].hotelMap.file=[]
+                else x[0].hotelMap.file.splice(index,1);
+
+                //setpdeparturecheck(x);
+                //console.log(arrayIndex,index)
+              }} 
                attachments={pdeparturecheck[0].hotelMap} 
             Icon={
               <Icons
@@ -1005,8 +1017,12 @@ export default function PreDepartureChecklist({navigation}) {
                type={i} 
                addedsection={true}
                init={ini}
+               
                uploadInitiator={uploadInitiator} 
-               removeFilePreA={removeFilePreA} 
+               removeFilePreA={(a,b,c)=>{
+                if(addedcrewSectionval[i].hotelMap.file.length===1) addedcrewSectionval[i].hotelMap.file=[]
+                else addedcrewSectionval[i].hotelMap.file.splice(b,1);
+               }} 
                attachments={addedcrewSectionval[i].hotelMap} 
             Icon={
               <Icons
@@ -1421,7 +1437,15 @@ export default function PreDepartureChecklist({navigation}) {
                type={1} 
                 
                uploadInitiator={uploadInitiator} 
-               removeFilePreA={removeFilePreA} 
+               removeFilePreA={(arrayIndex, index)=>{
+                //removeFilePreA(arrayIndex, index, added)
+                var x=[...pdeparturecheck]
+                if(x[1].hotelMap.file.length===1) x[1].hotelMap.file=[]
+                else x[1].hotelMap.file.splice(index,1);
+
+                //setpdeparturecheck(x);
+                //console.log(arrayIndex,index)
+              }} 
                attachments={pdeparturecheck[1].hotelMap} 
             Icon={
               <Icons
@@ -1620,7 +1644,20 @@ export default function PreDepartureChecklist({navigation}) {
                init={ini}
                sectionName={'pax'}
                uploadInitiator={uploadInitiator} 
-               removeFilePreA={removeFilePreA} 
+               removeFilePreA={(a,b,c)=>{
+                //removeFilePreA
+
+                  //removeFilePreA(arrayIndex, index, added)
+                  if(addedpaxSectionval[i].hotelMap.file.length===1) addedpaxSectionval[i].hotelMap.file=[]
+                  else addedpaxSectionval[i].hotelMap.file.splice(b,1);
+                 
+                 
+  
+                  //setpdeparturecheck(x);
+                  //console.log(arrayIndex,index)
+
+
+              }} 
                attachments={addedpaxSectionval[i].hotelMap} 
             Icon={
               <Icons
