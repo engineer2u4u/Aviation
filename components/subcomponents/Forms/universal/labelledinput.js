@@ -26,7 +26,7 @@ const LabelledInput=({label,disabled=false,multiline,numberOfLines,data,ini,inde
             <TextInput
               style={[s.input,{backgroundColor: disabled ? 'rgba(0,0,0,0.1)' : 'white'}]}
               editable={!disabled}
-              value={val}
+              value={disabled? '' : val}
               multiline={multiline}
               numberOfLines={numberOfLines}
               onChangeText={setTextbind}

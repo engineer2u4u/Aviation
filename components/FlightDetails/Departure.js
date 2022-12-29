@@ -885,7 +885,13 @@ case true:
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(13)}>
+              <TouchableOpacity onPress={event =>{
+                 setCheckedDepart(13)
+                 var x=[...departure]
+                 x[11]=null;
+                 x[12]=null;
+                 setdeparture(x);
+                }}>
                 <Icons
                   name={
                     departure[13].checked
@@ -979,7 +985,16 @@ case true:
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(18)}>
+              <TouchableOpacity onPress={event =>{
+                 setCheckedDepart(18)
+                 var x=[...departure]
+                 x[14]=null;
+                 x[15]=null;
+                 x[16]=null;
+                 x[17]={value:false,file:[]};
+                 x[58].remarks=null;
+                 setdeparture(x);
+                 }}>
                 <Icons
                   name={
                     departure[18].checked
@@ -1190,7 +1205,13 @@ case true:
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(21)}>
+              <TouchableOpacity onPress={event =>{
+                   setCheckedDepart(21)
+                   var x=[...departure];
+                   x[19]=null
+                   x[59]=null
+                   setdeparture(x);
+                }}>
                 <Icons
                   name={
                     departure[21].checked
@@ -1263,7 +1284,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Remarks</Text>
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 editable={!departure[21].checked}
@@ -1284,7 +1305,21 @@ case true:
                   setdeparture(tdeparture);
                 }}
               />
-            </View>
+            </View> */}
+             <LabelledInput
+                label={'Remarks'} //mark
+                disabled={departure[21].checked}
+                data={departure[20].remarks}
+                datatype={'text'}
+                index={20}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...departure];
+                  tcheckList[index].remarks = text;
+                  setdeparture(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
           </View>
           {/*   ------------------------------Water Service end ----------- */}
 
@@ -1306,7 +1341,13 @@ case true:
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(24)}>
+              <TouchableOpacity onPress={event =>{
+                  setCheckedDepart(24)
+                  var x=[...departure];
+                  x[22]=null;
+                  x[60]=null;
+                  setdeparture(x);
+                 }}>
                 <Icons
                   name={
                     departure[24].checked
@@ -1379,7 +1420,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Remarks</Text>
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 editable={!departure[24].checked}
@@ -1400,7 +1441,21 @@ case true:
                   setdeparture(tdeparture);
                 }}
               />
-            </View>
+            </View> */}
+              <LabelledInput
+                label={'Remarks'} //mark
+                disabled={departure[24].checked}
+                data={departure[23].remarks}
+                datatype={'text'}
+                index={23}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...departure];
+                  tcheckList[index].remarks = text;
+                  setdeparture(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
           </View>
           {/*   ------------------------------Lavatory Service end ----------- */}
 
@@ -1422,7 +1477,12 @@ case true:
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(27)}>
+              <TouchableOpacity onPress={event =>{
+                  setCheckedDepart(27)
+                  var x=[...departure];
+                  x[25]=null;
+                  setdeparture(x);
+                }}>
                 <Icons
                   name={
                     departure[27].checked
@@ -1465,7 +1525,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Remarks</Text>
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 editable={!departure[27].checked}
@@ -1486,7 +1546,21 @@ case true:
                   setdeparture(tdeparture);
                 }}
               />
-            </View>
+            </View> */}
+              <LabelledInput
+                label={'Remarks'} //mark
+                disabled={departure[27].checked}
+                data={departure[26].remarks}
+                datatype={'text'}
+                index={26}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...departure];
+                  tcheckList[index].remarks = text;
+                  setdeparture(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
           </View>
           {/*   ------------------------------Rubbish Service end ----------- */}
 
@@ -1506,7 +1580,15 @@ case true:
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setCheckedDepart(32)}>
+              <TouchableOpacity onPress={event =>{
+                    setCheckedDepart(32)
+                    var x=[...departure];
+                    x[28]=null;
+                    x[29]={value:false,file:[]};
+                    x[30]=null;
+                    setdeparture(x);
+
+                }}>
                 <Icons
                   name={
                     departure[32].checked
@@ -1643,7 +1725,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Remarks</Text>
+            {/* <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 editable={!departure[32].checked}
@@ -1664,7 +1746,21 @@ case true:
                   setdeparture(tdeparture);
                 }}
               />
-            </View>
+            </View> */}
+              <LabelledInput
+                label={'Remarks'} //mark
+                disabled={departure[32].checked}
+                data={departure[31].remarks}
+                datatype={'text'}
+                index={31}
+                setText={(index,text,type,section)=>{
+                  var tcheckList = [...departure];
+                  tcheckList[index].remarks = text;
+                  setdeparture(tcheckList);  
+                }} 
+                multiline={true}
+                numberOfLines={2}
+              />
           </View>
           {/*   ------------------------------Catering end ----------- */}
 
