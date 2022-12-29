@@ -843,7 +843,13 @@ export default function PreDepartureChecklist({navigation}) {
               <TouchableOpacity onPress={event =>{
                 var x = crewactivesections;
                 setcrewactivesections(!x);
-                console.log(x);
+      
+                setcrewmovement(false);
+                setaddedcrewSection([]);
+                
+                var x=[...pdeparturecheck];
+                x[0].hotelMap={value: null, file: []};
+                setpdeparturecheck(x);
                 }}>
                 <Icons
                   name={
@@ -1394,6 +1400,15 @@ export default function PreDepartureChecklist({navigation}) {
                 var x = paxhotelactivesections;
                 setpaxhotelactivesections(!x);
                 console.log(x);
+
+                setpaxmovement(false);
+                setaddedpaxSection([]);
+                
+                var x=[...pdeparturecheck];
+                x[1].hotelMap={value: null, file: []};
+                setpdeparturecheck(x);
+
+
                 }}>
                 <Icons
                   name={
@@ -2022,7 +2037,14 @@ export default function PreDepartureChecklist({navigation}) {
                init={ini}
                sectionName={'departure'}
                uploadInitiator={uploadInitiator} 
-               removeFilePreA={removeFilePreA} 
+               removeFilePreA={(a,b,c)=>{
+                console.log(a,b,c);
+                var x=[...pdeparturecheck];
+                if(x[4].hotelMap.file.length===1) x[4].hotelMap.file=[];
+                else  x[4].hotelMap.file.splice(b,1);
+//come here
+                //removeFilePreA()
+              }} 
                attachments={pdeparturecheck[4].hotelMap} 
             Icon={
               <Icons
@@ -2610,7 +2632,7 @@ slot
           <RBSheet
             ref={refRBSheet}
             closeOnDragDown={true}
-            closeOnPressMask={false}
+            closeOnPressMask={true}
             height={height / 4}
             customStyles={{
               wrapper: {

@@ -1309,12 +1309,12 @@ case true:
              <LabelledInput
                 label={'Remarks'} //mark
                 disabled={departure[21].checked}
-                data={departure[20].remarks}
+                data={departure[20]}
                 datatype={'text'}
                 index={20}
                 setText={(index,text,type,section)=>{
                   var tcheckList = [...departure];
-                  tcheckList[index].remarks = text;
+                  tcheckList[index] = text;
                   setdeparture(tcheckList);  
                 }} 
                 multiline={true}
@@ -1445,12 +1445,12 @@ case true:
               <LabelledInput
                 label={'Remarks'} //mark
                 disabled={departure[24].checked}
-                data={departure[23].remarks}
+                data={departure[23]}
                 datatype={'text'}
                 index={23}
                 setText={(index,text,type,section)=>{
                   var tcheckList = [...departure];
-                  tcheckList[index].remarks = text;
+                  tcheckList[index] = text;
                   setdeparture(tcheckList);  
                 }} 
                 multiline={true}
@@ -1550,12 +1550,12 @@ case true:
               <LabelledInput
                 label={'Remarks'} //mark
                 disabled={departure[27].checked}
-                data={departure[26].remarks}
+                data={departure[26]}
                 datatype={'text'}
                 index={26}
                 setText={(index,text,type,section)=>{
                   var tcheckList = [...departure];
-                  tcheckList[index].remarks = text;
+                  tcheckList[index] = text;
                   setdeparture(tcheckList);  
                 }} 
                 multiline={true}
@@ -1729,12 +1729,12 @@ case true:
               <LabelledInput
                 label={'Remarks'} //mark
                 disabled={departure[32].checked}
-                data={departure[31].remarks}
+                data={departure[31]}
                 datatype={'text'}
                 index={31}
                 setText={(index,text,type,section)=>{
                   var tcheckList = [...departure];
-                  tcheckList[index].remarks = text;
+                  tcheckList[index] = text;
                   setdeparture(tcheckList);  
                 }} 
                 multiline={true}
