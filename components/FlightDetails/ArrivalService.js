@@ -108,7 +108,8 @@ export default function ArrivalService({navigation}) {
     [], //61
     [], //62
     {},//63
-    null
+    null,//64
+    null,//65
   ]);
   const addMovement = () => {
     var tarrival = [...arrival];
@@ -346,7 +347,7 @@ export default function ArrivalService({navigation}) {
 
         <View style={{padding: 20, marginBottom: 100}}>
         <DateTimeInput 
-                label={'Movement (AC Landed (Local Time))'}
+                label={'Movement (AC Landed) (Local Time)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 0)}}
                 setNowPostDepart={()=>setNow(0)}
                 size={12}
@@ -374,7 +375,7 @@ export default function ArrivalService({navigation}) {
             </TouchableOpacity>
           </View> */}
           <DateTimeInput 
-                label={'Movement (Checks In (Local Time))'}
+                label={'Movement (Checks In) (Local Time)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 1)}}
                 setNowPostDepart={()=>setNow(1)}
                 size={12}
@@ -734,6 +735,7 @@ export default function ArrivalService({navigation}) {
             
             <DateTimeInput 
                 label={'Actual Transport Arrival Time at Airport (Local Time)'}
+                notrequiredSection={true}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 58)}}
                 setNowPostDepart={()=>setNow(58)}
                 size={12}
@@ -884,6 +886,19 @@ export default function ArrivalService({navigation}) {
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
+
+                  
+                  <DateTimeInput 
+                label={'Actual Transport Arrival Time at Airport (Local Time)'}
+//come here
+                notrequiredSection={true}
+                showDatePickerPostDepart={()=>{showDatePicker('time', 60, index, 'departed')}}
+                setNowPostDepart={()=>setNow(65)}
+                size={12}
+                type={'time'}
+                data={arrival[65]}
+                index={12}
+              />
                   <Text style={styleSheet.label}>
                     Pax Departed from Terminal (Local Time)
                   </Text>
@@ -1132,7 +1147,7 @@ export default function ArrivalService({navigation}) {
                 })}
               </View>
             )}
-            <Text style={styleSheet.label}>Catering Delivey Time</Text>
+            <Text style={styleSheet.label}>Catering Delivey Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[20].checked}
@@ -1220,7 +1235,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[24].checked}
@@ -1250,7 +1265,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local TIme)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[24].checked}
@@ -1339,7 +1354,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[28].checked}
@@ -1369,7 +1384,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local TIme)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[28].checked}
@@ -1457,7 +1472,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Completion Time</Text>
+            <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[31].checked}
@@ -1549,7 +1564,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Fuel Truck Arrival Time</Text>
+            <Text style={styleSheet.label}>Fuel Truck Arrival Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[37].checked}
@@ -1579,7 +1594,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[37].checked}
@@ -1609,7 +1624,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[37].checked}
@@ -1769,7 +1784,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[42].checked}
@@ -1799,7 +1814,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[42].checked}
@@ -2129,7 +2144,8 @@ export default function ArrivalService({navigation}) {
           
 
             <DateTimeInput 
-                label={'Actual Transport Arrival Time at Terminal (Local Time)'}
+                label={'Actual Transport Arrival Time at Airport (Local Time)'}
+                notrequiredSection={true}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 49)}}
                 setNowPostDepart={()=>setNow(49)}
                 size={12}
@@ -2276,6 +2292,7 @@ export default function ArrivalService({navigation}) {
                     
                     <DateTimeInput 
                 label={'Actual Transport Arrival Time at Airport (Local Time)'}
+                notrequiredSection={true}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 62, index, 'arrival')}}
                 setNowPostDepart={(a,time)=>{
                   var options={

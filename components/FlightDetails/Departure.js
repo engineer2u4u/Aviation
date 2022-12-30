@@ -529,7 +529,19 @@ case true:
               ]}>
               From Pickup Location to Airport
             </Text>
-            <Text style={styleSheet.label}>
+            <DateTimeInput 
+                      label={'Actual Transport Arrival Time at Pickup Location (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePickerDepart('time', 1)}}
+                      setNowPostDepart={()=>{setNowDepart(1)}}
+                      notrequiredSection={true}
+                      size={12}
+                      
+                      type={'time'}
+                      data={departure[1]}
+                      index={1}
+                    />
+
+            {/* <Text style={styleSheet.label}>
               Actual Transport Arrival Time at Pickup Location (Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -551,8 +563,8 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>
+            </View> */}
+            {/* <Text style={styleSheet.label}>
               Time Crew Boarded Transport at Pickup Location (Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -574,10 +586,30 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
-
+            </View> */}
+  <DateTimeInput 
+                      label={'Time Crew Boarded Transport at Pickup Location (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePickerDepart('time', 2)}}
+                      setNowPostDepart={()=>{setNowDepart(2)}}
+                      notrequiredSection={true}
+                      size={12}
+                      
+                      type={'time'}
+                      data={departure[2]}
+                      index={2}
+                    />
             
-            <Text style={styleSheet.label}>Time Crew Arrived at Terminal</Text>
+            <DateTimeInput 
+                      label={'Time Crew Arrived at Terminal (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePickerDepart('time', 5)}}
+                      setNowPostDepart={()=>{setNowDepart(5)}}
+                      size={12}
+                      
+                      type={'time'}
+                      data={departure[5]}
+                      index={5}
+                    />
+            {/* <Text style={styleSheet.label}>Time Crew Arrived at Terminal</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
@@ -597,7 +629,7 @@ case true:
                   Time Now
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
             <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -636,7 +668,18 @@ case true:
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-                  <Text style={styleSheet.label}>
+                  <DateTimeInput 
+                      label={'Actual Transport Arrival Time at Pickup Location (Local'}
+                      showDatePickerPostDepart={()=>{showDatePickerTrans('time', index, 'arrival')}}
+                      setNowPostDepart={()=>{setNowTrans(index, 'arrival')}}
+                      notrequiredSection={true}
+                      size={12}
+                      added={true}
+                      type={'time'}
+                      data={val.arrival}
+                      index={index}
+                    />
+                  {/* <Text style={styleSheet.label}>
                     Actual Transport Arrival Time at Pickup Location (Local
                     Time)
                   </Text>
@@ -661,8 +704,19 @@ case true:
                         Time Now
                       </Text>
                     </TouchableOpacity>
-                  </View>
-                  <Text style={styleSheet.label}>
+                  </View> */}
+                   <DateTimeInput 
+                      label={'Time Crew Boarded Transport at Pickup Location (Local'}
+                      showDatePickerPostDepart={()=>{showDatePickerTrans('time', index, 'boarded')}}
+                      setNowPostDepart={()=>{setNowTrans(index, 'boarded')}}
+                      notrequiredSection={true}
+                      size={12}
+                      added={true}
+                      type={'time'}
+                      data={val.boarded}
+                      index={index}
+                    />
+                  {/* <Text style={styleSheet.label}>
                     Time Crew Boarded Transport at Pickup Location (Local Time)
                   </Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -686,10 +740,19 @@ case true:
                         Time Now
                       </Text>
                     </TouchableOpacity>
-                  </View>
+                  </View> */}
 
-               
-                  <Text style={styleSheet.label}>
+<DateTimeInput 
+                      label={'Time Crew Arrived at Terminal (Local Time)'}
+                      showDatePickerPostDepart={()=>{showDatePickerTrans('time', index, 'timeCrew')}}
+                      setNowPostDepart={()=>{setNowTrans(index, 'timeCrew')}}
+                      size={12}
+                      added={true}
+                      type={'time'}
+                      data={val.timeCrew}
+                      index={index}
+                    />
+                  {/* <Text style={styleSheet.label}>
                     Time Crew Arrived at Terminal
                   </Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -713,7 +776,7 @@ case true:
                         Time Now
                       </Text>
                     </TouchableOpacity>
-                  </View>
+                  </View> */}
                   <Text style={styleSheet.label}>Remarks</Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <TextInput
@@ -740,7 +803,7 @@ case true:
               At Airport
             </Text>
             <Text style={[styleSheet.label]}>
-              Flight Documents Handover to Crew
+              Flight Documents Handover to Crew (Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
@@ -762,7 +825,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Time Crew Cleared CIQ</Text>
+            <Text style={styleSheet.label}>Time Crew Cleared CIQ (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
@@ -784,7 +847,7 @@ case true:
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>
-              Time Crew Cleared Airport Security
+              Time Crew Cleared Airport Security (Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
@@ -807,7 +870,7 @@ case true:
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>
-              Time Crew Boarded Transport to Aircraft
+              Time Crew Boarded Transport to Aircraft (Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
@@ -829,7 +892,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Time Crew Boarded Aircraft</Text>
+            <Text style={styleSheet.label}>Time Crew Boarded Aircraft (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 style={styleSheet.picker}
@@ -1069,7 +1132,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
+            <Text style={styleSheet.label}>End Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={departure[18].checked}
@@ -1254,7 +1317,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time (Local Time)</Text>
+            <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={departure[21].checked}
@@ -1495,7 +1558,7 @@ case true:
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Completion Time</Text>
+            <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={departure[27].checked}
@@ -1679,7 +1742,7 @@ case true:
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={{color: 'black',fontSize:12,fontWeight:'bold'}}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(29, index)}>
                         <Icons
@@ -1852,7 +1915,7 @@ case true:
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={{color: 'black',fontSize:12,fontWeight:'bold'}}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(36, index)}>
                         <Icons
@@ -2237,7 +2300,7 @@ case true:
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>
-              Time Pax Cleared Airport Security (Local Time) (Local Time)
+              Time Pax Cleared Airport Security (Local Time)
             </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
@@ -2437,6 +2500,14 @@ case true:
               </Text>
             </TouchableOpacity>
           </View>
+          <Text style={styleSheet.label}>Additional Remarks</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={[styleSheet.input]}
+                multiline={true}
+                numberOfLines={2}
+              />
+            </View>
         </View>
         <DateTimePickerModal
           isVisible={isDatePickerVisibleDepart}
@@ -2489,6 +2560,7 @@ case true:
                 </Text>
               </TouchableOpacity>
             </View>
+            
           </View>
         </RBSheet>
       </ScrollView>

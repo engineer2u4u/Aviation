@@ -1520,7 +1520,7 @@ const sendForm=()=>{
               />
 
 <TakeCamera 
-               label={"Map of Route to Hotel here"} 
+               label={"Map of Route to Hotel"} 
                type={13} 
                uploadInitiator={()=>{
                 setuploadAddedSection(true)
@@ -2012,7 +2012,7 @@ const sendForm=()=>{
             
 
                     <TakeCamera 
-               label={"Map of Route to Hotel here"} 
+               label={"Map of Route to Hotel"} 
                type={15} 
                uploadInitiator={()=>{
                 setuploadAddedSection(true)

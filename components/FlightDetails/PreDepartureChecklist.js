@@ -786,7 +786,7 @@ export default function PreDepartureChecklist({navigation}) {
                     color: pdeparturecheck[12].checked ? 'white' : 'black',
                   },
                 ]}>
-                Crew Notified on Meeting
+                Crew Notified on Meeting Location
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(12)}>
@@ -888,7 +888,7 @@ export default function PreDepartureChecklist({navigation}) {
                 numberOfLines={1}
               />
               <TakeCamera 
-               label={"Photo of Pickup Location s"} 
+               label={"Photo of Pickup Location"} 
                disabled={crewactivesections}
                type={0} 
                 
@@ -991,7 +991,7 @@ export default function PreDepartureChecklist({navigation}) {
         </View>
         
         <DateTimeInput 
-    label={'Scheduled Pickup Time (Local Time)'}
+    label={'Scheduled Transport Pickup Time (Local Time)'}
     //crewmark
     showDatePickerPostDepart={showDatePickerDeparture}
     setNowPostDepart={setAddedcrewData}
@@ -1343,7 +1343,7 @@ export default function PreDepartureChecklist({navigation}) {
                     color: pdeparturecheck[14].checked ? 'white' : 'black',
                   },
                 ]}>
-                Pax Transport Arranged
+                Pax Notifed on Meeting Location
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(14)}>
@@ -1623,7 +1623,7 @@ export default function PreDepartureChecklist({navigation}) {
                       </TouchableOpacity>
                     </View>
                     <DateTimeInput 
-                      label={'Scheduled Pickup Time (Local Time)'}
+                      label={'Scheduled Transport Pickup Time (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
                       size={12}
@@ -2031,7 +2031,7 @@ export default function PreDepartureChecklist({navigation}) {
           )}
 
 <TakeCamera 
-               label={"Upload Departure Gendec"} 
+               label={"Upload Departure GenDec"} 
                type={4} 
                addedsection={false}
                init={ini}
@@ -2168,7 +2168,7 @@ export default function PreDepartureChecklist({navigation}) {
                     />
 
 <DateTimeInput 
-                      label={'Weather Information (Local Time)'}
+                      label={'Weather Information Updated (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
                       size={12}
