@@ -6,7 +6,7 @@
  * @flow
  */
 
-import React, {Component, useState, useEffect} from 'react';
+import React, {Component, useState, useEffect, useContext} from 'react';
 import {
   StyleSheet,
   View,
@@ -25,6 +25,8 @@ import {
   StatusBar,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import auth from '@react-native-firebase/auth';
+import { UserContext } from './context/userContext';
 const {width, height} = Dimensions.get('window');
 // const MrzScanner = NativeModules.RNMrzscannerlib;
 // // import MrzScanner from 'react-native-mrzscannerlib';
@@ -60,7 +62,16 @@ const requestCameraPermission = async () => {
 
 export default function Home({navigation}) {
   const [details, setdetails] = useState(null);
-  
+  const {loggedIn,setloggedIn}=useContext(UserContext)
+
+  const logOut=()=>{
+    return  auth()
+     .signOut()
+       .then(() => {
+        setloggedIn(false);
+       });
+   }
+
   useEffect(() => {
     requestCameraPermission();
     // var subscription;
@@ -112,15 +123,27 @@ export default function Home({navigation}) {
       contentContainerStyle={{minHeight: Dimensions.get('window').height}}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
       <View style={styles.container}>
-        <Text
-          style={{
-            textAlign: 'left',
-            fontSize: width / 15,
-            fontWeight: 'bold',
-            color: 'black',
-          }}>
-          Hello,Bob
-        </Text>
+        <View style={{flexDirection:"row",justifyContent:'flex-start'}}>
+          <View  style={{flex:1,justifyContent:'center'}}>
+          <Text
+            style={{
+              textAlign: 'left',
+              fontSize: width / 15,
+              fontWeight: 'bold',
+              color: 'black',
+            }}>
+            Aviation
+          </Text>
+          </View>
+          <View style={{flex:1,justifyContent:'flex-end',alignContent:'flex-end',alignItems:'flex-end'}}>
+          <TouchableOpacity
+            onPress={() => logOut()}
+            >
+            <Icons color="black" name="person-pin" size={50} />
+            <Text style={{color: 'black'}}>Logout</Text>
+          </TouchableOpacity>
+          </View>
+          </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <View style={{backgroundColor: 'black', height: 5, flex: 1}}></View>
           <Image
