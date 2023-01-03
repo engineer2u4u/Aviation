@@ -7,13 +7,13 @@ import Scanner from './components/Scanner';
 import FlightDetailsRoute from './components/FlightDetailsRoute';
 import {NavigationContainer} from '@react-navigation/native';
 
+
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 
 import auth from '@react-native-firebase/auth';
 
-import { View,Text, TouchableOpacity } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { View,Text, TouchableOpacity,TextInput,ActivityIndicator } from 'react-native';
 import { UserContext } from './components/context/userContext';
 
 const Stack = createNativeStackNavigator();
@@ -56,6 +56,7 @@ console.log(res);
 
 const Login = (props) =>{
  // Set an initializing state whilst Firebase connects
+ const [loading,setloading]=useState(false);
  const [initializing, setInitializing] = useState(true);
  const [user, setUser] = useState();
 
@@ -79,21 +80,25 @@ const Login = (props) =>{
 
 
   const loginStart=()=>{
+    
     if(emailinvalid) return console.log("NO VALID");
     else if(email.length===0) return inValidator(true,'Email required');
     else if(pword.length===0) return inValidator(true,'Password Field Cannot be left Empty');
     else if(pword.length<6) return inValidator(true,'Password Should at least be 6 characters');
     
     else{
-    auth()
-      .signInWithEmailAndPassword(email, pword)
-      .then(() => {
-        console.log('User account created & signed in!');
-      })
-    .catch(error => {
-      if(error.code==="auth/user-not-found") inValidator(true,'Incorrect Credentials');
-    });
-  }
+        setloading(true)
+        auth()
+          .signInWithEmailAndPassword(email, pword)
+          .then(() => {
+            console.log('User account created & signed in!');
+            setloading(false)
+          })
+        .catch(error => {
+          if(error.code==="auth/user-not-found") inValidator(true,'Incorrect Credentials');
+          setloading(false)
+        });
+    }
   }
 
   const logOut=()=>{
@@ -122,16 +127,18 @@ const Login = (props) =>{
  if (!user) {
    return (
      <View style={{flex:1,flexDirection:'column',justifyContent:'flex-start',paddingTop:30,paddingHorizontal:20}}>
-      <Text style={{color:"#000",fontSize:42}}>Sign In</Text>
+        <Text style={{color:"#000",fontWeight:'bold',textAlign:'center',fontSize:32}}>
+          Sign In
+        </Text>
       <View style={{flex:5,marginTop:20}}>
           {err && <View style={{width:'100%',height:50,paddingHorizontal:10,justifyContent:'center',backgroundColor:'#d3d3d360'}}>
             <Text style={{color:"red",fontSize:14}}>&bull; {errmsg}</Text>
         </View>}
         <View style={{flex:1,marginTop:20}}>
-            <Text style={{color:"#000",fontSize:18}}>Email</Text>
+            <Text style={{color:"#000",fontSize:18}}>Email Address</Text>
             {emailinvalid && <Text style={{color:"red",fontSize:12,marginTop:10}}>{email.length===0 ? 'Email Required' : 'Invalid Email Address'}</Text>}
             <TextInput 
-              placeholder='Email'
+              placeholder='example@example.com'
               placeholderTextColor="#808080" 
               onChangeText={(text)=>setemail(text)}
               onFocus={()=>{
@@ -149,7 +156,8 @@ const Login = (props) =>{
               style={{
                 width:'100%',
                 height:50,
-                backgroundColor:'#d3d3d390',
+                paddingLeft:10,
+                backgroundColor:'#fff',
                 borderWidth:1,
                 borderColor:"#d3d3d3",
                 marginTop:10,
@@ -166,7 +174,7 @@ const Login = (props) =>{
               style={{
                 width:'100%',
                 height:50,
-                backgroundColor:'#d3d3d390',
+                backgroundColor:'#fff',
                 borderWidth:1,
                 borderColor:"#d3d3d3",
                 marginTop:10,
@@ -174,29 +182,42 @@ const Login = (props) =>{
               }}
             />
 
-            <TouchableOpacity onPress={loginStart} style={{
-              width:'100%',
-              height:50,
-              marginTop:80,
-              backgroundColor:"green",
-              justifyContent:'center',
-              alignItems:'center'
-            }}>
-              <Text style={{fontSize:22}}>Login</Text>
-            </TouchableOpacity>
+            {loading?   <TouchableOpacity style={{
+                  width:'100%',
+                  height:50,
+                  marginTop:80,
+                  backgroundColor:"green",
+                  justifyContent:'center',
+                  alignItems:'center'
+                }}>
+                    <ActivityIndicator />
+                </TouchableOpacity>  :
+                <TouchableOpacity onPress={loginStart} style={{
+                  width:'100%',
+                  height:50,
+                  marginTop:80,
+                  backgroundColor:"green",
+                  justifyContent:'center',
+                  alignItems:'center'
+                }}>
+                    <Text style={{fontSize:22}}>Login</Text>
+                </TouchableOpacity>
+            }
 
-            <Text style={{fontSize:22,color:"black",textAlign:'center',marginTop:20}}>Or</Text>
 
-            <TouchableOpacity onPress={createNewAccount} style={{
-              width:'100%',
-              height:50,
-              marginTop:5,
-              backgroundColor:"transparent",
-              justifyContent:'center',
-              alignItems:'center'
-            }}>
-              <Text style={{fontSize:22,color:"navy"}}>Create new account</Text>
-            </TouchableOpacity>
+            
+
+              <View style={{flexDirection:'row',justifyContent:'flex-start',alignContent:'center',marginTop:40}}>
+              <Text style={{color:"black",fontSize:18,paddingTop:10}}>Im a new user, </Text>
+              <TouchableOpacity onPress={createNewAccount} style={{
+                marginTop:5,
+                backgroundColor:"transparent",
+                justifyContent:'center',
+                alignItems:'center'
+              }}>
+                <Text style={{fontSize:18,paddingTop:5,color:"navy"}}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
         </View>
 
       </View>
@@ -236,6 +257,7 @@ const Login = (props) =>{
 
 const SignUp = (props) =>{
 
+    const [loading,setloading] = useState(false);
     const [email,setemail]=useState('');
     const [pword,setpword]=useState('');
     const [cpword,setcpword]=useState('');
@@ -256,29 +278,27 @@ const SignUp = (props) =>{
     }
 
     const createacc = () => {
-      console.log("START");
+      setloading(true)
       if(pword!==cpword) return inValidator(true,'Password and Confirm Password do not match');
       else if(emailinvalid) return console.log("NO VALID");
       else if(pword.length===0) return inValidator(true,'Password Field Cannot be left Empty');
       else if(pword.length<6) return inValidator(true,'Password Should at least be 6 characters');
       
       else{
-        console.log("HERE")
         seterr(false);
         authenticator(email,pword).then((data)=>{
-          console.log("DATA",data);
-          
+          setloading(false)
           if(data.account_created){
             console.log("Gk")
             props.setloggedIn(true);
           }else if(data.err){
+            
             //if(data.code.code) inValidator(true,'Password Should be atleast 6 character');
             if(data.code.code==="auth/email-already-in-use") inValidator(true,'Email already in use, try another.');
           }
         }).catch((e)=>{
-          console.log("HERE",e)
+          setloading(false)
           if(e.code==="auth/weak-password") inValidator(true,'Password Should be atleast 6 character');
-          console.log(e);
         });
       }
       
@@ -287,7 +307,9 @@ const SignUp = (props) =>{
 
   return(
     <View style={{flex:1,flexDirection:'column',justifyContent:'flex-start',paddingTop:30,paddingHorizontal:20}}>
-      <Text style={{color:"#000",fontSize:42}}>Sign Up</Text>
+      <Text style={{color:"#000",fontWeight:'bold',textAlign:'center',fontSize:32}}>
+          Create Account
+        </Text>
       <View style={{flex:5,marginTop:20}}>
         {err && <View style={{width:'100%',height:50,paddingHorizontal:10,justifyContent:'center',backgroundColor:'#d3d3d360'}}>
             <Text style={{color:"red",fontSize:14}}>&bull; {errmsg}</Text>
@@ -314,7 +336,8 @@ const SignUp = (props) =>{
               style={{
                 width:'100%',
                 height:50,
-                backgroundColor:'#d3d3d390',
+                backgroundColor:'#fff',
+                paddingLeft:10,
                 borderWidth:1,
                 borderColor:"#d3d3d3",
                 marginTop:10,
@@ -332,7 +355,7 @@ const SignUp = (props) =>{
               style={{
                 width:'100%',
                 height:50,
-                backgroundColor:'#d3d3d390',
+                backgroundColor:'#fff',
                 borderWidth:1,
                 borderColor:"#d3d3d3",
                 marginTop:10,
@@ -349,24 +372,36 @@ const SignUp = (props) =>{
               style={{
                 width:'100%',
                 height:50,
-                backgroundColor:'#d3d3d390',
+                backgroundColor:'#fff',
                 borderWidth:1,
                 borderColor:"#d3d3d3",
                 marginTop:10,
                 color:"#000"
               }}
             />
-
-            <TouchableOpacity onPress={createacc} style={{
-              width:'100%',
-              height:50,
-              marginTop:80,
-              backgroundColor:"green",
-              justifyContent:'center',
-              alignItems:'center'
-            }}>
-              <Text style={{fontSize:22}}>Create Account</Text>
-            </TouchableOpacity>
+          {loading? 
+                <TouchableOpacity style={{
+                    width:'100%',
+                    height:50,
+                    marginTop:80,
+                    backgroundColor:"green",
+                    justifyContent:'center',
+                    alignItems:'center'
+                  }}>
+                    <ActivityIndicator />
+                </TouchableOpacity>  
+                :
+              <TouchableOpacity onPress={createacc} style={{
+                width:'100%',
+                height:50,
+                marginTop:80,
+                backgroundColor:"green",
+                justifyContent:'center',
+                alignItems:'center'
+              }}>
+                <Text style={{fontSize:22}}>Create Account</Text>
+              </TouchableOpacity>
+            }
 
         </View>
 

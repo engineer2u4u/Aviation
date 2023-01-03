@@ -754,7 +754,7 @@ export default function PreDepartureChecklist({navigation}) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[11].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{flexDirection: 'row', marginBottom: 20, paddingHorizontal:20}}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[11].remarks}</Text>
               </View>
@@ -799,7 +799,7 @@ export default function PreDepartureChecklist({navigation}) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[12].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{flexDirection: 'row', marginBottom: 20, paddingHorizontal:20}}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[12].remarks}</Text>
               </View>
