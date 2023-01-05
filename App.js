@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Home from './components/Home';
 import GroundHandling from './components/GroundHandling';
 import FlightDetails from './components/FlightDetails';
@@ -15,6 +15,8 @@ import auth from '@react-native-firebase/auth';
 
 import { View,Text, TouchableOpacity,TextInput,ActivityIndicator } from 'react-native';
 import { UserContext } from './components/context/userContext';
+import { UserDetails } from './components/context/userDetailsContext';
+import SplashScreen from 'react-native-splash-screen';
 
 const Stack = createNativeStackNavigator();
 
@@ -257,6 +259,10 @@ const Login = (props) =>{
 
 const SignUp = (props) =>{
 
+    const {user,setUser}=useContext(UserDetails);
+    const {loggedIn,setloggedIn}=useContext(UserContext)
+
+  
     const [loading,setloading] = useState(false);
     const [email,setemail]=useState('');
     const [pword,setpword]=useState('');
@@ -278,19 +284,22 @@ const SignUp = (props) =>{
     }
 
     const createacc = () => {
-      setloading(true)
-      if(pword!==cpword) return inValidator(true,'Password and Confirm Password do not match');
+      
+      if(email.length===0) return inValidator(true,'Email Field required.');
+      else if(pword!==cpword) return inValidator(true,'Password and Confirm Password do not match');
       else if(emailinvalid) return console.log("NO VALID");
       else if(pword.length===0) return inValidator(true,'Password Field Cannot be left Empty');
       else if(pword.length<6) return inValidator(true,'Password Should at least be 6 characters');
       
       else{
+        setloading(true)
         seterr(false);
         authenticator(email,pword).then((data)=>{
           setloading(false)
           if(data.account_created){
             console.log("Gk")
-            props.setloggedIn(true);
+            setUser(email)
+            setloggedIn(true);
           }else if(data.err){
             
             //if(data.code.code) inValidator(true,'Password Should be atleast 6 character');
@@ -304,6 +313,8 @@ const SignUp = (props) =>{
       
       //console.log(email,pword,cpword)
     }
+
+
 
   return(
     <View style={{flex:1,flexDirection:'column',justifyContent:'flex-start',paddingTop:30,paddingHorizontal:20}}>
@@ -428,6 +439,7 @@ const App = () => {
 }
 
   useEffect(() => {
+    SplashScreen.hide();
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
@@ -436,6 +448,7 @@ const App = () => {
 
   return (
     <UserContext.Provider value={{loggedIn,setloggedIn}}>
+      <UserDetails.Provider value={{user, setUser}}>
     <NavigationContainer>
       
       <Stack.Navigator initialRouteName={loggedIn ? "Home" : "Login"} screenOptions={{headerShown: false}}>
@@ -465,6 +478,7 @@ const App = () => {
       </Stack.Navigator>
       
     </NavigationContainer>
+    </UserDetails.Provider>
     </UserContext.Provider>
   );
 };

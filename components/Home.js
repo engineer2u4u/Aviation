@@ -6,7 +6,7 @@
  * @flow
  */
 
-import React, {Component, useState, useEffect, useContext} from 'react';
+import React, {Component, useState, useEffect, useContext, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -14,6 +14,7 @@ import {
   Modal,
   Button,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Alert,
   NativeModules,
   NativeEventEmitter,
@@ -23,11 +24,14 @@ import {
   TextInput,
   PermissionsAndroid,
   StatusBar,
+  BackHandler,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
 import { UserContext } from './context/userContext';
+import { UserDetails } from './context/userDetailsContext';
 const {width, height} = Dimensions.get('window');
+import NotifService from '../components/methods/notifService'
 // const MrzScanner = NativeModules.RNMrzscannerlib;
 // // import MrzScanner from 'react-native-mrzscannerlib';
 // MrzScanner.registerWithLicenseKey(
@@ -61,18 +65,37 @@ const requestCameraPermission = async () => {
 };
 
 export default function Home({navigation}) {
+  const nf=useRef(null);
+
+  const [prompt,setprompt]=useState(false);
   const [details, setdetails] = useState(null);
   const {loggedIn,setloggedIn}=useContext(UserContext)
+  const {user, setUser} = useContext(UserDetails);
+
+  const onRegister=(token)=> {
+    console.log("OKOK")
+    console.log('tok',token);
+    //setonReg({registerToken: token.token, fcmRegistered: true});
+  }
+
+  const onNotif=(notif)=> {
+    console.log('RECIEVED NOTI',notif);
+  }
 
   const logOut=()=>{
+   
+  
     return  auth()
      .signOut()
        .then(() => {
         setloggedIn(false);
        });
    }
-
+   
   useEffect(() => {
+    nf.current=new NotifService(onRegister,onNotif);
+    console.log(nf.current)
+    //console.log('asdsd',nf.current);
     requestCameraPermission();
     // var subscription;
     // subscription = EventEmitter.addListener(
@@ -132,15 +155,24 @@ export default function Home({navigation}) {
               fontWeight: 'bold',
               color: 'black',
             }}>
-            Aviation
+            Aviation 
           </Text>
           </View>
           <View style={{flex:1,justifyContent:'flex-end',alignContent:'flex-end',alignItems:'flex-end'}}>
           <TouchableOpacity
-            onPress={() => logOut()}
+            onPress={() => setprompt(true)}
+            style={{
+              width:55,height:55,borderRadius:parseInt(55/2),backgroundColor:'#d3d3d3',
+              justifyContent:'center',
+              alignContent:'center',
+              alignItems:'center'
+            }}
             >
-            <Icons color="black" name="person-pin" size={50} />
-            <Text style={{color: 'black'}}>Logout</Text>
+            <Text style={{color: 'black',fontSize:28}}>
+            {
+             typeof user==='object' &&  user.email!=undefined && user.email.charAt(0).toUpperCase()
+            }
+            </Text>
           </TouchableOpacity>
           </View>
           </View>
@@ -284,6 +316,42 @@ export default function Home({navigation}) {
           </View>
         )}
       </View> */}
+      {prompt &&
+        
+      <View style={{
+        position:'absolute',
+        width:width,
+        height:(height+100),
+        backgroundColor:"#40404034",
+        justifyContent:'center',
+        paddingHorizontal:20
+      }}>
+        
+        <View style={{
+          width:width-40,
+          height:200,
+          backgroundColor:'#FFF',
+          padding:10
+        }}>
+          <Text style={{color:"#000",fontSize:25,fontWeight:'600'}}>Logout</Text>
+          <Text style={{color:"#808080",fontSize:16,fontWeight:'500',marginTop:20}}>Are you sure you want to logout ?</Text>
+          <View style={{marginTop:'auto',marginBottom:10,marginRight:20,flexDirection:'row',justifyContent:'flex-end'}}>
+            <TouchableOpacity onPress={()=>{
+              logOut();
+              setprompt(false);
+            }} style={{marginRight:60}}>
+              <Text style={{color:"cornflowerblue",fontSize:20,fontWeight:'600'}}>Yes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={()=>{
+              setprompt(false);
+            }} style={{}}>
+              <Text style={{color:"cornflowerblue",fontSize:20,fontWeight:'600'}}>No</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+      
+      }
     </ScrollView>
   );
 }
