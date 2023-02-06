@@ -24,7 +24,6 @@ export default function Flights({navigation}) {
   const [flightlist,setflightlist]=useState([]);
 
   useEffect(()=>{
-    if (true) functions().useEmulator("192.168.29.75", 5001)
     auth()
       .currentUser.getIdToken(true)
       .then(async function (idToken) {
