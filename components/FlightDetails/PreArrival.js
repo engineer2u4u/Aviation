@@ -19,9 +19,13 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import TakeCamera from '../subcomponents/Forms/takecamera';
+import functions from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
+
 const {height} = Dimensions.get('window');
 
-export default function PreArrival({navigation}) {
+export default function PreArrival(props) {
+  const UID=props.route.params.UID;
   const refRBSheet = useRef();
   //upload funcs
   const [uploadSection,setuploadSection]=useState(0);
@@ -347,17 +351,28 @@ case true:
 
 }
 
+const [callLoad,setcallLoad]=useState(false);
 const sendForm=()=>{
   //console.log(checkList);
+  setcallLoad(true);
   var meta=checkList.splice(0,12);
-  var formFields={
+  var payload={
     meta,
     pax_transport:checkList[12],
     pax_hotel:checkList[13],
     crew_transport:checkList[14],
     crew_hotel:checkList[15],
+    UID
   }
-  console.log(formFields);
+  //console.log(formFields);
+  const sayHello = functions().httpsCallable('getPreArrivalService');
+    sayHello(payload).then((data)=>{
+      console.log(data);
+      setcallLoad(false);
+    }).catch(e=>{
+      console.log(e);
+      setcallLoad(false);
+    });
 }
 
   return (
@@ -379,9 +394,14 @@ const sendForm=()=>{
           }}>
           Pre-Arrival Checklist
         </Text>
-        <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+        {
+          callLoad ?
+          <View style={{paddingRight:20}}><ActivityIndicator color="green" size={'small'} /></View>
+          :
+          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
           <Icons name="content-save" color="green" size={30} />
         </TouchableOpacity>
+        }
       </View>
       <ScrollView>
         <Loader visible={loading} />

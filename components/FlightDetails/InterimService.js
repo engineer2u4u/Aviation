@@ -7,10 +7,13 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
-
+import functions from '@react-native-firebase/functions';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { ActivityIndicator } from 'react-native';
 
-export default function InterimService({navigation}) {
+export default function InterimService(props) {
+  const UID=props.route.params.UID;
+  
   const [Iservices, setIservices] = useState([]);
 
   const onAddServices = () => {
@@ -27,6 +30,39 @@ export default function InterimService({navigation}) {
     service[index][type] = text;
     setIservices(service);
   };
+  const [callLoad,setcallLoad]=useState(false);
+  const finalSend=async (payload)=>{
+    const sayHello = functions().httpsCallable('getInterimService');
+    sayHello(payload).then((data)=>{
+      console.log(data);
+      setcallLoad(false);
+    }).catch(e=>{
+      console.log(e);
+      setcallLoad(false);
+    });
+  }
+  const sendForm= ()=>{
+    setcallLoad(true);
+    var data={
+      UID,
+      FUID:'',
+      INS_SERVICE:[],
+      INS_REM:[],
+      STATUS:0,
+      UPDATE_BY:'api_admin'
+    }
+    var send={
+      service:[],
+      remarks:[]
+    }
+    Iservices.map((msg)=>{
+      console.log(msg);
+      data.INS_SERVICE.push(msg.service);
+      data.INS_REM.push(msg.remarks);
+    })
+    finalSend(data);
+    //console.log("OKOK",Iservices);
+  }
   return (
     <View>
       <View
@@ -40,9 +76,14 @@ export default function InterimService({navigation}) {
         <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
           Interim Services
         </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
+        {
+          callLoad ? 
+          <View style={{paddingRight:20}}><ActivityIndicator color="green" size={'small'} /></View>
+          :
+          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+            <Icons name="content-save" color="green" size={30} />
+          </TouchableOpacity>
+        }
       </View>
       <ScrollView>
         <View style={{padding: 10}}>

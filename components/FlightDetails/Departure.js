@@ -22,9 +22,13 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import Loader from '../Loader';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
+import functions from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
 const {height} = Dimensions.get('window');
 
-export default function Departure({navigation}) {
+export default function Departure(props) {
+  const UID=props.route.params.UID;
+  
   const currentDepart = useRef(0);
   const refRBSheet = useRef();
 
@@ -472,8 +476,99 @@ case true:
     service[54].splice(index, 1);
     setdeparture(service);
   };
+  const [callLoad,setcallLoad]=useState(false);
+  const sendForm=()=>{
+    setcallLoad(true);
+    var x=crewTransport;
+    x.push({arrival:departure[1],  boarded:departure[2],  timeCrew:departure[5],  remarks:null});
+    setcrewTransport(x);
 
-  
+    var payload={
+      crew_num:departure[0] || null,
+      crew_movement:crewTransport,
+      crew_at_airport:{
+        flight_doc_handover_crew:departure[6],
+        crew_CIQ:departure[7],
+        crew_airport_security_clear:departure[8],
+        crew_boarded_transport_to_aircraft:departure[9],
+        crew_boarded_aircraft:departure[10],
+        remarks:departure[57]
+      },
+      gpu:{
+        start:departure[11],
+        stop:departure[12]
+      },
+      fuel_on_departure:{
+        truck_arrival_time:departure[14],
+        start:departure[15],
+        end:departure[16],
+        fuel_reciept:departure[17],
+        remarks:departure[58]
+      },
+      water_service:{
+        start:departure[19],
+        stop:departure[59],
+        remarks:departure[20]
+      },
+      lavatory_service:{
+        start:departure[22],
+        stop:departure[60],
+        remarks:departure[23]
+      },
+      rubbish_service:{
+        completion_time:departure[25],
+        remarks:departure[26]
+      },
+      catering:{
+        equipment_loaded:departure[28] || null,
+        equipment_list_or_photo:departure[29] || null,
+        delivery_time:departure[30] || null,
+        remarks:departure[31] || null
+      },
+      aircraft_ready_for_boarding:departure[33],
+      pax_num:departure[34],
+      baggage:{
+        baggage_uploaded_num:departure[35],
+        baggage_photo:departure[36] || []
+      },
+      pax_movement:[{
+      
+        arrivalActive:true,
+        arrival:departure[52],
+        boarded:departure[61],
+        mapF:departure[62],
+        remarks:null,
+        timeCrew:null,
+        travel:null
+      },departure[54]],
+      pax_at_airport:{
+        crew_informed_pax_arrival:departure[40],
+        refund:departure[41],
+        pax_CIQ:departure[42],
+        pax_airport_security:departure[43],
+        pax_boarded_transport:departure[44],
+        pax_boarded_aircraft:departure[45],
+        remarks:""
+      },
+      door_close:departure[46],
+      movement_chocksoff:departure[47],
+      movement_pushback:departure[48],
+      movement_takeoff:departure[49],
+      additional_remarks:"",
+      UID
+    }
+    //console.log(payload);
+    const sayHello = functions().httpsCallable('getDeparture');
+    sayHello(payload).then((data)=>{
+      console.log(data);
+      setcallLoad(false);
+    }).catch(e=>{
+      console.log(e);
+      setcallLoad(false);
+    });
+  }
+
+    
   return (
     <View>
       <View
@@ -486,9 +581,15 @@ case true:
         <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
           Departure
         </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
+        {
+          callLoad ? 
+          <View style={{paddingRight:20}}><ActivityIndicator color="green" size={'small'} /></View>
+          :
+          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+            <Icons name="content-save" color="green" size={30} />
+          </TouchableOpacity>
+        }
+          
       </View>
       <ScrollView>
         <View style={{padding: 20, marginBottom: 100}}>

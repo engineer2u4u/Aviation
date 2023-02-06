@@ -1,16 +1,30 @@
 import PushNotification from "react-native-push-notification";
+import getData from "./read";
+import storeData from "./store";
 
 class NotificationHandler {
   onNotification(notification) {
     console.log('NotificationHandler Recieved:', notification);
-
+    if (notification.foreground) {
+      console.log("foreground");
+      PushNotification.localNotification(notification);
+    } 
     if (typeof this._onNotification === 'function') {
       this._onNotification(notification);
     }
   }
 
   async onRegister(token) {
-    console.log('HERE',token)
+    var _token=token.token;
+    getData('@token').then(data=>{
+      console.log("RETURED",data);
+      if(data===null){
+        storeData('@token',{token:_token,login:false});
+      }
+    }).catch(e=>{
+      console.log(e)
+    })
+      //storeData('@token',{token,login:false});
     //storeFCMDevice(token);
     if (typeof this._onRegister === 'function') {
       this._onRegister(token);

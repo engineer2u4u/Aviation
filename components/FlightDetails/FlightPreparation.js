@@ -1,4 +1,4 @@
-import { View,StyleSheet,Text,TouchableOpacity,ScrollView,Dimensions } from 'react-native';
+import { View,StyleSheet,Text,TouchableOpacity,ScrollView,Dimensions, ActivityIndicator } from 'react-native';
 import React, {useState,useRef} from 'react';
 import Loader from '../Loader';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -9,6 +9,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 import Header from '../subcomponents/Forms/Header';
 import BroadTextInput from '../subcomponents/Forms/FlightPreparation/broadTextInput';
 import BroadImageUpload from '../subcomponents/Forms/FlightPreparation/broadImageUpload';
+import functions from '@react-native-firebase/functions';
 
 const {width,height} = Dimensions.get('window');
 
@@ -20,7 +21,7 @@ const uploadMenu=[
   {id:2,name:"Landing Permit",textId:5}
 ]
         
-export default function FlightPreparation({navigation}) {
+export default function FlightPreparation(props) {
   const refRBSheet = useRef();
   const [uploadSection,setuploadSection]=useState(0);
   const [loading, setloading] = useState(false);
@@ -29,6 +30,7 @@ export default function FlightPreparation({navigation}) {
     {value: null, file: []},
     {value: null, file: []}
   ]);
+  const UID=props.route.params.UID;
 
   const removeFileFP = (arrayIndex, index) => {
     var tfpreparation = [...fpreparation];
@@ -114,6 +116,7 @@ const validate=()=>{
 }
 
 const textSeeker=(type,event)=>{
+  console.log(type.event);
   validate();
   switch(type){
     case 0:
@@ -144,9 +147,34 @@ const uploadInitiator=(type)=>{
   setuploadSection(type);
   refRBSheet.current.open();
 }
+const [callLoad,setcallLoad]=useState(false);
+const sendtoApi =  (data) => {
+  
+  var send={
+    FLP_AP:data.textFields.Airport_Information || '',
+    FLP_NOTAMS:data.textFields.Notams || '',
+    FLP_SPECIAL:data.textFields.Special_Procedures || '',
+    FLP_SLOTS:data.uploadFields.Slots,
+    FLP_PARKING:data.uploadFields.Parking,
+    FLP_PERMIT:data.uploadFields.LandingPermit,
+    UID,
+    STATUS:0,
+    UPDATE_BY:'api_admin',
+  }
+  //console.log(send);
+  const sayHello = functions().httpsCallable('getFlightPreparation');
+  sayHello(send).then((data)=>{
+    console.log(data);
+    setcallLoad(false);
+  }).catch(e=>{
+    console.log(e);
+    setcallLoad(false);
+  });
+}
 
 const sendForm=()=>{
   //fields
+  setcallLoad(true);
   var formFields={
     textFields:{
       Airport_Information:airinfo,
@@ -168,8 +196,8 @@ const sendForm=()=>{
       }
     }
   }
-
-  console.log("READY TO BE SENT",formFields);
+  sendtoApi(formFields);
+  //console.log("READY TO BE SENT",formFields);
 }
 
 //NEW STRUCtURE ENDS
@@ -178,7 +206,12 @@ const sendForm=()=>{
   return (
     <ScrollView>
       <Loader visible={loading} />
-      <Header headingSize={HeadingTextSize} heading={"Flight Preparation"} sendForm={sendForm} Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} />
+      <Header headingSize={HeadingTextSize} heading={"Flight Preparation"} sendForm={sendForm} 
+        Icon={
+          callLoad ? <ActivityIndicator size={'small'} color="green" /> 
+          :
+          <Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />
+      } />
       <View style={{padding: 20}}>
         
         <BroadTextInput type={0} label={"Airport Information"} labelSize={labelTextSize} text={airinfo} textSeeker={textSeeker}/>

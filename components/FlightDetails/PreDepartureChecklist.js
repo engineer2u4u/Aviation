@@ -6,6 +6,7 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useRef} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,11 +22,13 @@ import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import TakeCamera from '../subcomponents/Forms/takecamera';
 import Header from '../subcomponents/Forms/Header';
-
+import functions from '@react-native-firebase/functions';
 const {width,height} = Dimensions.get('window');
 const HeadingTextSize=width / 15;
 
-export default function PreDepartureChecklist({navigation}) {
+export default function PreDepartureChecklist(props) {
+  const UID=props.route.params.UID;
+  console.log(UID);
   const refRBSheet = useRef();
 
   const [uploadSection, setuploadSection] = useState(0);
@@ -422,7 +425,13 @@ export default function PreDepartureChecklist({navigation}) {
     setini(!ini)
   }
 
+  
+
+
+
+
   const setAddedcrewData = (index,data,type,section='crew') => {
+    console.log(section,index);
     var x;
     if(section==='crew')  x=addedcrewSectionval;
     else if(section==='pax') x=addedpaxSectionval;
@@ -435,7 +444,9 @@ export default function PreDepartureChecklist({navigation}) {
       if(type==='remarks') { x[index].remarks=data}
       else if(type==='text') x[index].name=data
     }else if(section==='departure'){
-      if(type==='recieved')  x[index].recieved=data;
+      if(type==='recieved')  {
+        x[index].recieved=data
+      };
       if(type==='printed')  x[index].printed=data;
       if(type==='notams')  x[index].notams=data;
       if(type==='weather')  x[index].weather_info_updated=data;
@@ -444,7 +455,7 @@ export default function PreDepartureChecklist({navigation}) {
       if(type==='catering') x[index].catering.delivery=data;
       if(type==='fueling_time') x[index].fueling_time=data;
     }
-    console.log(x);
+    //console.log(x);
     if(section==='crew') setaddedcrewSectionval(x);
     else if(section==='departure') setpdeparturecheck(x);
     else setaddedpaxSectionval(x);
@@ -567,19 +578,68 @@ export default function PreDepartureChecklist({navigation}) {
   };
 
   const [formReady,setformReady]=useState(true);
-  const sendForm=()=>{
-    var formFields={
-      crewtransport:{
-        scheduled_pickup_time:'',
-        pickup_location:'',
-        photo_pickup_location:'',
-        driver_name:'',
-        driver_contact_num:'',
-        remarks:'',
-        additional_remarks:'',
-        add_transport:[]
+  const [flightdocrecieved,setflightdoc]=useState(null);
+  const [printed,setprinted]=useState(null);
+  const [notams_updated,setnotams_updated]=useState(null);
+  const [weather_information,setweather_information]=useState(null);
+  const [atc_flight,setatc_flight]=useState(null);
+  const [slots_confirmed,setslots_confirmed]=useState(null);
+  const [callLoad,setcallLoad]=useState(false);
+  const sendForm=(data)=>{
+    setcallLoad(true);
+    var crew=addedcrewSectionval;
+    crew.push(pdeparturecheck[0]);
+    var pax=addedpaxSectionval;
+    pax.push(pdeparturecheck[1]);
+    
+
+    var payload={
+      crew_transport_arranged:pdeparturecheck[11],
+      crew_notified_on_meeting_location:pdeparturecheck[12],
+      pax_transport_arranged:pdeparturecheck[13],
+      pax_notified_on_meeting_location:pdeparturecheck[14],
+      crew_transport:crew,
+      pax_transport:pax,
+      confirm_catering_delivery_time:pdeparturecheck[2].catering.delivery,
+      fueling_time:pdeparturecheck[2].fueling_time,
+      prepared_departure_gendec:pdeparturecheck[3],
+      flight_documents:{
+        recieved:flightdocrecieved,
+        printed:printed,
+        notams_updated:notams_updated,
+        weather_information:weather_information,
+        atc_flight:atc_flight,
+        slots_confirmed:slots_confirmed,
+      },
+      reminder:{
+        fbo:pdeparturecheck[5],
+        ciq:pdeparturecheck[6],
+        airport_security:pdeparturecheck[7],
+        catering_agent:pdeparturecheck[9],
+        aircraft_fueller:pdeparturecheck[10]
       }
     }
+    //console.log("OK",payload);
+    const sayHello = functions().httpsCallable('getPreDeparture');
+    sayHello(payload).then((data)=>{
+      console.log(data);
+      setcallLoad(false);
+    }).catch(e=>{
+      console.log(e);
+      setcallLoad(false);
+    });
+    // var formFields={
+    //   crewtransport:{
+    //     scheduled_pickup_time:'',
+    //     pickup_location:'',
+    //     photo_pickup_location:'',
+    //     driver_name:'',
+    //     driver_contact_num:'',
+    //     remarks:'',
+    //     additional_remarks:'',
+    //     add_transport:[]
+    //   }
+    // }
   }
 
   const uploadInitiator=(type,addedsection,section='crew')=>{
@@ -600,129 +660,18 @@ export default function PreDepartureChecklist({navigation}) {
       <Header 
         headingSize={HeadingTextSize} 
         heading={"Pre-Departure Checklist"} 
-        sendForm={sendForm} 
-        Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} 
+        sendForm={()=>sendForm(pdeparturecheck[2])} 
+        Icon={
+        callLoad  ?
+        <ActivityIndicator color="green" size="small" />
+        : <Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />
+      } 
       />
       <ScrollView>
         <Feedback visible={vFeedback} onCloseFeedback={() => setvFeedback(false)} onSubmitFeedback={onSubmitFeedback} />
         <Loader visible={loading} />
 
-        {/* <View style={{padding: 20, marginBottom: 80}}> */
-          /** CREW TRANSPPORT */
-          
-          /* <Text style={styleSheet.label}>Test Section :</Text>  
-
-          <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',marginTop:20
-              }}>
-              <TouchableOpacity
-                onPress={addnewtestSection}
-                style={[styleSheet.button]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
-                  Add Transport 
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {
-              testmovement &&
-                addedtestSection.length > 0 &&
-                addedtestSection.map((data,index)=>{
-                  console.log('VAL',data);
-                  return (
-                    <View
-                        key={index}>
-                      <LabelledInput
-                        label={'Added Pickup Location'}
-                        data={addedtestSectionval[index].location}
-                        index={index}
-                        added={true}
-                        setText={setAddedData} 
-                        multiline={false}
-                        numberOfLines={1}
-                      />
-                      <TouchableOpacity onPress={()=>{
-                        removetestSection(index)
-                      }}>
-                        <Text style={{color:"#000"}}>Remove {JSON.stringify(addedtestSectionval[index].location)}</Text>
-                      </TouchableOpacity>
-                      
-                    </View>
-                  )
-                })
-            }
-
-<TouchableOpacity onPress={()=>{
-  console.log(addedtestSectionval);
-}}>
-<Text style={{color:"#000"}}>"ACASDads"</Text>
-</TouchableOpacity>
-        </View> */
-}
-
-        {/* <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                onPress={() => addnewcrewSection()}
-                style={[styleSheet.button]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
-                  Add Transport
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {
-              crewmovement &&
-                addedcrewSection.map((data,i)=>{
-                  return(
-                    <View key={i}>
-                      <Text style={{color:"black"}}>Hello {JSON.stringify(addedcrewSectionval[i].time)}</Text>
-                      <View style={{alignItems: 'flex-end'}}>
-                      <TouchableOpacity
-                        style={styleSheet.label}
-                        onPress={() => {
-                          removecrewSection(i);
-                        }}>
-                        <Icons name="minus-box-outline" color="red" size={30} />
-                      </TouchableOpacity>
-                    </View>
-                    <DateTimeInput 
-                label={'Scheduled Pickup Time (Local Time)'}
-                showDatePickerPostDepart={showDatePickerDeparture}
-                setNowPostDepart={setAddedcrewData}
-                size={12}
-                sectionName={'pax'}
-                added={true}
-                type={'datetime'}
-                data={addedcrewSectionval[i].time}
-                index={i}
-              />
-
-            <TakeCamera 
-               label={"Photo of Pickup Location"} 
-               type={i} 
-               addedsection={true}
-               uploadInitiator={uploadInitiator} 
-               removeFilePreA={removeFilePreA} 
-               attachments={addedcrewSectionval[i].hotelMap} 
-            Icon={
-              <Icons
-                style={{color: 'green', marginLeft: 10}}
-                name="close"
-                size={30}
-              /> 
-            } />
-                    </View>
-                  )
-                })
-            }
-             */}
+        
 
 <View style={[styleSheet.toggleContainer,{paddingHorizontal:20}]}>
             <TouchableOpacity
@@ -2132,6 +2081,7 @@ export default function PreDepartureChecklist({navigation}) {
                       label={'Flight Documents Received (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
+                      setflightdoc={setflightdoc}
                       size={12}
                       ini={ini}
                       added={true}
@@ -2145,6 +2095,7 @@ export default function PreDepartureChecklist({navigation}) {
                       label={'Flight Documents Printed (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
+                      setflightdoc={setprinted}
                       size={12}
                       ini={ini}
                       added={true}
@@ -2158,6 +2109,7 @@ export default function PreDepartureChecklist({navigation}) {
                       label={'Notams Updated (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
+                      setflightdoc={setnotams_updated}
                       size={12}
                       ini={ini}
                       added={true}
@@ -2171,6 +2123,7 @@ export default function PreDepartureChecklist({navigation}) {
                       label={'Weather Information Updated (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
+                      setflightdoc={setweather_information}
                       size={12}
                       ini={ini}
                       added={true}
@@ -2184,6 +2137,7 @@ export default function PreDepartureChecklist({navigation}) {
                       label={'ATC Flight Plan Filed (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
+                      setflightdoc={setatc_flight}
                       size={12}
                       ini={ini}
                       added={true}
@@ -2197,6 +2151,7 @@ export default function PreDepartureChecklist({navigation}) {
                       label={'Slots Confirmed (Local Time)'}
                       showDatePickerPostDepart={showDatePickerDeparture}
                       setNowPostDepart={setAddedcrewData}
+                      setflightdoc={setslots_confirmed}
                       size={12}
                       ini={ini}
                       added={true}
@@ -2205,149 +2160,7 @@ export default function PreDepartureChecklist({navigation}) {
                       data={pdeparturecheck[2].flight_and_admin_documents.slot_confirmed}
                       index={2}
                     />
-            {/* 
-            recieved
-printed
-notams
-weather
-atc
-slot
-            
-            <Text style={styleSheet.label}>
-              Flight Documents Received (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePickerDeparture('time', 9)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {pdeparturecheck[9] ? pdeparturecheck[9] : 'dd/mm/yy,--:--'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNowDeparture(9)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> 
-            <Text style={styleSheet.label}>
-              Flight Documents Printed (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePickerDeparture('time', 10)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {pdeparturecheck[10] ? pdeparturecheck[10] : 'dd/mm/yy,--:--'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNowDeparture(10)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Notams Updated (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePickerDeparture('time', 11)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {pdeparturecheck[11] ? pdeparturecheck[11] : 'dd/mm/yy,--:--'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNowDeparture(11)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>
-              Weather Information Updated (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePickerDeparture('time', 12)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {pdeparturecheck[12] ? pdeparturecheck[12] : 'dd/mm/yy,--:--'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNowDeparture(12)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>
-              ATC Flight Plan Filed (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePickerDeparture('time', 13)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {pdeparturecheck[13] ? pdeparturecheck[13] : 'dd/mm/yy,--:--'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNowDeparture(13)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Slots Confirmed (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePickerDeparture('time', 14)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {pdeparturecheck[14] ? pdeparturecheck[14] : 'dd/mm/yy,--:--'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNowDeparture(14)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            */}
+          
           </View>
           {/*   ------------------------------Flight Documents/Admin End ----------- */}
 

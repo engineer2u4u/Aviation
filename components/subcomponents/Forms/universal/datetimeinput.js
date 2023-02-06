@@ -3,7 +3,7 @@ import {View,Text,TextInput,TouchableOpacity} from 'react-native'
 import s from '../FlightPreparation/form.styles'
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const DateTimeInput=({label,showLabel=true,notrequiredSection=false,disabled,showDatePickerPostDepart,ini,setNowPostDepart,size,data,index,type='time',sectionName='crew',added=false})=>{
+const DateTimeInput=({label,showLabel=true,notrequiredSection=false,disabled,showDatePickerPostDepart,ini,setNowPostDepart,size,data,index,type='time',sectionName='crew',added=false,setflightdoc=null})=>{
 
     const [date,setdate]=useState(data);
     const [notreq,setnotreq]=useState(disabled);
@@ -15,8 +15,14 @@ const DateTimeInput=({label,showLabel=true,notrequiredSection=false,disabled,sho
         hour12: false,
       });
       console.log("JOLLYYYY")
+      if(typeof setflightdoc ==='function'){
+        setflightdoc(x);
+      }else{
+        setNowPostDepart(index,x,'time',sectionName);
+      }
+      
       setdate(x)
-      setNowPostDepart(index,x,'time',sectionName);
+      
     }
 
     useEffect(()=>{

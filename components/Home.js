@@ -11,27 +11,22 @@ import {
   StyleSheet,
   View,
   Text,
-  Modal,
-  Button,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  Alert,
-  NativeModules,
-  NativeEventEmitter,
   Image,
   Dimensions,
   ScrollView,
-  TextInput,
   PermissionsAndroid,
   StatusBar,
-  BackHandler,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
-import auth from '@react-native-firebase/auth';
 import { UserContext } from './context/userContext';
 import { UserDetails } from './context/userDetailsContext';
 const {width, height} = Dimensions.get('window');
 import NotifService from '../components/methods/notifService'
+import getData from './methods/read';
+import storeData from './methods/store';
+import auth from '@react-native-firebase/auth'
+import functions from '@react-native-firebase/functions';
 // const MrzScanner = NativeModules.RNMrzscannerlib;
 // // import MrzScanner from 'react-native-mrzscannerlib';
 // MrzScanner.registerWithLicenseKey(
@@ -64,6 +59,8 @@ const requestCameraPermission = async () => {
   }
 };
 
+const DEV=true;
+
 export default function Home({navigation}) {
   const nf=useRef(null);
 
@@ -72,6 +69,7 @@ export default function Home({navigation}) {
   const {loggedIn,setloggedIn}=useContext(UserContext)
   const {user, setUser} = useContext(UserDetails);
 
+  
   const onRegister=(token)=> {
     console.log("OKOK")
     console.log('tok',token);
@@ -80,10 +78,27 @@ export default function Home({navigation}) {
 
   const onNotif=(notif)=> {
     console.log('RECIEVED NOTI',notif);
+    return notif;
   }
 
-  const logOut=()=>{
-   
+  const logOut=async ()=>{
+    try {
+      var data=await getData('@token');
+      if(data.login===false){
+        data.login=false;
+        storeData('@token',data);
+      }
+      console.log(data);
+      
+      const sayHello = functions().httpsCallable('addUserToken');
+      sayHello({deviceRegisteration:data,user:uid}).then(data=>{
+        console.log(data.data);
+      }).catch(e=>{
+        console.log(e);
+      });
+    } catch (error) {
+      console.log(error);
+    }
   
     return  auth()
      .signOut()
@@ -91,11 +106,33 @@ export default function Home({navigation}) {
         setloggedIn(false);
        });
    }
+
+  const requestNotificationAndFunctions=async (uid)=>{
+    try {
+      var data=await getData('@token');
+      if(data.login===false){
+        data.login=true;
+        storeData('@token',data);
+      }
+      console.log(data);
+      
+      const sayHello = functions().httpsCallable('addUserToken');
+      sayHello({deviceRegisteration:data,user:uid}).then(data=>{
+        console.log(data.data);
+      }).catch(e=>{
+        console.log(e);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
    
   useEffect(() => {
+    const uid=auth().currentUser.uid;
     nf.current=new NotifService(onRegister,onNotif);
     console.log(nf.current)
     //console.log('asdsd',nf.current);
+    requestNotificationAndFunctions(uid);
     requestCameraPermission();
     // var subscription;
     // subscription = EventEmitter.addListener(

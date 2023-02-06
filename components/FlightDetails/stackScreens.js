@@ -10,16 +10,17 @@ import PostDeparture from './PostDeparture';
 import InitialScreen from './initialScreen';
 const Stack = createStackNavigator();
 
-export default function MainStackNavigator({navigation}){
+export default function MainStackNavigator({navigation,route}){
     return(
     <Stack.Navigator initialRouteName='InitialScreenView' options={{headerShown: false}}>
       <Stack.Screen
         name="IntialScreenView"
-        component={InitialScreen}
         options={{
           headerShown: false,
         }}
-      />
+      >
+        {(props)=><InitialScreen {...props} {...route} />}
+        </Stack.Screen>
       <Stack.Screen
         name="FlightPreparation"
         component={FlightPreparation}

@@ -1,4 +1,4 @@
-import { View,StyleSheet,Text,TouchableOpacity,Dimensions,ScrollView} from 'react-native';
+import { View,StyleSheet,Text,TouchableOpacity,Dimensions,ScrollView, ActivityIndicator} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,11 +11,13 @@ import Header from '../subcomponents/Forms/Header';
 import TakeCamera from '../subcomponents/Forms/takecamera';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
+import functions from '@react-native-firebase/functions';
 
 const {width,height} = Dimensions.get('window');
 const HeadingTextSize=width / 15;
 
-export default function PostDeparture({navigation}) {
+export default function PostDeparture(props) {
+  const UID=props.route.params.UID;
   const refRBSheet = useRef();
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
@@ -128,7 +130,7 @@ export default function PostDeparture({navigation}) {
 }
 
 const [formReady,setformReady]=useState(true);
-
+const [callLoad,setcallLoad]=useState(false);
 const uploadInitiator=(type)=>{
   setuploadSection(type)
   refRBSheet.current.open()
@@ -140,18 +142,30 @@ const setText=(index,text)=>{
     setpostdeparture(tpostdeparture);
 }
 
+const finalSend=async (payload)=>{
+  const sayHello = functions().httpsCallable('getPostDeparture');
+  sayHello(payload).then((data)=>{
+    console.log(data);
+    setcallLoad(false);
+  }).catch(e=>{
+    console.log(e);
+    setcallLoad(false);
+  });
+}
+
 const sendForm=()=>{
-  //
+  setcallLoad(true);
   var formFields={
     stamped_gendec:postdeparture[0],
     service_verified:{
      time_verified: postdeparture[1],
      name_of_verifier:postdeparture[2]
     },
-    remarks:postdeparture[3]
+    remarks:postdeparture[3],
+    UID
 
   }
-  console.log(formFields)
+  finalSend(formFields)
 }
   return (
     <ScrollView>
@@ -160,7 +174,10 @@ const sendForm=()=>{
         headingSize={HeadingTextSize} 
         heading={"Post-Departure"} 
         sendForm={sendForm} 
-        Icon={<Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />} 
+        Icon={
+          callLoad ? <ActivityIndicator color='green' size='small' /> :
+          <Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />
+      } 
       />
       <View style={{padding: 20}}>
         <TakeCamera label={"Stamped GenDec"} type={0} uploadInitiator={uploadInitiator} 

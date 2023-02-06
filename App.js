@@ -17,9 +17,21 @@ import { View,Text, TouchableOpacity,TextInput,ActivityIndicator } from 'react-n
 import { UserContext } from './components/context/userContext';
 import { UserDetails } from './components/context/userDetailsContext';
 import SplashScreen from 'react-native-splash-screen';
+import EditFlight from './components/FlightDetails/EditFlight';
 
 const Stack = createNativeStackNavigator();
 
+//import functions from '@react-native-firebase/functions';
+
+// functions()
+//       .httpsCallable('listProducts')()
+//       .then(response => {
+//         return response.json();
+//       }).then(data=>{
+//         console.log(data);
+//       }).catch(e=>{
+//         console.log(e);
+//       });
 
 const authenticator=async (email,pass,call)=>{
   var res={};
@@ -474,6 +486,7 @@ const App = () => {
           component={FlightDetailsRoute}
         />
         <Stack.Screen name="Scanner" component={Scanner} />
+        <Stack.Screen name="EditPageFlight" component={EditFlight} />
         
       </Stack.Navigator>
       

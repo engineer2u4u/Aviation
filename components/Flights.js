@@ -1,3 +1,5 @@
+import React, {useState,useEffect} from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -6,10 +8,11 @@ import {
   View,
 } from 'react-native';
 
-import React, {useState} from 'react';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import Icons from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import auth from '@react-native-firebase/auth'
+import functions from '@react-native-firebase/functions';
 
 export default function Flights({navigation}) {
   const [listData, setListData] = useState(
@@ -17,6 +20,37 @@ export default function Flights({navigation}) {
       .fill('')
       .map((_, i) => ({key: `${i}`, text: `item #${i}`})),
   );
+
+  const [flightlist,setflightlist]=useState([]);
+
+  useEffect(()=>{
+    if (true) functions().useEmulator("192.168.29.75", 5001)
+    auth()
+      .currentUser.getIdToken(true)
+      .then(async function (idToken) {
+        // const url='https://demo.vellas.net:94/arrowdemoapi/api/Values/GetGroundHandlingList?_token=66D64C12-2055-4F11-BCF1-9F563ACB032F&_opco=&_uid=';
+        // fetch(url,{method:"GET"}).then(data=>{
+        //     return data.json();
+        //   }).then((data=>{
+        //     setflightlist(data.Table);
+        //   })).catch(e=>{
+        //     console.log(e);
+        //   });
+        
+        //console.log('token',idToken);
+        const sayHello = functions().httpsCallable('getGroundHandling');
+        sayHello({payload:"FROM CLIENT"}).then((data=>{
+          var packet=JSON.parse(data.data.body);
+          //console.log(packet.Table);
+          setflightlist(packet.Table);
+        })).catch(e=>{
+          console.log(e);
+        });
+      }).catch(e=>{
+        console.log(e);
+      })
+    
+  },[])
 
   const closeRow = (rowMap, rowKey) => {
     if (rowMap[rowKey]) {
@@ -34,11 +68,12 @@ export default function Flights({navigation}) {
 
   const onRowDidOpen = rowKey => {
     console.log('This row opened', rowKey);
+    
   };
 
   const renderItem = data => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('FlightDetailsRoute',{flightName:"N123AB",dataOne:4,dataTwo:2})}
+      onPress={() => navigation.navigate('FlightDetailsRoute',{flightName:data.item.FLIGHT_REGISTRATION,dataOne:4,dataTwo:2,uid:data.item.UID})}
       style={styles.rowFront}
       underlayColor={'#AAA'}
       activeOpacity={2}>
@@ -56,13 +91,13 @@ export default function Flights({navigation}) {
           <Text style={{color: 'white', fontSize: 25}}>A</Text>
         </View>
         <View>
-          <Text style={{fontSize: 15, color: 'black'}}>N123AB</Text>
+          <Text style={{fontSize: 15, color: 'black'}}>{data.item.FLIGHT_REGISTRATION}</Text>
           <Text style={{fontSize: 15, color: 'black'}}>
-            4 <Icons color="black" name="user-nurse" size={15} /> 4{' '}
-            <Icons color="black" name="user-friends" size={15} />
+            4 <Icons color="black" name="user-nurse" size={15} /> 
+            4{' '}<Icons color="black" name="user-friends" size={15} />
           </Text>
           <Text style={{fontSize: 15, color: 'black'}}>
-            20 Aug 2022, 13:00:00
+          20 Aug 2022, 13:00:00
           </Text>
         </View>
       </View>
@@ -85,7 +120,11 @@ export default function Flights({navigation}) {
             </TouchableOpacity> */}
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnRight]}
-        onPress={() => deleteRow(rowMap, data.item.key)}>
+        onPress={() => {
+          deleteRow(rowMap, data.item.key)
+          console.log("HHERERERR");
+          navigation.navigate('EditPageFlight');
+        }}>
         <MaterialIcons color="white" name="edit" size={40} />
       </TouchableOpacity>
     </View>
@@ -96,7 +135,7 @@ export default function Flights({navigation}) {
         Flights Details
       </Text>
       <SwipeListView
-        data={listData}
+        data={flightlist}
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
         leftOpenValue={75}

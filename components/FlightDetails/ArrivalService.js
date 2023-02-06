@@ -21,7 +21,8 @@ import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
-
+import functions from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
 const {width, height} = Dimensions.get('window');
 
 export default function ArrivalService({navigation}) {
@@ -319,6 +320,95 @@ export default function ArrivalService({navigation}) {
     tarrival[index] = text;
     setArrival(tarrival);  
   }
+  const [callLoad,setcallLoad]=useState(false);
+  const sendForm=()=>{
+    setcallLoad(true);
+    var pax={
+      departed_from_aircraft:arrival[7],
+      arrived_terminal:arrival[8],
+      VOA:arrival[9],
+      VOA_not_req:arrival[12],
+      completed_CIQ:arrival[10],
+      arrival:arrival[58],
+      departed:arrival[11],
+      remarks:arrival[14],
+      added:arrival[60]
+    }
+
+    var crew={
+      departed_from_aircraft:arrival[45],
+      arrived_at_terminal:arrival[46],
+      VOA:arrival[9],
+      VOA_not_req:arrival[12],
+      completed_CIQ:arrival[48],
+      arrival_at_airport:arrival[49],
+      departed_from_terminal:arrival[61],
+      remarks:arrival[41],
+      added:arrival[62],
+      addedRemarks:arrival[64],
+    }
+
+    var payload={
+      movement_ac:arrival[0],
+      movement_checkin:arrival[1],
+      pax_movement:pax,
+      crew_movement:crew,
+      gpu:{
+        start:arrival[2],
+        stop:arrival[3]
+      },
+      pax_num:arrival[4],
+      crew_num:arrival[5],
+      baggage:arrival[6],
+      pax_movement:pax,
+      catering:{
+        equipment_offloaded:arrival[15],
+        equipment_list:arrival[16],
+        catering_order:arrival[17],
+        delivery_time:arrival[18],
+        remarks:arrival[19]
+      },
+      services:{
+        water:{
+          start:arrival[21],
+          end:arrival[22],
+          remarks:arrival[23]
+        },
+        lavatory:{
+          start:arrival[25],
+          end:arrival[26],
+          remarks:arrival[27],
+        },
+        rubbish:{
+          completion:arrival[29],
+          remarks:arrival[30]
+        },
+        fuel_on_arrival:{
+          fuel_truck_arrival:arrival[32],
+          start:arrival[33],
+          end:arrival[34],
+          fuel_reciept:arrival[35],
+          remarks:arrival[36]
+        },
+        towing:{
+          start:arrival[38],
+          end:arrival[39],
+          photo:arrival[40],
+          remarks:arrival[41]
+        },
+      },
+      overnight_bay:arrival[43],
+    };
+    //console.log(payload);
+    const sayHello = functions().httpsCallable('getArrivalService');
+    sayHello(payload).then((data)=>{
+      console.log(data);
+      setcallLoad(false);
+    }).catch(e=>{
+      console.log(e);
+      setcallLoad(false);
+    });
+  }
 
   return (
     <View>
@@ -338,9 +428,15 @@ export default function ArrivalService({navigation}) {
           }}>
           Arrival Services
         </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
+        {
+          callLoad ?
+          <View style={{paddingRight:20}}><ActivityIndicator color="green" size={'small'} /></View>
+          :
+          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
           <Icons name="content-save" color="green" size={30} />
         </TouchableOpacity>
+        }
+        
       </View>
       <ScrollView>
         <Loader visible={loading} />
@@ -355,25 +451,7 @@ export default function ArrivalService({navigation}) {
                 data={arrival[0]}
                 index={12}
               />
-          {/* <Text style={styleSheet.label}>Movement (AC Landed (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePicker('time', 0)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[0] ? arrival[0] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setNow(0)} style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+         
           <DateTimeInput 
                 label={'Movement (Checks In) (Local Time)'}
                 showDatePickerPostDepart={()=>{showDatePicker('time', 1)}}
@@ -383,25 +461,7 @@ export default function ArrivalService({navigation}) {
                 data={arrival[1]}
                 index={12}
               />
-          {/* <Text style={styleSheet.label}>Movement (Chocks in (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePicker('time', 1)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[1] ? arrival[1] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setNow(1)} style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+         
           <Text style={styleSheet.label}>Ground Power Unit (GPU):</Text>
           <View
             style={{
@@ -1765,9 +1825,9 @@ export default function ArrivalService({navigation}) {
               <TouchableOpacity onPress={event =>{
                   setArrivalcheck(42)
                   var x=[...arrival];
+                  //x[34]=null;
                   x[38]=null;
                   x[39]=null;
-                  //x[34]=null;
                   x[40]={value:false,file:[]};
                   x[41]=null;
                   setArrival(x);
