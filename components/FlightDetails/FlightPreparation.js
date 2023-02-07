@@ -1,5 +1,5 @@
 import { View,StyleSheet,Text,TouchableOpacity,ScrollView,Dimensions, ActivityIndicator } from 'react-native';
-import React, {useState,useRef} from 'react';
+import React, {useState,useRef, useEffect} from 'react';
 import Loader from '../Loader';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -10,7 +10,7 @@ import Header from '../subcomponents/Forms/Header';
 import BroadTextInput from '../subcomponents/Forms/FlightPreparation/broadTextInput';
 import BroadImageUpload from '../subcomponents/Forms/FlightPreparation/broadImageUpload';
 import functions from '@react-native-firebase/functions';
-
+if(true) functions().useEmulator('192.168.29.75',5001)
 const {width,height} = Dimensions.get('window');
 
 const HeadingTextSize=width / 15;
@@ -149,7 +149,7 @@ const uploadInitiator=(type)=>{
 }
 const [callLoad,setcallLoad]=useState(false);
 const sendtoApi =  (data) => {
-  
+  console.log(UID);
   var send={
     FLP_AP:data.textFields.Airport_Information || '',
     FLP_NOTAMS:data.textFields.Notams || '',
@@ -161,22 +161,24 @@ const sendtoApi =  (data) => {
     STATUS:0,
     UPDATE_BY:'api_admin',
   }
-  //console.log(send);
-  
-  const sayHello = functions().httpsCallable('getFlightPreparation');
+  console.log(send);
+  const sayHello = functions().httpsCallable('postFlightPreparation');
   sayHello(send).then((data)=>{
-    var res=JSON.parse(data.data.body).Table;
-    setSlot(res[0].FLP_SLOTS);
-    setParking(res[0].FLP_PARKING);
-    setlandingperm(res[0].FLP_PERMIT);
-    setnotams(res[0].FLP_NOTAMS)
-    setAirInfo(res[0].FLP_AP);
-    setspecialproc(res[0].FLP_SPECIAL);
-    setcallLoad(false);
+    console.log(data);
+    // var res=JSON.parse(data.data.body).Table;
+    // console.log(res);
+    // setSlot(res[0].FLP_SLOTS);
+    // setParking(res[0].FLP_PARKING);
+    // setlandingperm(res[0].FLP_PERMIT);
+    // setnotams(res[0].FLP_NOTAMS)
+    // setAirInfo(res[0].FLP_AP);
+    // setspecialproc(res[0].FLP_SPECIAL);
+    // setcallLoad(false);
   }).catch(e=>{
     console.log(e);
     setcallLoad(false);
   });
+  //create api
 }
 
 const sendForm=()=>{
@@ -206,6 +208,25 @@ const sendForm=()=>{
   sendtoApi(formFields);
   //console.log("READY TO BE SENT",formFields);
 }
+
+useEffect(()=>{
+  
+  const sayHello = functions().httpsCallable('getFlightPreparation');
+  sayHello({UID}).then((data)=>{
+    var res=JSON.parse(data.data.body).Table;
+    console.log(res);
+    setSlot(res[0].FLP_SLOTS);
+    setParking(res[0].FLP_PARKING);
+    setlandingperm(res[0].FLP_PERMIT);
+    setnotams(res[0].FLP_NOTAMS)
+    setAirInfo(res[0].FLP_AP);
+    setspecialproc(res[0].FLP_SPECIAL);
+    setcallLoad(false);
+  }).catch(e=>{
+    console.log(e);
+    setcallLoad(false);
+  });
+},[])
 
 //NEW STRUCtURE ENDS
 

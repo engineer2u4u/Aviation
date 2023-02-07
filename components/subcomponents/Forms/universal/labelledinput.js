@@ -16,6 +16,7 @@ const LabelledInput=({label,disabled=false,multiline,numberOfLines,data,ini,inde
     }
 
     useEffect(()=>{
+      console.log("HEELLLO",data)
       setval(data);
     },[ini])
 

@@ -121,8 +121,8 @@ export default function Flights({navigation}) {
         style={[styles.backRightBtn, styles.backRightBtnRight]}
         onPress={() => {
           deleteRow(rowMap, data.item.key)
-          console.log("HHERERERR");
-          navigation.navigate('EditPageFlight');
+          //console.log("HHERERERR",data.item.UID);
+          navigation.navigate('EditPageFlight',{UID:data.item.UID});
         }}>
         <MaterialIcons color="white" name="edit" size={40} />
       </TouchableOpacity>

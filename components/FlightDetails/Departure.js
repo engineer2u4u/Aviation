@@ -561,6 +561,22 @@ case true:
     const sayHello = functions().httpsCallable('getDeparture');
     sayHello(payload).then((data)=>{
       var res=JSON.parse(data.data.body).Table;
+      var x=departure;
+      x[6]=DES_CRM_FDHC;
+      x[7]=DES_CRM_TCCIQ;
+      x[8]=DES_CRM_TCCAS;
+      x[9]=DES_CRM_TCBTA;
+      x[10]=DES_CRM_TCBA;
+      x[57]=DES_CRM_REM;
+      x[11]=DES_GPU_START;
+      x[12]=DES_GPU_STOP;
+      x[14]=DES_FOD_TFTA;
+      x[15]=DES_FOD_START;
+      x[16]=DES_FOD_END;
+      x[17]=DES_FOD_RECEIPT;
+      x[58]=DES_FOD_REM;
+      
+            
       console.log(res);
       setcallLoad(false);
     }).catch(e=>{
