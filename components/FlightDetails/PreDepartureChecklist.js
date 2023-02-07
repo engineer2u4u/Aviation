@@ -620,6 +620,7 @@ export default function PreDepartureChecklist(props) {
       }
     }
     //console.log("OK",payload);
+    
     const sayHello = functions().httpsCallable('getPreDeparture');
     sayHello(payload).then((data)=>{
       console.log(data);

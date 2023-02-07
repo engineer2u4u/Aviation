@@ -56,7 +56,6 @@ export default function InterimService(props) {
       remarks:[]
     }
     Iservices.map((msg)=>{
-      console.log(msg);
       data.INS_SERVICE.push(msg.service);
       data.INS_REM.push(msg.remarks);
     })

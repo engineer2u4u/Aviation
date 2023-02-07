@@ -560,7 +560,8 @@ case true:
     //console.log(payload);
     const sayHello = functions().httpsCallable('getDeparture');
     sayHello(payload).then((data)=>{
-      console.log(data);
+      var res=JSON.parse(data.data.body).Table;
+      console.log(res);
       setcallLoad(false);
     }).catch(e=>{
       console.log(e);

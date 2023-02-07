@@ -162,9 +162,16 @@ const sendtoApi =  (data) => {
     UPDATE_BY:'api_admin',
   }
   //console.log(send);
+  
   const sayHello = functions().httpsCallable('getFlightPreparation');
   sayHello(send).then((data)=>{
-    console.log(data);
+    var res=JSON.parse(data.data.body).Table;
+    setSlot(res[0].FLP_SLOTS);
+    setParking(res[0].FLP_PARKING);
+    setlandingperm(res[0].FLP_PERMIT);
+    setnotams(res[0].FLP_NOTAMS)
+    setAirInfo(res[0].FLP_AP);
+    setspecialproc(res[0].FLP_SPECIAL);
     setcallLoad(false);
   }).catch(e=>{
     console.log(e);
