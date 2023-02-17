@@ -6,6 +6,7 @@ import {
   Dimensions,
   ScrollView,
   TextInput,
+  Alert,
 } from 'react-native';
 import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,49 +22,56 @@ import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import TakeCamera from '../subcomponents/Forms/takecamera';
 import {firebase} from '@react-native-firebase/functions';
 import {ActivityIndicator} from 'react-native';
+import auth from '@react-native-firebase/auth';
+import s from '../subcomponents/Forms/FlightPreparation/form.styles';
 
 const {height} = Dimensions.get('window');
 
 export default function PreArrival(props) {
-  const UID = props.route.params.UID;
   const FUID = props.route.params.UID;
-
+  const [uid, setuid] = useState(null);
+  const pHotel = useRef();
+  const pTransport = useRef();
+  const cTransport = useRef();
+  const cHotel = useRef();
   const [checkList, setChecklist] = useState([
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
-    {checked: false, file: [], remarks: null},
-    {checked: false, remarks: null},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, remarks: ''},
+    {checked: false, file: [], remarks: ''},
+    {checked: false, remarks: ''},
 
-    [{transportTime: null, name: null, number: null, remarks: null}], //12
+    [{transportTime: null, name: null, number: null, remarks: ''}], //12
     [
       {
         name: null,
         location: null,
         hotelMap: {value: null, file: []},
         time: null,
-        remarks: null,
+        remarks: '',
+        type: 'Pax',
       },
     ],
-    [{transportTime: null, name: null, number: null, remarks: null}],
+    [{transportTime: null, name: null, number: null, remarks: ''}],
     [
       {
         name: null,
         location: null,
         hotelMap: {value: null, file: []},
         time: null,
-        remarks: null,
+        remarks: '',
+        type: 'Crew',
       },
     ],
-    {checked: false, remarks: null}, //16
-    {checked: false, remarks: null}, //17
+    {checked: false, remarks: ''}, //16
+    {checked: false, remarks: ''}, //17
   ]);
   const refRBSheet = useRef();
   //upload funcs
@@ -78,6 +86,7 @@ export default function PreArrival(props) {
   const [mode, setMode] = useState('time');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   useEffect(() => {
+    setcallLoad(true);
     firebase
       .app()
       .functions('asia-southeast1')
@@ -87,41 +96,202 @@ export default function PreArrival(props) {
       .then(response => {
         var packet = JSON.parse(response.data.body);
         var res = packet.Table[0];
-        console.log(res);
-        var x = checkList;
-        x[0].checked = res.PAC_CER == 0 ? false : true;
-        x[0].remarks = res.PAC_CER_REM;
-        x[1].checked = res.PAC_PER == 0 ? false : true;
-        x[1].remarks = res.PAC_PER_REM;
-        x[2].checked = res.PAC_CTA == 0 ? false : true;
-        x[2].remarks = res.PAC_CTA_REM;
-        x[3].checked = res.PAC_PTA == 0 ? false : true;
-        x[3].remarks = res.PAC_PTA_REM;
-        x[16].checked = res.PAC_CHA == 0 ? false : true;
-        x[16].remarks = res.PAC_CHA_REM;
-        x[17].checked = res.PAC_PHA == 0 ? false : true;
-        x[17].remarks = res.PAC_PHA_REM;
-        x[4].checked = res.PAC_IRP == 0 ? false : true;
-        x[4].remarks = res.PAC_IRP_REM;
-        x[5].checked = res.PAC_IFBO == 0 ? false : true;
-        x[5].remarks = res.PAC_IFBO_REM;
-        x[6].checked = res.PAC_IHA == 0 ? false : true;
-        x[6].remarks = res.PAC_IHA_REM;
-        x[7].checked = res.PAC_ICAI == 0 ? false : true;
-        x[7].remarks = res.PAC_ICAI_REM;
-        x[8].checked = res.PAC_IAS == 0 ? false : true;
-        x[8].remarks = res.PAC_IAS_REM;
-        x[9].checked = res.PAC_ICC == 0 ? false : true;
-        x[9].remarks = res.PAC_ICC_REM;
-        x[10].checked = res.PAC_PAGD == 0 ? false : true;
-        x[10].remarks = res.PAC_PAGD_REM;
-        x[11].checked = res.PAC_PRA == 0 ? false : true;
-        x[11].remarks = res.PAC_PRA_REM;
-        setChecklist([...x]);
-        setpaxactivesection(res.PAC_PTNR == 0 ? false : true);
-        console.log(x);
+        if (res) {
+          console.log(res, 'Actual');
+          var x = checkList;
+          x[0].checked = res.PAC_CER == 0 ? false : true;
+          x[0].remarks = res.PAC_CER_REM == '""' ? '' : res.PAC_CER_REM;
+          x[1].checked = res.PAC_PER == 0 ? false : true;
+          x[1].remarks = res.PAC_PER_REM == '""' ? '' : res.PAC_PER_REM;
+          x[2].checked = res.PAC_CTA == 0 ? false : true;
+          x[2].remarks = res.PAC_CTA_REM == '""' ? '' : res.PAC_CTA_REM;
+          x[3].checked = res.PAC_PTA == 0 ? false : true;
+          x[3].remarks = res.PAC_PTA_REM == '""' ? '' : res.PAC_PTA_REM;
+          x[16].checked = res.PAC_CHA == 0 ? false : true;
+          x[16].remarks = res.PAC_CHA_REM == '""' ? '' : res.PAC_CHA_REM;
+          x[17].checked = res.PAC_PHA == 0 ? false : true;
+          x[17].remarks = res.PAC_PHA_REM == '""' ? '' : res.PAC_PHA_REM;
+          x[4].checked = res.PAC_IRP == 0 ? false : true;
+          x[4].remarks = res.PAC_IRP_REM == '""' ? '' : res.PAC_IRP_REM;
+          x[5].checked = res.PAC_IFBO == 0 ? false : true;
+          x[5].remarks = res.PAC_IFBO_REM == '""' ? '' : res.PAC_IFBO_REM;
+          x[6].checked = res.PAC_IHA == 0 ? false : true;
+          x[6].remarks = res.PAC_IHA_REM == '""' ? '' : res.PAC_IHA_REM;
+          x[7].checked = res.PAC_ICAI == 0 ? false : true;
+          x[7].remarks = res.PAC_ICAI_REM == '""' ? '' : res.PAC_ICAI_REM;
+          x[8].checked = res.PAC_IAS == 0 ? false : true;
+          x[8].remarks = res.PAC_IAS_REM == '""' ? '' : res.PAC_IAS_REM;
+          x[9].checked = res.PAC_ICC == 0 ? false : true;
+          x[9].remarks = res.PAC_ICC_REM == '""' ? '' : res.PAC_ICC_REM;
+          x[10].checked = res.PAC_PAGD == 0 ? false : true;
+          x[10].remarks = res.PAC_PAGD_REM == '""' ? '' : res.PAC_PAGD_REM;
+          x[11].checked = res.PAC_PRA == 0 ? false : true;
+          x[11].remarks = res.PAC_PRA_REM == '""' ? '' : res.PAC_PRA_REM;
+          setChecklist([...x]);
+          setpaxactivesection(res.PAC_PTNR == 0 ? false : true);
+          setpaxhotelactivesections(res.PAC_PHNR == 0 ? false : true);
+          setcrewactivesections(res.PAC_CTNR == 0 ? false : true);
+          setcrewhotelactivesections(res.PAC_CHNR == 0 ? false : true);
+          setuid(res.UID);
+          console.log(x);
+        } else {
+          console.log(res, 'Actual');
+          setuid('');
+        }
+        setcallLoad(false);
       })
       .catch(error => {
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
+
+    // pax crew hotel
+
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable(
+        'getFlightModule?fuid=' + FUID + '&module=GetPreArrivalHotel',
+      )()
+      .then(response => {
+        var packet = JSON.parse(response.data.body);
+        var res = packet.Table;
+        console.log(res);
+        if (res.length > 0) {
+          var y = checkList;
+          y[13] = [];
+          y[15] = [];
+          res.forEach((val, index) => {
+            if (val.PCH_TYPE == 'Pax       ') {
+              y[13].push({
+                name: val.PCH_HN,
+                location: val.PCH_HL,
+                hotelMap: {value: null, file: []},
+                time: val.PCH_TT,
+                remarks: val.PCH_REM,
+                type: val.PCH_TYPE,
+                UID: val.UID,
+              });
+            } else {
+              y[15].push({
+                name: val.PCH_HN,
+                location: val.PCH_HL,
+                hotelMap: {value: null, file: []},
+                time: val.PCH_TT,
+                remarks: val.PCH_REM,
+                type: val.PCH_TYPE,
+                UID: val.UID,
+              });
+            }
+          });
+          pHotel.current = y[13];
+          cHotel.current = y[15];
+
+          if (y[13].length == 0) {
+            y[13] = [
+              {
+                transportTime: null,
+                name: null,
+                number: null,
+                remarks: null,
+                hotelMap: {value: null, file: []},
+                UID: '',
+              },
+            ];
+          }
+          if (y[15].length == 0) {
+            y[15] = [
+              {
+                transportTime: null,
+                name: null,
+                number: null,
+                remarks: null,
+                hotelMap: {value: null, file: []},
+                UID: '',
+              },
+            ];
+          }
+          console.log(y[13]);
+          setChecklist([...y]);
+        } else {
+          console.log(checkList[13], checkList[15]);
+        }
+      })
+      .catch(error => {
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
+
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable(
+        'getFlightModule?fuid=' + FUID + '&module=GetPreArrivalTransport',
+      )()
+      .then(response => {
+        var packet = JSON.parse(response.data.body);
+        var res = packet.Table;
+        console.log(res);
+        if (res.length > 0) {
+          var y = checkList;
+          y[12] = [];
+          y[14] = [];
+          res.forEach((val, index) => {
+            console.log(val.PCT_TYPE);
+            if (val.PCT_TYPE == 'Pax       ') {
+              y[12].push({
+                transportTime: val.PCT_STAT,
+                name: val.PCT_DN,
+                number: val.PCT_DCN,
+                remarks: val.PCT_REM,
+                type: val.PCT_TYPE,
+                UID: val.UID,
+              });
+            } else {
+              y[14].push({
+                transportTime: val.PCT_STAT,
+                name: val.PCT_DN,
+                number: val.PCT_DCN,
+                remarks: val.PCT_REM,
+                type: val.PCT_TYPE,
+                UID: val.UID,
+              });
+            }
+          });
+          if (y[12].length == 0) {
+            y[12] = [
+              {
+                transportTime: null,
+                name: null,
+                number: null,
+                remarks: null,
+                UID: '',
+              },
+            ];
+          }
+          if (y[14].length == 0) {
+            y[14] = [
+              {
+                transportTime: null,
+                name: null,
+                number: null,
+                remarks: null,
+                UID: '',
+              },
+            ];
+          }
+          pTransport.current = y[12];
+          cTransport.current = y[14];
+          setChecklist([...y]);
+          // setuid(res.UID);
+          // console.log(x);
+          // setcallLoad(false);
+        } else {
+          console.log(checkList[12], checkList[14]);
+        }
+      })
+      .catch(error => {
+        setcallLoad(false);
         console.log(error, 'Function error');
       });
   }, []);
@@ -197,7 +367,7 @@ export default function PreArrival(props) {
   };
   const removeFeedback = index => {
     var tcheckList = [...checkList];
-    tcheckList[index].remarks = null;
+    tcheckList[index].remarks = '';
     setChecklist(tcheckList);
   };
   const onPressDocPreA = async (index, pos) => {
@@ -274,6 +444,7 @@ export default function PreArrival(props) {
         hotelMap: {value: null, file: []},
         time: null,
         remarks: null,
+        type: 'Pax',
       },
     ];
     setChecklist(tcheckList);
@@ -288,6 +459,7 @@ export default function PreArrival(props) {
         hotelMap: {value: null, file: []},
         time: null,
         remarks: null,
+        type: 'Crew',
       },
     ];
     setChecklist(tcheckList);
@@ -303,9 +475,13 @@ export default function PreArrival(props) {
     setChecklist(service);
   };
   const onRemoveHotel = index => {
+    console.log(index);
     var service = [...checkList];
+    console.log(service[13]);
     service[13].splice(index, 1);
-    setChecklist(service);
+    console.log(checkList[13]);
+
+    setChecklist([...service]);
   };
   const onRemoveHotelCrew = index => {
     var service = [...checkList];
@@ -403,26 +579,108 @@ export default function PreArrival(props) {
   const sendForm = () => {
     //console.log(checkList);
     setcallLoad(true);
-    var meta = checkList.splice(0, 12);
+    var x = checkList;
+    console.log(checkList[13]);
+    let hotel = [];
+    checkList[13].map((val, index) => {
+      if (pHotel[index]) {
+        if (
+          JSON.stringify(checkList[13][index]) != JSON.stringify(pHotel[index])
+        ) {
+          hotel.push(checkList[13][index]);
+        }
+      } else {
+        hotel.push(checkList[13][index]);
+      }
+    });
+    console.log('hotel', hotel);
+    const email = auth().currentUser.email;
     var payload = {
-      meta,
-      pax_transport: checkList[12],
-      pax_hotel: checkList[13],
-      crew_transport: checkList[14],
-      crew_hotel: checkList[15],
-      UID,
+      PAC_CER: x[0].checked == true ? 1 : 0,
+      PAC_CER_REM: x[0].remarks == '' ? '""' : x[0].remarks,
+      PAC_PER: x[1].checked == true ? 1 : 0,
+      PAC_PER_REM: x[1].remarks == '' ? '""' : x[1].remarks,
+      PAC_CTA: x[2].checked == true ? 1 : 0,
+      PAC_CTA_REM: x[2].remarks == '' ? '""' : x[2].remarks,
+      PAC_PTA: x[3].checked == true ? 1 : 0,
+      PAC_PTA_REM: x[3].remarks == '' ? '""' : x[3].remarks,
+      PAC_CHA: x[16].checked == true ? 1 : 0,
+      PAC_CHA_REM: x[16].remarks == '' ? '""' : x[16].remarks,
+      PAC_PHA: x[17].checked == true ? 1 : 0,
+      PAC_PHA_REM: x[17].remarks == '' ? '""' : x[17].remarks,
+      PAC_IRP: x[4].checked == true ? 1 : 0,
+      PAC_IRP_REM: x[4].remarks == '' ? '""' : x[4].remarks,
+      PAC_IFBO: x[5].checked == true ? 1 : 0,
+      PAC_IFBO_REM: x[5].remarks == '' ? '""' : x[5].remarks,
+      PAC_IHA: x[6].checked == true ? 1 : 0,
+      PAC_IHA_REM: x[6].remarks == '' ? '""' : x[6].remarks,
+      PAC_ICAI: x[7].checked == true ? 1 : 0,
+      PAC_ICAI_REM: x[7].remarks == '' ? '""' : x[7].remarks,
+      PAC_IAS: x[8].checked == true ? 1 : 0,
+      PAC_IAS_REM: x[8].remarks == '' ? '""' : x[8].remarks,
+      PAC_ICC: x[9].checked == true ? 1 : 0,
+      PAC_ICC_REM: x[9].remarks == '' ? '""' : x[9].remarks,
+      PAC_PAGD: x[10].checked == true ? 1 : 0,
+      PAC_PAGD_REM: x[10].remarks == '' ? '""' : x[10].remarks,
+      PAC_PRA: x[11].checked == true ? 1 : 0,
+      PAC_PRA_REM: x[11].remarks == '' ? '""' : x[11].remarks,
+      PAC_PTNR: paxactivesections == true ? 1 : 0,
+      PAC_PHNR: paxhotelactivesections == true ? 1 : 0,
+      PAC_CTNR: crewactivesections == true ? 1 : 0,
+      PAC_CHNR: crewhotelactivesections == true ? 1 : 0,
+      FUID: FUID,
+      UID: uid,
+      UPDATE_BY: email,
+      STATUS: '0',
     };
-    //console.log(formFields);
-    const sayHello = functions().httpsCallable('getPreArrivalService');
-    sayHello(payload)
-      .then(data => {
-        console.log(data);
+
+    // console.log(payload);
+
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable('updateFlightModule?module=PostPreArrivalChecklist')(
+        JSON.stringify(payload),
+      )
+      .then(response => {
+        Alert.alert('Success');
         setcallLoad(false);
+        console.log(response);
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        Alert.alert('Error in updation');
         setcallLoad(false);
+        console.log(error, 'Function error');
       });
+
+    hotel.map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewHotel')(
+          JSON.stringify({
+            PCH_HN: val.name ? val.name : '""',
+            PCH_HL: val.location ? val.location : '""',
+            PCH_TT: val.time ? val.time : '""',
+            PCH_REM: val.remarks ? val.remarks : '""',
+            PCH_TYPE: val.type ? val.type : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          // Alert.alert('Success');
+          // setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          // Alert.alert('Error in updation');
+          // setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
   };
 
   return (
@@ -1358,7 +1616,7 @@ export default function PreArrival(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -1379,12 +1637,7 @@ export default function PreArrival(props) {
                       remarks: null,
                     },
                   ]),
-                    //y[13][0].hotelMap = {value: null, file: []};
-                    //y=checkList[13]=[];
-
                     setChecklist(y);
-
-                  // console.log(x);
                 }}>
                 <Icons
                   name={
@@ -1398,17 +1651,6 @@ export default function PreArrival(props) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-
-            {/* <Text style={styleSheet.label}>Hotel Name</Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[13][0].name}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[13][0].name = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
             <LabelledInput
               label={'Hotel Name'} //mark
               disabled={paxhotelactivesections}
@@ -1423,6 +1665,7 @@ export default function PreArrival(props) {
               multiline={false}
               numberOfLines={1}
             />
+
             <LabelledInput
               disabled={paxhotelactivesections}
               label={'Hotel Location'} //mark
@@ -1437,16 +1680,6 @@ export default function PreArrival(props) {
               multiline={false}
               numberOfLines={1}
             />
-            {/* <Text style={styleSheet.label}>Hotel Location</Text>
-            <TextInput
-              style={styleSheet.input}
-              value={checkList[13][0].location}
-              onChangeText={text => {
-                var tcheckList = [...checkList];
-                tcheckList[13][0].location = text;
-                setChecklist(tcheckList);
-              }}
-            /> */}
 
             <View
               style={{
@@ -1545,7 +1778,7 @@ export default function PreArrival(props) {
               }}
               multiline={false}
               numberOfLines={1}
-            />
+            /> */}
 
             <View
               style={{
@@ -1570,23 +1803,23 @@ export default function PreArrival(props) {
               </TouchableOpacity>
             </View>
             {checkList[13].map((val, index) => {
-              if (index > 0) {
-                return (
-                  <View key={index} style={{marginTop: 20}}>
-                    <View
-                      style={{
-                        borderBottomWidth: 1,
-                        borderBottomColor: 'rgba(0,0,0,0.4)',
-                        marginBottom: 20,
-                      }}></View>
-                    <View style={{alignItems: 'flex-end'}}>
-                      <TouchableOpacity
-                        style={styleSheet.label}
-                        onPress={() => onRemoveHotel(index)}>
-                        <Icons name="minus-box-outline" color="red" size={30} />
-                      </TouchableOpacity>
-                    </View>
-                    <LabelledInput
+              // if (index > 0) {
+              return (
+                <View key={index} style={{marginTop: 20}}>
+                  <View
+                    style={{
+                      borderBottomWidth: 1,
+                      borderBottomColor: 'rgba(0,0,0,0.4)',
+                      marginBottom: 20,
+                    }}></View>
+                  <View style={{alignItems: 'flex-end'}}>
+                    <TouchableOpacity
+                      style={styleSheet.label}
+                      onPress={() => onRemoveHotel(index)}>
+                      <Icons name="minus-box-outline" color="red" size={30} />
+                    </TouchableOpacity>
+                  </View>
+                  {/* <LabelledInput
                       label={'Hotel Name'} //mark
                       data={checkList[13][index].name}
                       datatype={'text'}
@@ -1594,91 +1827,114 @@ export default function PreArrival(props) {
                       setText={(i, text, type, section) => {
                         var tcheckList = [...checkList];
                         tcheckList[13][index].name = text;
-                        setChecklist(tcheckList);
+                        setChecklist([...tcheckList]);
                       }}
                       multiline={false}
                       numberOfLines={1}
-                    />
+                    /> */}
+                  <>
+                    <Text style={s.label}>{'Hotel Name'}</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <TextInput
+                        style={[
+                          s.input,
+                          {
+                            backgroundColor: paxhotelactivesections
+                              ? 'rgba(0,0,0,0.1)'
+                              : 'white',
+                          },
+                        ]}
+                        value={checkList[13][index].name}
+                        multiline={false}
+                        numberOfLines={1}
+                        onChangeText={text => {
+                          var tcheckList = [...checkList];
+                          tcheckList[13][index].name = text;
+                          setChecklist(tcheckList);
+                        }}
+                      />
+                    </View>
+                  </>
 
-                    <LabelledInput
-                      label={'Hotel Location'} //mark
-                      data={checkList[13][index].location}
-                      datatype={'location'}
-                      index={13}
-                      setText={(i, text, type, section) => {
-                        var tcheckList = [...checkList];
-                        tcheckList[13][index].location = text;
-                        setChecklist(tcheckList);
-                      }}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
+                  <LabelledInput
+                    label={'Hotel Location'} //mark
+                    data={checkList[13][index].location}
+                    datatype={'location'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      var tcheckList = [...checkList];
+                      tcheckList[13][index].location = text;
+                      setChecklist([...tcheckList]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
 
-                    <TakeCamera
-                      label={'Map of Route to Hotel'}
-                      type={13}
-                      uploadInitiator={() => {
-                        setuploadAddedSection(true);
-                        setuploadAddedSectionindex(index);
-                        setuploadSection(13);
-                        refRBSheet.current.open();
-                      }}
-                      removeFilePreA={(type, i) => {
-                        //console.log(type,i);
-                        var x = [...checkList];
-                        //console.log(x[13][index].hotelMap.file.length);
-                        //x[13][index].hotelMap.splice(i, 1);
-                        if (x[13][index].hotelMap.file.length === 1) {
-                          x[13][index].hotelMap.file = [];
-                        } else {
-                          x[13][index].hotelMap.file.splice(i, 1);
-                        }
-
-                        //console.log(x[13][index].hotelMap.file.length);
-
-                        /**
-                         * NEW STRUCTURE REQ
-                         *  NEW ARRAY FOR ATTACHED FILES
-                         */
-                      }}
-                      attachments={checkList[13][index].hotelMap}
-                      Icon={
-                        <Icons
-                          style={{color: 'green', marginLeft: 10}}
-                          name="close"
-                          size={30}
-                        />
+                  <TakeCamera
+                    label={'Map of Route to Hotel'}
+                    type={13}
+                    uploadInitiator={() => {
+                      setuploadAddedSection(true);
+                      setuploadAddedSectionindex(index);
+                      setuploadSection(13);
+                      refRBSheet.current.open();
+                    }}
+                    removeFilePreA={(type, i) => {
+                      //console.log(type,i);
+                      var x = [...checkList];
+                      //console.log(x[13][index].hotelMap.file.length);
+                      //x[13][index].hotelMap.splice(i, 1);
+                      if (x[13][index].hotelMap.file.length === 1) {
+                        x[13][index].hotelMap.file = [];
+                      } else {
+                        x[13][index].hotelMap.file.splice(i, 1);
                       }
-                    />
 
-                    <DateTimeInput
-                      label={'Travel Time (Approximate)'}
-                      showDatePickerPostDepart={() => {
-                        showDatePicker('time', 13, index);
-                      }}
-                      setNowPostDepart={() => setNow(13, index)}
-                      size={12}
-                      type={'time'}
-                      data={checkList[13][index].transportTime}
-                      index={13}
-                    />
+                      //console.log(x[13][index].hotelMap.file.length);
 
-                    <LabelledInput
-                      label={'Remarks'} //mark
-                      data={checkList[13][index].remarks}
-                      datatype={'text'}
-                      index={13}
-                      setText={(i, text, type, section) => {
-                        var tcheckList = [...checkList];
-                        tcheckList[13][index].remarks = text;
-                        setChecklist(tcheckList);
-                      }}
-                      multiline={true}
-                      numberOfLines={2}
-                    />
-                  </View>
-                );
-              }
+                      /**
+                       * NEW STRUCTURE REQ
+                       *  NEW ARRAY FOR ATTACHED FILES
+                       */
+                    }}
+                    attachments={checkList[13][index].hotelMap}
+                    Icon={
+                      <Icons
+                        style={{color: 'green', marginLeft: 10}}
+                        name="close"
+                        size={30}
+                      />
+                    }
+                  />
+
+                  <DateTimeInput
+                    label={'Travel Time (Approximate)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', 13, index);
+                    }}
+                    setNowPostDepart={() => setNow(13, index)}
+                    size={12}
+                    type={'time'}
+                    data={checkList[13][index].transportTime}
+                    index={13}
+                  />
+
+                  <LabelledInput
+                    label={'Remarks'} //mark
+                    data={checkList[13][index].remarks}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      var tcheckList = [...checkList];
+                      tcheckList[13][index].remarks = text;
+                      setChecklist([...tcheckList]);
+                    }}
+                    multiline={true}
+                    numberOfLines={2}
+                  />
+                </View>
+              );
+              // }
             })}
           </View>
           <Text style={[styleSheet.label, {marginTop: 20}]}>

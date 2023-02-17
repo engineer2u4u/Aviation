@@ -6,6 +6,7 @@ import {
   ScrollView,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
 import Loader from '../Loader';
@@ -18,6 +19,8 @@ import Header from '../subcomponents/Forms/Header';
 import BroadTextInput from '../subcomponents/Forms/FlightPreparation/broadTextInput';
 import BroadImageUpload from '../subcomponents/Forms/FlightPreparation/broadImageUpload';
 import {firebase} from '@react-native-firebase/functions';
+import auth from '@react-native-firebase/auth';
+
 // if (true) functions().useEmulator('192.168.29.75', 5001);
 const {width, height} = Dimensions.get('window');
 
@@ -158,18 +161,19 @@ export default function FlightPreparation(props) {
   };
   const [callLoad, setcallLoad] = useState(false);
   const sendtoApi = data => {
-    console.log(FUID);
+    setcallLoad(true);
+    const email = auth().currentUser.email;
     var send = {
-      FLP_AP: data.textFields.Airport_Information || '',
-      FLP_NOTAMS: data.textFields.Notams || '',
-      FLP_SPECIAL: data.textFields.Special_Procedures || '',
-      FLP_SLOTS: data.uploadFields.Slots.text,
-      FLP_PARKING: data.uploadFields.Parking.text,
-      FLP_PERMIT: data.uploadFields.LandingPermit.text,
+      FLP_AP: data.textFields.Airport_Information || '""',
+      FLP_NOTAMS: data.textFields.Notams || '""',
+      FLP_SPECIAL: data.textFields.Special_Procedures || '""',
+      FLP_SLOTS: data.uploadFields.Slots.text || '""',
+      FLP_PARKING: data.uploadFields.Parking.text || '""',
+      FLP_PERMIT: data.uploadFields.LandingPermit.text || '""',
       FUID: FUID,
       UID: uid,
-      STATUS: 0,
-      UPDATE_BY: 'api_admin',
+      STATUS: '0',
+      UPDATE_BY: email,
     };
     console.log(send);
     firebase
@@ -179,9 +183,13 @@ export default function FlightPreparation(props) {
         JSON.stringify(send),
       )
       .then(response => {
+        setcallLoad(false);
+        Alert.alert('Success');
         console.log(response);
       })
       .catch(error => {
+        setcallLoad(false);
+        Alert.alert('Error in updating');
         console.log(error, 'Function error');
       });
     // const sayHello = functions().httpsCallable('postFlightPreparation');
@@ -239,18 +247,25 @@ export default function FlightPreparation(props) {
         'getFlightModule?fuid=' + FUID + '&module=GetFlightPreparation',
       )()
       .then(response => {
+        setcallLoad(true);
         console.log(response);
         var packet = JSON.parse(response.data.body);
-        var res = packet.Table;
-        setuid(res[0].UID);
-        setSlot(res[0].FLP_SLOTS);
-        setParking(res[0].FLP_PARKING);
-        setlandingperm(res[0].FLP_PERMIT);
-        setnotams(res[0].FLP_NOTAMS);
-        setAirInfo(res[0].FLP_AP);
-        setspecialproc(res[0].FLP_SPECIAL);
+        var res = packet.Table[0];
+        if (res) {
+          setuid(res.UID);
+          setSlot(res.FLP_SLOTS == '""' ? '' : res.FLP_SLOTS);
+          setParking(res.FLP_PARKING == '""' ? '' : res.FLP_PARKING);
+          setlandingperm(res.FLP_PERMIT == '""' ? '' : res.FLP_PERMIT);
+          setnotams(res.FLP_NOTAMS == '""' ? '' : res.FLP_NOTAMS);
+          setAirInfo(res.FLP_AP == '""' ? '' : res.FLP_AP);
+          setspecialproc(res.FLP_SPECIAL == '""' ? '' : res.FLP_SPECIAL);
+        } else {
+          setuid('');
+        }
+        setcallLoad(false);
       })
       .catch(error => {
+        setcallLoad(false);
         console.log(error, 'Function error');
       });
   }, []);
@@ -258,8 +273,7 @@ export default function FlightPreparation(props) {
   //NEW STRUCtURE ENDS
 
   return (
-    <ScrollView>
-      <Loader visible={loading} />
+    <>
       <Header
         headingSize={HeadingTextSize}
         heading={'Flight Preparation'}
@@ -276,122 +290,126 @@ export default function FlightPreparation(props) {
           )
         }
       />
-      <View style={{padding: 20}}>
-        <BroadTextInput
-          type={0}
-          label={'Airport Information'}
-          labelSize={labelTextSize}
-          text={airinfo}
-          textSeeker={textSeeker}
-        />
-        <BroadTextInput
-          type={1}
-          label={'NOTAMs'}
-          labelSize={labelTextSize}
-          text={notams}
-          textSeeker={textSeeker}
-        />
-        <BroadTextInput
-          type={2}
-          label={'Special Procedures'}
-          labelSize={labelTextSize}
-          text={specialproc}
-          textSeeker={textSeeker}
-        />
-        {uploadMenu.map((data, index) => {
-          return (
-            <BroadImageUpload
-              key={index}
-              type={index}
-              textId={data.textId}
-              label={data.name}
-              text={index === 0 ? slot : index === 1 ? parking : landingperm}
-              textSeeker={textSeeker}
-              uploadType={index}
-              uploadInitiator={uploadInitiator}
-              icon={
-                <Icons
-                  style={{marginLeft: 10}}
-                  color={'green'}
-                  name="upload"
-                  size={40}
-                />
-              }
-              attachMents={
-                <>
-                  {fpreparation[data.id].file.length > 0 && (
-                    <View style={{marginBottom: 20}}>
-                      {fpreparation[data.id].file.map((value, index) => {
-                        return (
-                          <View key={index} style={styleSheet.attachment}>
-                            <Text style={{color: 'black'}}>{value.name}</Text>
-                            <TouchableOpacity
-                              onPress={() => removeFileFP(data.id, index)}>
-                              <Icons
-                                style={{color: 'green', marginLeft: 10}}
-                                name="close"
-                                size={30}
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  )}
-                </>
-              }
-            />
-          );
-        })}
+      <ScrollView>
+        <Loader visible={loading} />
 
-        <RBSheet
-          ref={refRBSheet}
-          closeOnDragDown={true}
-          closeOnPressMask={true}
-          height={height / 4}
-          customStyles={{
-            wrapper: {
-              backgroundColor: '#00000056',
-            },
-            draggableIcon: {
-              backgroundColor: '#000',
-            },
-          }}>
-          <View style={{flex: 1, paddingLeft: 20}}>
-            <View style={{flex: 1}}>
-              <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
+        <View style={{padding: 20}}>
+          <BroadTextInput
+            type={0}
+            label={'Airport Information'}
+            labelSize={labelTextSize}
+            text={airinfo}
+            textSeeker={textSeeker}
+          />
+          <BroadTextInput
+            type={1}
+            label={'NOTAMs'}
+            labelSize={labelTextSize}
+            text={notams}
+            textSeeker={textSeeker}
+          />
+          <BroadTextInput
+            type={2}
+            label={'Special Procedures'}
+            labelSize={labelTextSize}
+            text={specialproc}
+            textSeeker={textSeeker}
+          />
+          {uploadMenu.map((data, index) => {
+            return (
+              <BroadImageUpload
+                key={index}
+                type={index}
+                textId={data.textId}
+                label={data.name}
+                text={index === 0 ? slot : index === 1 ? parking : landingperm}
+                textSeeker={textSeeker}
+                uploadType={index}
+                uploadInitiator={uploadInitiator}
+                icon={
+                  <Icons
+                    style={{marginLeft: 10}}
+                    color={'green'}
+                    name="upload"
+                    size={40}
+                  />
+                }
+                attachMents={
+                  <>
+                    {fpreparation[data.id].file.length > 0 && (
+                      <View style={{marginBottom: 20}}>
+                        {fpreparation[data.id].file.map((value, index) => {
+                          return (
+                            <View key={index} style={styleSheet.attachment}>
+                              <Text style={{color: 'black'}}>{value.name}</Text>
+                              <TouchableOpacity
+                                onPress={() => removeFileFP(data.id, index)}>
+                                <Icons
+                                  style={{color: 'green', marginLeft: 10}}
+                                  name="close"
+                                  size={30}
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </>
+                }
+              />
+            );
+          })}
+
+          <RBSheet
+            ref={refRBSheet}
+            closeOnDragDown={true}
+            closeOnPressMask={true}
+            height={height / 4}
+            customStyles={{
+              wrapper: {
+                backgroundColor: '#00000056',
+              },
+              draggableIcon: {
+                backgroundColor: '#000',
+              },
+            }}>
+            <View style={{flex: 1, paddingLeft: 20}}>
+              <View style={{flex: 1}}>
+                <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
+              </View>
+              <View style={{flex: 1.5, flexDirection: 'column'}}>
+                <TouchableOpacity
+                  onPress={() => getImage(false)}
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Icons name="camera-outline" size={25} color={'black'} />
+                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                    Upload from Camera
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  //onPress={() => onPressDocPreA(6)}
+                  onPress={() => getImage(true)}
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Icons name="image-outline" size={25} color={'black'} />
+                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                    Upload from Gallery
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={{flex: 1.5, flexDirection: 'column'}}>
-              <TouchableOpacity
-                onPress={() => getImage(false)}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                }}>
-                <Icons name="camera-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
-                  Upload from Camera
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                //onPress={() => onPressDocPreA(6)}
-                onPress={() => getImage(true)}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                }}>
-                <Icons name="image-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
-                  Upload from Gallery
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </RBSheet>
-      </View>
-    </ScrollView>
+          </RBSheet>
+        </View>
+      </ScrollView>
+    </>
   );
 }
 
