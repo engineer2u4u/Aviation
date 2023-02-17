@@ -119,13 +119,7 @@ export default function FlightPreparation(props) {
 
   const [formReady, setformReady] = useState(true);
 
-  const validate = () => {
-    //console.log('called');
-    //lay validation rules
-    //setformReady(true)
-    //asd
-    //test
-  };
+  const validate = () => {};
 
   const textSeeker = (type, event) => {
     console.log(type.event);
@@ -192,23 +186,6 @@ export default function FlightPreparation(props) {
         Alert.alert('Error in updating');
         console.log(error, 'Function error');
       });
-    // const sayHello = functions().httpsCallable('postFlightPreparation');
-    // sayHello(send).then((data)=>{
-    //   console.log(data);
-    //   // var res=JSON.parse(data.data.body).Table;
-    //   // console.log(res);
-    //   // setSlot(res[0].FLP_SLOTS);
-    //   // setParking(res[0].FLP_PARKING);
-    //   // setlandingperm(res[0].FLP_PERMIT);
-    //   // setnotams(res[0].FLP_NOTAMS)
-    //   // setAirInfo(res[0].FLP_AP);
-    //   // setspecialproc(res[0].FLP_SPECIAL);
-    //   // setcallLoad(false);
-    // }).catch(e=>{
-    //   console.log(e);
-    //   setcallLoad(false);
-    // });
-    //create api
   };
 
   const sendForm = () => {

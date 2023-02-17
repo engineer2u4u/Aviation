@@ -164,7 +164,7 @@ export default function PreArrival(props) {
           res.forEach((val, index) => {
             if (val.PCH_TYPE == 'Pax       ') {
               y[13].push({
-                name: val.PCH_HN,
+                name: val.PCH_HN.trim(),
                 location: val.PCH_HL,
                 hotelMap: {value: null, file: []},
                 time: val.PCH_TT,
@@ -583,15 +583,15 @@ export default function PreArrival(props) {
     console.log(checkList[13]);
     let hotel = [];
     checkList[13].map((val, index) => {
-      if (pHotel[index]) {
-        if (
-          JSON.stringify(checkList[13][index]) != JSON.stringify(pHotel[index])
-        ) {
-          hotel.push(checkList[13][index]);
-        }
-      } else {
-        hotel.push(checkList[13][index]);
-      }
+      // if (pHotel[index]) {
+      // if (
+      //   JSON.stringify(checkList[13][index]) != JSON.stringify(pHotel[index])
+      // ) {
+      hotel.push(checkList[13][index]);
+      // }
+      // } else {
+      //   hotel.push(checkList[13][index]);
+      // }
     });
     console.log('hotel', hotel);
     const email = auth().currentUser.email;
