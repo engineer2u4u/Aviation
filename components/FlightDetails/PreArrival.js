@@ -48,28 +48,10 @@ export default function PreArrival(props) {
     {checked: false, file: [], remarks: ''},
     {checked: false, remarks: ''},
 
-    [{transportTime: null, name: null, number: null, remarks: ''}], //12
-    [
-      {
-        name: null,
-        location: null,
-        hotelMap: {value: null, file: []},
-        time: null,
-        remarks: '',
-        type: 'Pax',
-      },
-    ],
-    [{transportTime: null, name: null, number: null, remarks: ''}],
-    [
-      {
-        name: null,
-        location: null,
-        hotelMap: {value: null, file: []},
-        time: null,
-        remarks: '',
-        type: 'Crew',
-      },
-    ],
+    [], //12
+    [],
+    [],
+    [],
     {checked: false, remarks: ''}, //16
     {checked: false, remarks: ''}, //17
   ]);
@@ -154,6 +136,7 @@ export default function PreArrival(props) {
         'getFlightModule?fuid=' + FUID + '&module=GetPreArrivalHotel',
       )()
       .then(response => {
+        
         var packet = JSON.parse(response.data.body);
         var res = packet.Table;
         console.log(res);
@@ -164,21 +147,21 @@ export default function PreArrival(props) {
           res.forEach((val, index) => {
             if (val.PCH_TYPE == 'Pax       ') {
               y[13].push({
-                name: val.PCH_HN.trim(),
-                location: val.PCH_HL,
+                name: val.PCH_HN.trim().replace('""',""),
+                location: val.PCH_HL.trim().replace('""',""),
                 hotelMap: {value: null, file: []},
                 time: val.PCH_TT,
-                remarks: val.PCH_REM,
+                remarks: val.PCH_REM.trim().replace('""',""),
                 type: val.PCH_TYPE,
                 UID: val.UID,
               });
             } else {
               y[15].push({
-                name: val.PCH_HN,
-                location: val.PCH_HL,
+                name: val.PCH_HN.trim().replace('""',""),
+                location: val.PCH_HL.trim().replace('""',""),
                 hotelMap: {value: null, file: []},
                 time: val.PCH_TT,
-                remarks: val.PCH_REM,
+                remarks: val.PCH_REM.trim().replace('""',""),
                 type: val.PCH_TYPE,
                 UID: val.UID,
               });
@@ -187,30 +170,30 @@ export default function PreArrival(props) {
           pHotel.current = y[13];
           cHotel.current = y[15];
 
-          if (y[13].length == 0) {
-            y[13] = [
-              {
-                transportTime: null,
-                name: null,
-                number: null,
-                remarks: null,
-                hotelMap: {value: null, file: []},
-                UID: '',
-              },
-            ];
-          }
-          if (y[15].length == 0) {
-            y[15] = [
-              {
-                transportTime: null,
-                name: null,
-                number: null,
-                remarks: null,
-                hotelMap: {value: null, file: []},
-                UID: '',
-              },
-            ];
-          }
+          // if (y[13].length == 0) {
+          //   y[13] = [
+          //     {
+          //       transportTime: null,
+          //       name: null,
+          //       number: null,
+          //       remarks: null,
+          //       hotelMap: {value: null, file: []},
+          //       UID: '',
+          //     },
+          //   ];
+          // }
+          // if (y[15].length == 0) {
+          //   y[15] = [
+          //     {
+          //       transportTime: null,
+          //       name: null,
+          //       number: null,
+          //       remarks: null,
+          //       hotelMap: {value: null, file: []},
+          //       UID: '',
+          //     },
+          //   ];
+          // }
           console.log(y[13]);
           setChecklist([...y]);
         } else {
@@ -229,6 +212,7 @@ export default function PreArrival(props) {
         'getFlightModule?fuid=' + FUID + '&module=GetPreArrivalTransport',
       )()
       .then(response => {
+        //get pax & crew transport
         var packet = JSON.parse(response.data.body);
         var res = packet.Table;
         console.log(res);
@@ -240,46 +224,46 @@ export default function PreArrival(props) {
             console.log(val.PCT_TYPE);
             if (val.PCT_TYPE == 'Pax       ') {
               y[12].push({
-                transportTime: val.PCT_STAT,
-                name: val.PCT_DN,
-                number: val.PCT_DCN,
-                remarks: val.PCT_REM,
+                transportTime: val.PCT_STAT.trim().replace('""',""),
+                name: val.PCT_DN.trim().replace('""',""),
+                number: val.PCT_DCN.trim().replace('""',""),
+                remarks: val.PCT_REM.trim().replace('""',""),
                 type: val.PCT_TYPE,
                 UID: val.UID,
               });
             } else {
               y[14].push({
-                transportTime: val.PCT_STAT,
-                name: val.PCT_DN,
-                number: val.PCT_DCN,
-                remarks: val.PCT_REM,
+                transportTime: val.PCT_STAT.trim().replace('""',""),
+                name: val.PCT_DN.trim().replace('""',""),
+                number: val.PCT_DCN.trim().replace('""',""),
+                remarks: val.PCT_REM.trim().replace('""',""),
                 type: val.PCT_TYPE,
                 UID: val.UID,
               });
             }
           });
-          if (y[12].length == 0) {
-            y[12] = [
-              {
-                transportTime: null,
-                name: null,
-                number: null,
-                remarks: null,
-                UID: '',
-              },
-            ];
-          }
-          if (y[14].length == 0) {
-            y[14] = [
-              {
-                transportTime: null,
-                name: null,
-                number: null,
-                remarks: null,
-                UID: '',
-              },
-            ];
-          }
+          // if (y[12].length == 0) {
+          //   y[12] = [
+          //     {
+          //       transportTime: null,
+          //       name: null,
+          //       number: null,
+          //       remarks: null,
+          //       UID: '',
+          //     },
+          //   ];
+          // }
+          // if (y[14].length == 0) {
+          //   y[14] = [
+          //     {
+          //       transportTime: null,
+          //       name: null,
+          //       number: null,
+          //       remarks: null,
+          //       UID: '',
+          //     },
+          //   ];
+          // }
           pTransport.current = y[12];
           cTransport.current = y[14];
           setChecklist([...y]);
@@ -418,7 +402,7 @@ export default function PreArrival(props) {
     var tcheckList = [...checkList];
     tcheckList[12] = [
       ...checkList[12],
-      {transportTime: null, name: null, number: null, remarks: null},
+      {transportTime: null, name: null, number: null, remarks: null,type:"Pax"},
     ];
     setChecklist(tcheckList);
   };
@@ -426,7 +410,7 @@ export default function PreArrival(props) {
     var tcheckList = [...checkList];
     tcheckList[14] = [
       ...checkList[14],
-      {transportTime: null, name: null, number: null, remarks: null},
+      {transportTime: null, name: null, number: null, remarks: null,type:"Crew"},
     ];
     setChecklist(tcheckList);
   };
@@ -580,20 +564,7 @@ export default function PreArrival(props) {
     //console.log(checkList);
     setcallLoad(true);
     var x = checkList;
-    console.log(checkList[13]);
-    let hotel = [];
-    checkList[13].map((val, index) => {
-      // if (pHotel[index]) {
-      // if (
-      //   JSON.stringify(checkList[13][index]) != JSON.stringify(pHotel[index])
-      // ) {
-      hotel.push(checkList[13][index]);
-      // }
-      // } else {
-      //   hotel.push(checkList[13][index]);
-      // }
-    });
-    console.log('hotel', hotel);
+    
     const email = auth().currentUser.email;
     var payload = {
       PAC_CER: x[0].checked == true ? 1 : 0,
@@ -653,7 +624,7 @@ export default function PreArrival(props) {
         console.log(error, 'Function error');
       });
 
-    hotel.map(val => {
+    checkList[13].map(val => {
       firebase
         .app()
         .functions('asia-southeast1')
@@ -681,6 +652,101 @@ export default function PreArrival(props) {
           console.log(error, 'Function error');
         });
     });
+
+    checkList[15].map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewHotel')(
+          JSON.stringify({
+            PCH_HN: val.name ? val.name : '""',
+            PCH_HL: val.location ? val.location : '""',
+            PCH_TT: val.time ? val.time : '""',
+            PCH_REM: val.remarks ? val.remarks : '""',
+            PCH_TYPE: val.type ? val.type : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          // Alert.alert('Success');
+          // setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          // Alert.alert('Error in updation');
+          // setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    checkList[12].map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewTransport')(
+          JSON.stringify({
+            PCT_STAT:val.transportTime,
+            PCT_DN:val.name,
+            PCT_DCN:val.number,
+            PCT_REM:val.remarks,
+            PCT_TYPE:val.type,
+            STATUS:0,
+            FUID:FUID,
+            UPDATE_BY:email,
+          }),
+        )
+        .then(response => {
+          // Alert.alert('Success');
+          // setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          // Alert.alert('Error in updation');
+          // setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+
+    checkList[14].map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewTransport')(
+          JSON.stringify({
+            PCT_STAT:val.transportTime,
+            PCT_DN:val.name,
+            PCT_DCN:val.number,
+            PCT_REM:val.remarks,
+            PCT_TYPE:val.type,
+            STATUS:0,
+            FUID:FUID,
+            UPDATE_BY:email,
+          }),
+        )
+        .then(response => {
+          // Alert.alert('Success');
+          // setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          // Alert.alert('Error in updation');
+          // setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+
   };
 
   return (
@@ -991,7 +1057,7 @@ export default function PreArrival(props) {
           )}
           {
             //to be added
-            // crew hotel arranged ok
+            // jphotel arranged ok
             // pax hotel arranged ok
           }
           <View style={styleSheet.toggleContainer}>
@@ -1420,7 +1486,7 @@ export default function PreArrival(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -1499,7 +1565,7 @@ export default function PreArrival(props) {
               numberOfLines={1}
             />
 
-            <LabelledInput
+         <LabelledInput
               label={'Remarks'} //mark
               disabled={paxactivesections}
               data={checkList[12][0].remarks}
@@ -1512,7 +1578,22 @@ export default function PreArrival(props) {
               }}
               multiline={true}
               numberOfLines={2}
-            />
+            /> 
+            <Text style={styleSheet.label}>Remarks</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                multiline={true}
+                placeholder="Vehicle Number, Vehicle Type, Pax Name"
+                numberOfLines={2}
+                value={checkList[12][0].remarks}
+                onChangeText={text => {
+                  var tcheckList = [...checkList];
+                  tcheckList[12][0].remarks = text;
+                  setChecklist(tcheckList);
+                }}
+              />
+            </View> */}
 
             <View
               style={{
@@ -1533,7 +1614,7 @@ export default function PreArrival(props) {
               </TouchableOpacity>
             </View>
             {checkList[12].map((val, index) => {
-              if (index > 0) {
+              //if (index > 0) {
                 return (
                   <View key={index} style={{marginTop: 20}}>
                     <View
@@ -1604,7 +1685,7 @@ export default function PreArrival(props) {
                     />
                   </View>
                 );
-              }
+              
             })}
           </View>
           <Text style={[styleSheet.label, {marginTop: 20}]}>Pax Hotel:</Text>
@@ -1919,7 +2000,7 @@ export default function PreArrival(props) {
                     index={13}
                   />
 
-                  <LabelledInput
+                  {/* <LabelledInput
                     label={'Remarks'} //mark
                     data={checkList[13][index].remarks}
                     datatype={'text'}
@@ -1931,7 +2012,22 @@ export default function PreArrival(props) {
                     }}
                     multiline={true}
                     numberOfLines={2}
-                  />
+                  /> */}
+                  <Text style={styleSheet.label}>Remarks</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                multiline={true}
+                placeholder="Vehicle Number, Vehicle Type, Pax Name"
+                numberOfLines={2}
+                value={checkList[13][index].remarks}
+                onChangeText={text => {
+                  var tcheckList = [...checkList];
+                  tcheckList[13][index].remarks = text;
+                  setChecklist(tcheckList);
+                }}
+              />
+            </View>
                 </View>
               );
               // }
@@ -1948,7 +2044,7 @@ export default function PreArrival(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -2024,7 +2120,7 @@ export default function PreArrival(props) {
               numberOfLines={1}
             />
 
-            <LabelledInput
+            {/* <LabelledInput
               label={'Remarks'} //mark
               disabled={crewactivesections}
               data={checkList[14][0].remarks}
@@ -2037,7 +2133,23 @@ export default function PreArrival(props) {
               }}
               multiline={true}
               numberOfLines={2}
-            />
+            /> 
+
+        <Text style={styleSheet.label}>Remarks</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <TextInput
+                style={styleSheet.input}
+                multiline={true}
+                placeholder="Vehicle Number, Vehicle Type, Pax Name"
+                numberOfLines={2}
+                value={checkList[14][0].remarks}
+                onChangeText={text => {
+                  var tcheckList = [...checkList];
+                  tcheckList[14][0].remarks = text;
+                  setChecklist(tcheckList);
+                }}
+              />
+            </View> */}
 
             <View
               style={{
@@ -2058,7 +2170,7 @@ export default function PreArrival(props) {
               </TouchableOpacity>
             </View>
             {checkList[14].map((val, index) => {
-              if (index > 0) {
+              //if (index > 0) {
                 return (
                   <View key={index} style={{marginTop: 20}}>
                     <View
@@ -2129,7 +2241,7 @@ export default function PreArrival(props) {
                     />
                   </View>
                 );
-              }
+              
             })}
           </View>
           <Text style={[styleSheet.label, {marginTop: 20}]}>Crew Hotel:</Text>
@@ -2142,7 +2254,7 @@ export default function PreArrival(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -2307,7 +2419,7 @@ export default function PreArrival(props) {
               }}
               multiline={true}
               numberOfLines={2}
-            />
+            /> */}
 
             <View
               style={{
@@ -2334,7 +2446,7 @@ export default function PreArrival(props) {
               </TouchableOpacity>
             </View>
             {checkList[15].map((val, index) => {
-              if (index > 0) {
+              //if (index > 0) {
                 return (
                   <View key={index} style={{marginTop: 20}}>
                     <View
@@ -2350,21 +2462,33 @@ export default function PreArrival(props) {
                         <Icons name="minus-box-outline" color="red" size={30} />
                       </TouchableOpacity>
                     </View>
-                    <LabelledInput
+                    {/* <LabelledInput
                       label={'Hotel Name'}
                       data={checkList[15][index].name}
                       datatype={'text'}
                       index={15}
                       setText={text => {
+                        console.log(text);
                         var tcheckList = [...checkList];
                         tcheckList[15][index].name = text;
                         setChecklist(tcheckList);
                       }}
                       multiline={false}
                       numberOfLines={1}
-                    />
+                    /> */}
+                    <Text style={styleSheet.label}>Hotel Name</Text>
+            <TextInput
+              style={styleSheet.input}
+              value={checkList[15][index].name.trim()}
+              onChangeText={text => {
+                console.log(text);
+                var tcheckList = [...checkList];
+                tcheckList[15][index].name = text;
+                setChecklist(tcheckList);
+              }}
+            />
 
-                    <LabelledInput
+                    {/* <LabelledInput
                       label={'Hotel Location'}
                       data={checkList[15][index].name}
                       datatype={'text'}
@@ -2376,7 +2500,19 @@ export default function PreArrival(props) {
                       }}
                       multiline={false}
                       numberOfLines={1}
-                    />
+                    /> */}
+
+          <Text style={styleSheet.label}>Hotel Location</Text>
+            <TextInput
+              style={styleSheet.input}
+              value={checkList[15][index].location}
+              onChangeText={text => {
+                console.log(text);
+                var tcheckList = [...checkList];
+                tcheckList[15][index].location = text;
+                setChecklist(tcheckList);
+              }}
+            />
 
                     <TakeCamera
                       label={'Map of Route to Hotel'}
@@ -2441,7 +2577,7 @@ export default function PreArrival(props) {
                     />
                   </View>
                 );
-              }
+              
             })}
           </View>
         </View>
