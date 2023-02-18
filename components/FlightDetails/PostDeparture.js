@@ -1,4 +1,13 @@
-import { View,StyleSheet,Text,TouchableOpacity,Dimensions,ScrollView, ActivityIndicator} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import React, {useRef, useState, useEffect} from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,18 +20,20 @@ import Header from '../subcomponents/Forms/Header';
 import TakeCamera from '../subcomponents/Forms/takecamera';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
-import functions from '@react-native-firebase/functions';
+import {firebase} from '@react-native-firebase/functions';
+import auth from '@react-native-firebase/auth';
 
-const {width,height} = Dimensions.get('window');
-const HeadingTextSize=width / 15;
+const {width, height} = Dimensions.get('window');
+const HeadingTextSize = width / 15;
 
 export default function PostDeparture(props) {
-  const UID=props.route.params.UID;
+  const FUID = props.route.params.UID;
   const refRBSheet = useRef();
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
-  
-  const [uploadSection,setuploadSection]=useState(0);
+  const [uid, setuid] = useState(null);
+
+  const [uploadSection, setuploadSection] = useState(0);
 
   const [postdeparture, setpostdeparture] = useState([
     {value: null, file: []},
@@ -77,165 +88,223 @@ export default function PostDeparture(props) {
     setpostdeparture(tpostdeparture);
   };
 
-  const onPressDocPreA_New = async (index,res) => {
+  const onPressDocPreA_New = async (index, res) => {
     setloading(false);
     RNFetchBlob.fs
-  .readFile(res.uri, 'base64')
-  .then(encoded => {
-    // console.log(encoded, 'reports.base64');
-    setloading(false);
-    var tpostdeparture = [...postdeparture];
-      tpostdeparture[index].file.push({
-      name: res.fileName.replace('rn_image_picker_lib_temp_',''),
-      base64: 'data:' + res.type + ';base64,' + encoded,
-    });
-    setpostdeparture(tpostdeparture);
-    
-  })
-  .catch(error => {
-    setloading(false);
-    console.log(error);
-  });
-  refRBSheet.current.close();
-}
+      .readFile(res.uri, 'base64')
+      .then(encoded => {
+        // console.log(encoded, 'reports.base64');
+        setloading(false);
+        var tpostdeparture = [...postdeparture];
+        tpostdeparture[index].file.push({
+          name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
+          base64: 'data:' + res.type + ';base64,' + encoded,
+        });
+        setpostdeparture(tpostdeparture);
+      })
+      .catch(error => {
+        setloading(false);
+        console.log(error);
+      });
+    refRBSheet.current.close();
+  };
 
-  const getImage=async (type)=>{
-    console.log("HERE")
-    var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
+  const getImage = async type => {
+    console.log('HERE');
+    var options = {
+      mediaType: 'image',
+      includeBase64: false,
+      maxHeight: 800,
+      maxWidth: 800,
+    };
     console.log(options);
-    switch(type){
+    switch (type) {
       case true:
         try {
-          options.mediaType='photo';
-          const result = await ImagePicker.launchImageLibrary(options);  
-          const file=result.assets[0];
-          onPressDocPreA_New(uploadSection,file)
+          options.mediaType = 'photo';
+          const result = await ImagePicker.launchImageLibrary(options);
+          const file = result.assets[0];
+          onPressDocPreA_New(uploadSection, file);
         } catch (error) {
           console.log(error);
         }
         break;
-        case false:
-          try {
-            const result = await ImagePicker.launchCamera(options);  
-            const file=result.assets[0];
-            onPressDocPreA_New(uploadSection,file)
-          } catch (error) {
-            console.log(error);
-          }
-          break;
-          default:
-            break;
+      case false:
+        try {
+          const result = await ImagePicker.launchCamera(options);
+          const file = result.assets[0];
+          onPressDocPreA_New(uploadSection, file);
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      default:
+        break;
     }
-    
-}
+  };
 
-const [formReady,setformReady]=useState(true);
-const [callLoad,setcallLoad]=useState(false);
-const uploadInitiator=(type)=>{
-  setuploadSection(type)
-  refRBSheet.current.open()
-}
+  const [formReady, setformReady] = useState(true);
+  const [callLoad, setcallLoad] = useState(false);
+  const uploadInitiator = type => {
+    setuploadSection(type);
+    refRBSheet.current.open();
+  };
 
-const setText=(index,text)=>{
+  const setText = (index, text) => {
     var tpostdeparture = [...postdeparture];
     tpostdeparture[index] = text;
     setpostdeparture(tpostdeparture);
-}
+  };
 
-const finalSend=async (payload)=>{
-  const sayHello = functions().httpsCallable('getPostDeparture');
-  sayHello(payload).then((data)=>{
-    console.log(data);
-    setcallLoad(false);
-  }).catch(e=>{
-    console.log(e);
-    setcallLoad(false);
-  });
-}
+  const sendForm = () => {
+    setcallLoad(true);
+    const email = auth().currentUser.email;
+    console.log(
+      {
+        POD_SEV_TIME: postdeparture[1] ? postdeparture[1] : '""',
+        POD_SEV_NAME: postdeparture[2] ? postdeparture[2] : '""',
+        POD_REM: postdeparture[3] ? postdeparture[3] : '""',
+        UID: uid ? uid : '',
+        STATUS: 0,
+        FUID: FUID,
+        UPDATE_BY: email,
+      },
+      'res',
+    );
 
-const sendForm=()=>{
-  setcallLoad(true);
-  var formFields={
-    stamped_gendec:postdeparture[0],
-    service_verified:{
-     time_verified: postdeparture[1],
-     name_of_verifier:postdeparture[2]
-    },
-    remarks:postdeparture[3],
-    UID
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable('updateFlightModule?module=PostPostDepartureChecklist')(
+        JSON.stringify({
+          POD_GENDEC: '""',
+          POD_SEV_TIME: postdeparture[1] ? postdeparture[1] : '""',
+          POD_SEV_NAME: postdeparture[2] ? postdeparture[2] : '""',
+          POD_REM: postdeparture[3] ? postdeparture[3] : '""',
+          UID: uid ? uid : '',
+          STATUS: 0,
+          FUID: FUID,
+          UPDATE_BY: email,
+        }),
+      )
+      .then(response => {
+        Alert.alert('Success');
+        setcallLoad(false);
+        console.log(response);
+      })
+      .catch(error => {
+        Alert.alert('Error in updation');
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
+  };
 
-  }
-  finalSend(formFields)
-}
+  useEffect(() => {
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable(
+        'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureChecklist',
+      )()
+      .then(response => {
+        var packet = JSON.parse(response.data.body);
+        var res = [...packet.Table];
+        console.log(res, 'res');
+        if (res.length > 0) {
+          console.log(res[0]);
+          setuid(res[0].UID);
+          let x = [...postdeparture];
+          x[1] = res[0].POD_SEV_TIME;
+          x[2] = res[0].POD_SEV_NAME;
+          x[3] = res[0].POD_REM;
+          setpostdeparture([...x]);
+        }
+        setcallLoad(false);
+      })
+      .catch(error => {
+        setcallLoad(false);
+        console.log(error, 'Function error');
+        setpostdeparture([...x]);
+      });
+  }, []);
+
   return (
     <ScrollView>
       <Loader visible={loading} />
-      <Header 
-        headingSize={HeadingTextSize} 
-        heading={"Post-Departure"} 
-        sendForm={sendForm} 
+      <Header
+        headingSize={HeadingTextSize}
+        heading={'Post-Departure'}
+        sendForm={sendForm}
         Icon={
-          callLoad ? <ActivityIndicator color='green' size='small' /> :
-          <Icons name="content-save" color={formReady ? "green" : "#aeaeae"} size={30} />
-      } 
+          callLoad ? (
+            <ActivityIndicator color="green" size="small" />
+          ) : (
+            <Icons
+              name="content-save"
+              color={formReady ? 'green' : '#aeaeae'}
+              size={30}
+            />
+          )
+        }
       />
       <View style={{padding: 20}}>
-        <TakeCamera label={"Stamped GenDec"} type={0} uploadInitiator={uploadInitiator} 
-        removeFilePreA={(a,b,c)=>{
-          console.log(a,b,c)
-          if(postdeparture[0].file.length===1) postdeparture[0].file=[]
-          else postdeparture[0].file.splice(b,1);
-          //removeFilePreA
-        }} 
-        attachments={postdeparture[0]} 
-            Icon={
-              <Icons
-                style={{color: 'green', marginLeft: 10}}
-                name="close"
-                size={30}
-              /> 
-            } 
-        />
-        
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
-            Services Verified:
-          </Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: 'rgba(0,0,0,0.5)',
-              padding: 10,
-              borderRadius: 10,
-              marginVertical: 10,
-            }}>
-
-              <DateTimeInput 
-                label={'Time Verified (Local Time)'}
-                showDatePickerPostDepart={showDatePickerPostDepart}
-                setNowPostDepart={setNowPostDepart}
-                data={postdeparture[1]}
-                size={width / 25}
-                index={1}
-              />
-              <LabelledInput
-                label={'Name of Verifier'}
-                data={postdeparture[2]}
-                index={2}
-                setText={setText} 
-                multiline={false}
-                numberOfLines={1}
-              />
-          </View>
-        {/*   ------------------------------Services Verified end ----------- */}
-            <LabelledInput
-              label={'Additional Remarks'}
-              data={postdeparture[3]}
-              index={3}
-              setText={setText} 
-              multiline={true}
-              numberOfLines={2}
+        <TakeCamera
+          label={'Stamped GenDec'}
+          type={0}
+          uploadInitiator={uploadInitiator}
+          removeFilePreA={(a, b, c) => {
+            console.log(a, b, c);
+            if (postdeparture[0].file.length === 1) postdeparture[0].file = [];
+            else postdeparture[0].file.splice(b, 1);
+            //removeFilePreA
+          }}
+          attachments={postdeparture[0]}
+          Icon={
+            <Icons
+              style={{color: 'green', marginLeft: 10}}
+              name="close"
+              size={30}
             />
-        
+          }
+        />
+
+        <Text style={[styleSheet.label, {marginTop: 10}]}>
+          Services Verified:
+        </Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 10,
+            marginVertical: 10,
+          }}>
+          <DateTimeInput
+            label={'Time Verified (Local Time)'}
+            showDatePickerPostDepart={showDatePickerPostDepart}
+            setNowPostDepart={setNowPostDepart}
+            data={postdeparture[1]}
+            size={width / 25}
+            index={1}
+          />
+          <LabelledInput
+            label={'Name of Verifier'}
+            data={postdeparture[2]}
+            index={2}
+            setText={setText}
+            multiline={false}
+            numberOfLines={1}
+          />
+        </View>
+        {/*   ------------------------------Services Verified end ----------- */}
+        <LabelledInput
+          label={'Additional Remarks'}
+          data={postdeparture[3]}
+          index={3}
+          setText={setText}
+          multiline={true}
+          numberOfLines={2}
+        />
       </View>
       <DateTimePickerModal
         isVisible={isDatePickerVisiblePostDepart}
@@ -245,51 +314,51 @@ const sendForm=()=>{
         is24Hour={true}
       />
       <RBSheet
-          ref={refRBSheet}
-          closeOnDragDown={true}
-          closeOnPressMask={true}
-          height={height / 4}
-          customStyles={{
-            wrapper: {
-              backgroundColor: '#00000056',
-            },
-            draggableIcon: {
-              backgroundColor: '#000',
-            },
-          }}>
-          <View style={{flex: 1, paddingLeft: 20}}>
-            <View style={{flex: 1}}>
-              <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
-            </View>
-            <View style={{flex: 1.5, flexDirection: 'column'}}>
-              <TouchableOpacity
-                onPress={()=>getImage(false)}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                }}>
-                <Icons name="camera-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
-                  Upload from Camera
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                //onPress={() => onPressDocPreA(6)}
-                onPress={()=>getImage(true)}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                }}>
-                <Icons name="image-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
-                  Upload from Gallery
-                </Text>
-              </TouchableOpacity>
-            </View>
+        ref={refRBSheet}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        height={height / 4}
+        customStyles={{
+          wrapper: {
+            backgroundColor: '#00000056',
+          },
+          draggableIcon: {
+            backgroundColor: '#000',
+          },
+        }}>
+        <View style={{flex: 1, paddingLeft: 20}}>
+          <View style={{flex: 1}}>
+            <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
           </View>
-        </RBSheet>
+          <View style={{flex: 1.5, flexDirection: 'column'}}>
+            <TouchableOpacity
+              onPress={() => getImage(false)}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+              }}>
+              <Icons name="camera-outline" size={25} color={'black'} />
+              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                Upload from Camera
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              //onPress={() => onPressDocPreA(6)}
+              onPress={() => getImage(true)}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+              }}>
+              <Icons name="image-outline" size={25} color={'black'} />
+              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                Upload from Gallery
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </RBSheet>
     </ScrollView>
   );
 }
@@ -299,7 +368,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName:{color: 'black',fontSize:12,fontWeight:'600'},
+  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
   checkbox: {
     width: 40,
     height: 40,

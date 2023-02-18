@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import functions from '@react-native-firebase/functions';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ActivityIndicator} from 'react-native';
 import {firebase} from '@react-native-firebase/functions';
+import auth from '@react-native-firebase/auth';
 
 export default function InterimService(props) {
   const FUID = props.route.params.UID;
@@ -32,12 +34,13 @@ export default function InterimService(props) {
         var res = packet.Table;
         console.log(res);
         if (res.length > 0) {
-          var y = Iservices;
+          var y = [...Iservices];
           y = [];
           res.forEach((val, index) => {
             y.push({
-              service: val.INS_SERVICE.trim(),
-              remarks: val.INS_REM,
+              service: val.INS_SERVICE.trim().replace('""', ''),
+              remarks: val.INS_REM.trim().replace('""', ''),
+              UID: val.UID,
             });
           });
           setIservices([...y]);
@@ -64,38 +67,34 @@ export default function InterimService(props) {
     setIservices(service);
   };
   const [callLoad, setcallLoad] = useState(false);
-  const finalSend = async payload => {
-    const sayHello = functions().httpsCallable('getInterimService');
-    sayHello(payload)
-      .then(data => {
-        console.log(data);
-        setcallLoad(false);
-      })
-      .catch(e => {
-        console.log(e);
-        setcallLoad(false);
-      });
-  };
   const sendForm = () => {
+    const email = auth().currentUser.email;
     setcallLoad(true);
-    var data = {
-      UID,
-      FUID: '',
-      INS_SERVICE: [],
-      INS_REM: [],
-      STATUS: 0,
-      UPDATE_BY: 'api_admin',
-    };
-    var send = {
-      service: [],
-      remarks: [],
-    };
-    Iservices.map(msg => {
-      data.INS_SERVICE.push(msg.service);
-      data.INS_REM.push(msg.remarks);
+    Iservices.map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostInterimServices')(
+          JSON.stringify({
+            INS_SERVICE: val.service ? val.service : '""',
+            INS_REM: val.remarks ? val.remarks : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
     });
-    finalSend(data);
-    //console.log("OKOK",Iservices);
   };
   return (
     <View>

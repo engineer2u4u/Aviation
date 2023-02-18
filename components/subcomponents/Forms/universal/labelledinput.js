@@ -30,7 +30,7 @@ const LabelledInput = ({
   useEffect(() => {
     // console.log("HEELLLO",data)
     setval(data);
-  }, [ini]);
+  }, [data]);
 
   return (
     <>
