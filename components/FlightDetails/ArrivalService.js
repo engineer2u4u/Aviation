@@ -143,54 +143,120 @@ export default function ArrivalService(props) {
           console.log(res[0]);
           setuid(res[0].UID);
           let x = [...arrival];
-          x[0] = res[0].ARS_MOVACLANDED;
-          x[1] = res[0].ARS_MOVCHOCKIN;
-          x[2] = res[0].ARS_GPU_START;
-          x[3] = res[0].ARS_GPU_STOP;
-          x[4] = res[0].ARS_PAX;
-          x[5] = res[0].ARS_CREW;
-          x[6].value = res[0].ARS_BAGGAGE;
-          x[7] = res[0].ARS_MOV_PXDA;
-          x[8] = res[0].ARS_MOV_PXTAT;
+          x[0] = res[0].ARS_MOVACLANDED
+            ? res[0].ARS_MOVACLANDED.toString().trim().replace('""', '')
+            : '';
+          x[1] = res[0].ARS_MOVCHOCKIN
+            ? res[0].ARS_MOVCHOCKIN.toString().trim().replace('""', '')
+            : '';
+          x[2] = res[0].ARS_GPU_START
+            ? res[0].ARS_GPU_START.toString().trim().replace('""', '')
+            : '';
+          x[3] = res[0].ARS_GPU_STOP
+            ? res[0].ARS_GPU_STOP.toString().trim().replace('""', '')
+            : '';
+          x[4] = res[0].ARS_PAX
+            ? res[0].ARS_PAX.toString().trim().replace('""', '')
+            : '';
+          x[5] = res[0].ARS_CREW
+            ? res[0].ARS_CREW.toString().trim().replace('""', '')
+            : '';
+          x[6].value = res[0].ARS_BAGGAGE
+            ? res[0].ARS_BAGGAGE.toString().toString().trim().replace('""', '')
+            : '';
+          x[7] = res[0].ARS_MOV_PXDA
+            ? res[0].ARS_MOV_PXDA.toString().trim().replace('""', '')
+            : '';
+          x[8] = res[0].ARS_MOV_PXTAT
+            ? res[0].ARS_MOV_PXTAT.toString().trim().replace('""', '')
+            : '';
           x[9].checked = res[0].ARS_MOV_PXVA;
-          x[10] = res[0].ARS_MOV_PXCIQ;
-          // x[11] = res[0].ARS_MOV_PXDT;
-          x[12].checked = res[0].ARS_MOV_VOA;
-          // x[14] = res[0].ARS_MOV_PXDT;
-          x[15] = res[0].ARS_CTR_CEO;
-          // x[16] = res[0].ARS_CTR_CEL;
-          // x[17] = res[0].ARS_CTR_NCO;
-          x[18] = res[0].ARS_CTR_CDT;
-          x[19] = res[0].ARS_CTR_REM;
+          x[10] = res[0].ARS_MOV_PXCIQ
+            ? res[0].ARS_MOV_PXCIQ.toString().trim().replace('""', '')
+            : '';
+          // x[11] = res[0].ARS_MOV_PXDT?res[0].ARS_MOV_PXDT.toString().trim().replace('""', ''): '';
+          x[12].checked = res[0].ARS_MOV_VOA == 1 ? true : false;
+          // x[14] = res[0].ARS_MOV_PXDT?res[0].ARS_MOV_PXDT.toString().trim().replace('""', ''): '';
+          x[15] = res[0].ARS_CTR_CEO
+            ? res[0].ARS_CTR_CEO.toString().trim().replace('""', '')
+            : '';
+          // x[16] = res[0].ARS_CTR_CEL?res[0].ARS_CTR_CEL.toString().trim().replace('""', ''): '';
+          // x[17] = res[0].ARS_CTR_NCO?res[0].ARS_CTR_NCO.toString().trim().replace('""', ''): '';
+          x[18] = res[0].ARS_CTR_CDT
+            ? res[0].ARS_CTR_CDT.toString().trim().replace('""', '')
+            : '';
+          x[19] = res[0].ARS_CTR_REM
+            ? res[0].ARS_CTR_REM.toString().trim().replace('""', '')
+            : '';
           x[20].checked = res[0].ARS_CTR_REQ == 1 ? true : false;
-          x[21] = res[0].ARS_WAS_CT;
-          x[22] = res[0].ARS_WAS_ET;
-          x[23] = res[0].ARS_WAS_REM;
+          x[21] = res[0].ARS_WAS_CT
+            ? res[0].ARS_WAS_CT.toString().trim().replace('""', '')
+            : '';
+          x[22] = res[0].ARS_WAS_ET
+            ? res[0].ARS_WAS_ET.toString().trim().replace('""', '')
+            : '';
+          x[23] = res[0].ARS_WAS_REM
+            ? res[0].ARS_WAS_REM.toString().trim().replace('""', '')
+            : '';
           x[24].checked = res[0].ARS_WAS_REQ == 1 ? true : false;
-          x[25] = res[0].ARS_LAS_CT;
-          x[26] = res[0].ARS_LAS_ET;
-          x[27] = res[0].ARS_LAS_REM;
+          x[25] = res[0].ARS_LAS_CT
+            ? res[0].ARS_LAS_CT.toString().trim().replace('""', '')
+            : '';
+          x[26] = res[0].ARS_LAS_ET
+            ? res[0].ARS_LAS_ET.toString().trim().replace('""', '')
+            : '';
+          x[27] = res[0].ARS_LAS_REM
+            ? res[0].ARS_LAS_REM.toString().trim().replace('""', '')
+            : '';
           x[28].checked = res[0].ARS_LAS_REQ == 1 ? true : false;
-          x[29] = res[0].ARS_RUS_CT;
-          x[30] = res[0].ARS_RUS_REM;
+          x[29] = res[0].ARS_RUS_CT
+            ? res[0].ARS_RUS_CT.toString().trim().replace('""', '')
+            : '';
+          x[30] = res[0].ARS_RUS_REM
+            ? res[0].ARS_RUS_REM.toString().trim().replace('""', '')
+            : '';
           x[31].checked = res[0].ARS_RUS_REQ == 1 ? true : false;
-          x[32] = res[0].ARS_FOA_FTAT;
-          x[33] = res[0].ARS_FOA_START;
-          x[34] = res[0].ARS_FOA_END;
-          // x[35] = res[0].ARS_FOA_RECEIPT;
-          x[36] = res[0].ARS_FOA_REM;
+          x[32] = res[0].ARS_FOA_FTAT
+            ? res[0].ARS_FOA_FTAT.toString().trim().replace('""', '')
+            : '';
+          x[33] = res[0].ARS_FOA_START
+            ? res[0].ARS_FOA_START.toString().trim().replace('""', '')
+            : '';
+          x[34] = res[0].ARS_FOA_END
+            ? res[0].ARS_FOA_END.toString().trim().replace('""', '')
+            : '';
+          // x[35] = res[0].ARS_FOA_RECEIPT?res[0].ARS_FOA_RECEIPT.toString().trim().replace('""', ''): '';
+          x[36] = res[0].ARS_FOA_REM
+            ? res[0].ARS_FOA_REM.toString().trim().replace('""', '')
+            : '';
           x[37].checked = res[0].ARS_FOA_REQ == 1 ? true : false;
-          x[38] = res[0].ARS_TOS_START;
-          x[39] = res[0].ARS_TOS_END;
-          // x[40] = res[0].ARS_TOS_PHOTO;
-          x[41] = res[0].ARS_TOS_REM;
+          x[38] = res[0].ARS_TOS_START
+            ? res[0].ARS_TOS_START.toString().trim().replace('""', '')
+            : '';
+          x[39] = res[0].ARS_TOS_END
+            ? res[0].ARS_TOS_END.toString().trim().replace('""', '')
+            : '';
+          // x[40] = res[0].ARS_TOS_PHOTO?res[0].ARS_TOS_PHOTO.toString().trim().replace('""', ''): '';
+          x[41] = res[0].ARS_TOS_REM
+            ? res[0].ARS_TOS_REM.toString().trim().replace('""', '')
+            : '';
           x[42].checked = res[0].ARS_TOS_REQ == 1 ? true : false;
-          x[43] = res[0].ARS_OVB_NUMBER;
-          x[44].checked = res[0].ARS_OVB_REQ;
-          x[46] = res[0].ARS_CRM_CAT;
-          x[48] = res[0].ARS_CRM_CCIQ;
-          x[45] = res[0].ARS_CRM_CDA;
-          x[47] = res[0].ARS_CRM_CVA;
+          x[43] = res[0].ARS_OVB_NUMBER
+            ? res[0].ARS_OVB_NUMBER.toString().trim().replace('""', '')
+            : '';
+          x[44].checked = res[0].ARS_OVB_REQ == 1 ? true : false;
+          x[46] = res[0].ARS_CRM_CAT
+            ? res[0].ARS_CRM_CAT.toString().trim().replace('""', '')
+            : '';
+          x[48] = res[0].ARS_CRM_CCIQ
+            ? res[0].ARS_CRM_CCIQ.toString().trim().replace('""', '')
+            : '';
+          x[45] = res[0].ARS_CRM_CDA
+            ? res[0].ARS_CRM_CDA.toString().trim().replace('""', '')
+            : '';
+          x[47] = res[0].ARS_CRM_CVA
+            ? res[0].ARS_CRM_CVA.toString().trim().replace('""', '')
+            : '';
           // console.log([...x]);
           setArrival([...x]);
           firebase

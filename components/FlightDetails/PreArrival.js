@@ -138,7 +138,7 @@ export default function PreArrival(props) {
       .then(response => {
         var packet = JSON.parse(response.data.body);
         var res = packet.Table;
-        console.log(res);
+        // console.log(res);
         if (res.length > 0) {
           var y = checkList;
           y[13] = [];
@@ -149,7 +149,7 @@ export default function PreArrival(props) {
                 name: val.PCH_HN.trim().replace('""', ''),
                 location: val.PCH_HL.trim().replace('""', ''),
                 hotelMap: {value: null, file: []},
-                time: val.PCH_TT,
+                transportTime: val.PCH_TT,
                 remarks: val.PCH_REM.trim().replace('""', ''),
                 type: val.PCH_TYPE,
                 UID: val.UID,
@@ -159,7 +159,7 @@ export default function PreArrival(props) {
                 name: val.PCH_HN.trim().replace('""', ''),
                 location: val.PCH_HL.trim().replace('""', ''),
                 hotelMap: {value: null, file: []},
-                time: val.PCH_TT,
+                transportTime: val.PCH_TT,
                 remarks: val.PCH_REM.trim().replace('""', ''),
                 type: val.PCH_TYPE,
                 UID: val.UID,
@@ -168,7 +168,7 @@ export default function PreArrival(props) {
           });
           pHotel.current = y[13];
           cHotel.current = y[15];
-          console.log(y[13]);
+          console.log(y[15]);
           setChecklist([...y]);
         } else {
           console.log(checkList[13], checkList[15]);
@@ -189,13 +189,13 @@ export default function PreArrival(props) {
         //get pax & crew transport
         var packet = JSON.parse(response.data.body);
         var res = packet.Table;
-        console.log(res);
+        // console.log(res);
         if (res.length > 0) {
           var y = checkList;
           y[12] = [];
           y[14] = [];
           res.forEach((val, index) => {
-            console.log(val.PCT_TYPE);
+            // console.log(val.PCT_TYPE);
             if (val.PCT_TYPE == 'Pax       ') {
               y[12].push({
                 transportTime: val.PCT_STAT.trim().replace('""', ''),
@@ -593,7 +593,7 @@ export default function PreArrival(props) {
           JSON.stringify({
             PCH_HN: val.name ? val.name : '""',
             PCH_HL: val.location ? val.location : '""',
-            PCH_TT: val.time ? val.time : '""',
+            PCH_TT: val.transportTime ? val.transportTime : '""',
             PCH_REM: val.remarks ? val.remarks : '""',
             PCH_TYPE: val.type ? val.type : '""',
             UID: val.UID ? val.UID : '',
@@ -622,7 +622,7 @@ export default function PreArrival(props) {
           JSON.stringify({
             PCH_HN: val.name ? val.name : '""',
             PCH_HL: val.location ? val.location : '""',
-            PCH_TT: val.time ? val.time : '""',
+            PCH_TT: val.transportTime ? val.transportTime : '""',
             PCH_REM: val.remarks ? val.remarks : '""',
             PCH_TYPE: val.type ? val.type : '""',
             UID: val.UID ? val.UID : '',
@@ -659,6 +659,7 @@ export default function PreArrival(props) {
             STATUS: 0,
             FUID: FUID,
             UPDATE_BY: email,
+            UID: val.UID ? val.UID : '',
           }),
         )
         .then(response => {
@@ -2230,19 +2231,30 @@ export default function PreArrival(props) {
                     data={checkList[15][index].transportTime}
                     index={15}
                   />
-                  <LabelledInput
+                  <Text style={styleSheet.label}>Remarks</Text>
+                  <TextInput
+                    style={styleSheet.input}
+                    value={checkList[15][index].remarks}
+                    onChangeText={text => {
+                      console.log(text);
+                      var tcheckList = [...checkList];
+                      tcheckList[15][index].remarks = text;
+                      setChecklist(tcheckList);
+                    }}
+                  />
+                  {/* <LabelledInput
                     label={'Remarks'}
                     data={checkList[15][index].remarks}
                     datatype={'text'}
                     index={15}
                     setText={text => {
                       var tcheckList = [...checkList];
-                      tcheckList[15][index].location = text;
+                      tcheckList[15][index].remarks = text;
                       setChecklist(tcheckList);
                     }}
                     multiline={true}
                     numberOfLines={2}
-                  />
+                  /> */}
                 </View>
               );
             })}
