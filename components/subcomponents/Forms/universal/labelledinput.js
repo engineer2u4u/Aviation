@@ -24,12 +24,12 @@ const LabelledInput = ({
   const setTextbind = event => {
     if (added) {
       setval(event);
-    } else setText(index, event);
+    } else setText(index, event, datatype, sectionName);
   };
 
   useEffect(() => {
     // console.log("HEELLLO",data)
-    setval(data);
+    setval(data ? data.toString() : '');
   }, [data]);
 
   return (

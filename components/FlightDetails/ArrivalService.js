@@ -140,8 +140,8 @@ export default function ArrivalService(props) {
         var packet = JSON.parse(response.data.body);
         var res = [...packet.Table];
         if (res) {
-          console.log(res);
-          setuid(res.UID);
+          console.log(res[0]);
+          setuid(res[0].UID);
           let x = [...arrival];
           x[0] = res[0].ARS_MOVACLANDED;
           x[1] = res[0].ARS_MOVCHOCKIN;
@@ -150,12 +150,12 @@ export default function ArrivalService(props) {
           x[4] = res[0].ARS_PAX;
           x[5] = res[0].ARS_CREW;
           x[6].value = res[0].ARS_BAGGAGE;
-          // x[7] = res[0].ARS_MOV_PXDA;
-          // x[8] = res[0].ARS_MOV_PXTAT;
-          // x[9].checked = res[0].ARS_MOV_VOA;
-          // x[10] = res[0].ARS_MOV_PXCIQ;
+          x[7] = res[0].ARS_MOV_PXDA;
+          x[8] = res[0].ARS_MOV_PXTAT;
+          x[9].checked = res[0].ARS_MOV_PXVA;
+          x[10] = res[0].ARS_MOV_PXCIQ;
           // x[11] = res[0].ARS_MOV_PXDT;
-          // x[12].checked = res[0].ARS_MOV_VOA;
+          x[12].checked = res[0].ARS_MOV_VOA;
           // x[14] = res[0].ARS_MOV_PXDT;
           x[15] = res[0].ARS_CTR_CEO;
           // x[16] = res[0].ARS_CTR_CEL;
@@ -187,8 +187,12 @@ export default function ArrivalService(props) {
           x[42].checked = res[0].ARS_TOS_REQ == 1 ? true : false;
           x[43] = res[0].ARS_OVB_NUMBER;
           x[44].checked = res[0].ARS_OVB_REQ;
+          x[46] = res[0].ARS_CRM_CAT;
+          x[48] = res[0].ARS_CRM_CCIQ;
+          x[45] = res[0].ARS_CRM_CDA;
+          x[47] = res[0].ARS_CRM_CVA;
           // console.log([...x]);
-          // setArrival([...x]);
+          setArrival([...x]);
           firebase
             .app()
             .functions('asia-southeast1')
@@ -199,7 +203,7 @@ export default function ArrivalService(props) {
               var packet = JSON.parse(response.data.body);
               var res = packet.Table;
               console.log(res, 'res');
-              if (res.length > 0) {
+              if (res && res.length > 0) {
                 x[60] = [];
                 x[62] = [];
                 res.forEach((val, index) => {
@@ -221,8 +225,12 @@ export default function ArrivalService(props) {
                     });
                   }
                 });
+                console.log(x, 'res');
+
                 setArrival([...x]);
               } else {
+                console.log(x, 'res');
+
                 setArrival([...x]);
               }
               setcallLoad(false);
@@ -443,6 +451,7 @@ export default function ArrivalService(props) {
     const payload = {
       ARS_MOVACLANDED: arrival[0] ? arrival[0] : '""',
       ARS_MOVCHOCKIN: arrival[1] ? arrival[1] : '""',
+      ARS_GPU_REQ: 0,
       ARS_GPU_START: arrival[2] ? arrival[2] : '""',
       ARS_GPU_STOP: arrival[3] ? arrival[3] : '""',
       ARS_PAX: arrival[4] ? arrival[4] : '""',
@@ -456,7 +465,8 @@ export default function ArrivalService(props) {
       ARS_WAS_ET: arrival[22] ? arrival[22] : '""',
       ARS_WAS_REM: arrival[23] ? arrival[23] : '""',
       ARS_WAS_REQ: arrival[24].checked == true ? 1 : 0,
-      ARS_LAS_CT: arrival[25] ? arrival[25] : '""',
+      ARS_LAS_ST: arrival[25] ? arrival[25] : '""',
+      ARS_LAS_CT: '""',
       ARS_LAS_ET: arrival[26] ? arrival[26] : '""',
       ARS_LAS_REM: arrival[27] ? arrival[27] : '""',
       ARS_LAS_REQ: arrival[28].checked == true ? 1 : 0,
@@ -477,25 +487,36 @@ export default function ArrivalService(props) {
       STATUS: 0,
       UID: uid ? uid : '',
       FUID: FUID,
+      UPDATE_BY: email,
+      ARS_CRM_CAT: arrival[46] ? arrival[46] : '""',
+      ARS_CRM_CCIQ: arrival[48] ? arrival[48] : '""',
+      ARS_CRM_CDA: arrival[45] ? arrival[45] : '""',
+      ARS_CRM_CVA: arrival[47].checked == true ? 1 : 0,
+      ARS_CRM_REM: '""',
+      ARS_MOV_PXAT: arrival[8] ? arrival[8] : '""',
+      ARS_MOV_PXCIQ: arrival[10] ? arrival[10] : '""',
+      ARS_MOV_PXDA: arrival[7] ? arrival[7] : '""',
+      ARS_MOV_PXVA: arrival[9].checked == true ? 1 : 0,
+      ARS_MOV_VOA: arrival[12].checked == true ? 1 : 0,
     };
-    console.log(arrival[62]);
+    console.log(payload, 'payload');
     setcallLoad(true);
-    // firebase
-    //   .app()
-    //   .functions('asia-southeast1')
-    //   .httpsCallable('updateFlightModule?module=PostArrivalServices')(
-    //     JSON.stringify(payload),
-    //   )
-    //   .then(response => {
-    //     Alert.alert('Success');
-    //     setcallLoad(false);
-    //     console.log(response);
-    //   })
-    //   .catch(error => {
-    //     Alert.alert('Error in updation');
-    //     setcallLoad(false);
-    //     console.log(error, 'Function error');
-    //   });
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable('updateFlightModule?module=PostArrivalServices')(
+        JSON.stringify(payload),
+      )
+      .then(response => {
+        Alert.alert('Success');
+        setcallLoad(false);
+        console.log(response);
+      })
+      .catch(error => {
+        Alert.alert('Error in updation');
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
     arrival[60].map(val => {
       firebase
         .app()
@@ -658,7 +679,7 @@ export default function ArrivalService(props) {
             <TextInput
               style={[s.input, {backgroundColor: 'white'}]}
               editable={true}
-              value={arrival[4]}
+              value={arrival[4] ? arrival[4].toString() : ''}
               onChangeText={text => {
                 var tarrival = [...arrival];
                 tarrival[4] = text;
@@ -688,7 +709,7 @@ export default function ArrivalService(props) {
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 style={styleSheet.input}
-                value={arrival[6].value}
+                value={arrival[6].value ? arrival[6].value.toString() : ''}
                 onChangeText={text => {
                   var tarrival = [...arrival];
                   tarrival[6].value = text;
@@ -2316,6 +2337,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,

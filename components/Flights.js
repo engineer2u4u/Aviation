@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   TouchableHighlight,
+  ActivityIndicator,
   View,
 } from 'react-native';
 
@@ -15,6 +16,8 @@ import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/functions';
 
 export default function Flights({navigation}) {
+  const [callLoad, setcallLoad] = useState(false);
+
   const [listData, setListData] = useState(
     Array(20)
       .fill('')
@@ -24,29 +27,22 @@ export default function Flights({navigation}) {
   const [flightlist, setflightlist] = useState([]);
 
   useEffect(() => {
-    // const url =
-    //   'https://demo.vellas.net:94/arrowdemoapi/api/Values/GetGroundHandlingList?_token=66D64C12-2055-4F11-BCF1-9F563ACB032F&_opco=&_uid=';
-    // fetch(url, {method: 'GET'})
-    //   .then(data => {
-    //     return data.json();
-    //   })
-    //   .then(data => {
-    //     setflightlist(data.Table);
-    //   })
-    //   .catch(e => {
-    //     console.log(e);
-    //   });
+    setcallLoad(true);
     firebase
       .app()
       .functions('asia-southeast1')
       .httpsCallable('getFlights')()
       .then(response => {
         console.log(response);
+        setcallLoad(false);
+
         var packet = JSON.parse(response.data.body);
         // //console.log(packet.Table);
         setflightlist(packet.Table);
       })
       .catch(error => {
+        setcallLoad(false);
+
         console.log(error, 'Function error');
       });
   }, []);
@@ -138,9 +134,31 @@ export default function Flights({navigation}) {
   );
   return (
     <View style={styles.container}>
-      <Text style={{fontSize: 30, marginLeft: 10, color: 'black'}}>
+      {/* <Text style={{fontSize: 30, marginLeft: 10, color: 'black'}}>
         Flights Details
-      </Text>
+      </Text> */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginVertical: 20,
+        }}>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: 'black',
+            paddingLeft: 20,
+          }}>
+          Flights Details
+        </Text>
+        {callLoad && (
+          <View style={{paddingRight: 20}}>
+            <ActivityIndicator color="green" size={'small'} />
+          </View>
+        )}
+      </View>
       <SwipeListView
         data={flightlist}
         renderItem={renderItem}

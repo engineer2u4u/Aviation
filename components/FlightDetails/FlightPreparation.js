@@ -217,6 +217,8 @@ export default function FlightPreparation(props) {
   };
 
   useEffect(() => {
+    setcallLoad(true);
+
     firebase
       .app()
       .functions('asia-southeast1')

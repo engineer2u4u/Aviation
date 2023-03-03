@@ -226,6 +226,7 @@ const styleSheet = StyleSheet.create({
     marginVertical: 10,
     textAlignVertical: 'top',
     color: 'black',
+    fontSize: 20,
   },
   picker: {
     flex: 1,

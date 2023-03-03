@@ -153,7 +153,7 @@ export default function PostDeparture(props) {
   const setText = (index, text) => {
     var tpostdeparture = [...postdeparture];
     tpostdeparture[index] = text;
-    setpostdeparture(tpostdeparture);
+    setpostdeparture([...tpostdeparture]);
   };
 
   const sendForm = () => {
@@ -179,7 +179,9 @@ export default function PostDeparture(props) {
         JSON.stringify({
           POD_GENDEC: '""',
           POD_SEV_TIME: postdeparture[1] ? postdeparture[1] : '""',
-          POD_SEV_NAME: postdeparture[2] ? postdeparture[2] : '""',
+          POD_SEV_NAME: postdeparture[2].trim()
+            ? postdeparture[2].trim()
+            : '""',
           POD_REM: postdeparture[3] ? postdeparture[3] : '""',
           UID: uid ? uid : '',
           STATUS: 0,
@@ -200,11 +202,12 @@ export default function PostDeparture(props) {
   };
 
   useEffect(() => {
+    setcallLoad(true);
     firebase
       .app()
       .functions('asia-southeast1')
       .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureChecklist',
+        'getFlightModule?fuid=' + FUID + '&module=GetPostDepartureChecklist',
       )()
       .then(response => {
         var packet = JSON.parse(response.data.body);
@@ -215,8 +218,8 @@ export default function PostDeparture(props) {
           setuid(res[0].UID);
           let x = [...postdeparture];
           x[1] = res[0].POD_SEV_TIME;
-          x[2] = res[0].POD_SEV_NAME;
-          x[3] = res[0].POD_REM;
+          x[2] = res[0].POD_SEV_NAME.trim().replace('""', '');
+          x[3] = res[0].POD_REM.trim().replace('""', '');
           setpostdeparture([...x]);
         }
         setcallLoad(false);
@@ -224,7 +227,7 @@ export default function PostDeparture(props) {
       .catch(error => {
         setcallLoad(false);
         console.log(error, 'Function error');
-        setpostdeparture([...x]);
+        // setpostdeparture([...x]);
       });
   }, []);
 
@@ -421,6 +424,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,

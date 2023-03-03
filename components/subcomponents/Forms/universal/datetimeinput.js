@@ -28,10 +28,11 @@ const DateTimeInput = ({
     var x = new Date().toLocaleString('en-US', {
       hour12: false,
     });
-    // console.log('JOLLYYYY');
+
     if (typeof setflightdoc === 'function') {
       setflightdoc(x);
     } else {
+      console.log('JOLLYYYY');
       setNowPostDepart(index, x, 'time', sectionName);
     }
 

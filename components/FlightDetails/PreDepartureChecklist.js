@@ -6,6 +6,7 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  Alert,
   ActivityIndicator,
 } from 'react-native';
 import React, {useState, useRef, useEffect} from 'react';
@@ -107,114 +108,150 @@ export default function PreDepartureChecklist(props) {
         'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureChecklist',
       )()
       .then(response => {
-        // console.log(response);
+        console.log(response);
         var packet = JSON.parse(response.data.body);
         var res = [...packet.Table];
-        if (res) {
-          // console.log(res);
+        if (res && res.length > 0) {
           setuid(res[0].UID);
           let x = [...pdeparturecheck];
-          x[2].catering.delivery =
-            res[0]['PDC_CCDT'] == '""' ? '' : res[0]['PDC_CCDT'];
-          x[2].fueling_time =
-            res[0]['PDC_FT'] == '""' ? '' : res[0]['PDC_FT'].trim();
+          x[2].catering.delivery = res[0]['PDC_CCDT']
+            ? res[0]['PDC_CCDT'].trim().replace('""', '')
+            : '';
+          x[2].fueling_time = res[0]['PDC_FT']
+            ? res[0]['PDC_FT'].trim().replace('""', '')
+            : '';
           x[3].checked = res[0]['PDC_PAGD'] == 1 ? true : false;
-          x[3].remarks =
-            res[0]['PDC_PAGD_REM'] == '""' ? '' : res[0]['PDC_PAGD_REM'];
-          x[2].flight_and_admin_documents.recieved =
-            res[0]['PDC_FD_FDR'] == '""' ? '' : res[0]['PDC_FD_FDR'];
-          x[2].flight_and_admin_documents.printed =
-            res[0]['PDC_FD_FDP'] == '""' ? '' : res[0]['PDC_FD_FDP'];
-          x[2].flight_and_admin_documents.notams =
-            res[0]['PDC_FD_NOTAMS'] == '""' ? '' : res[0]['PDC_FD_NOTAMS'];
-          x[2].flight_and_admin_documents.weather_info_updated =
-            res[0]['PDC_FD_WIU'] == '""' ? '' : res[0]['PDC_FD_WIU'];
-          x[2].flight_and_admin_documents.atc_flight_plan =
-            res[0]['PDC_FD_ATC'] == '""' ? '' : res[0]['PDC_FD_ATC'];
-          x[2].flight_and_admin_documents.slot_confirmed =
-            res[0]['PDC_FD_SLOTS'] == '""' ? '' : res[0]['PDC_FD_SLOTS'];
+          x[3].remarks = res[0]['PDC_PAGD_REM']
+            ? res[0]['PDC_PAGD_REM'].trim().replace('""', '')
+            : '';
+          x[2].flight_and_admin_documents.recieved = res[0]['PDC_FD_FDR']
+            ? res[0]['PDC_FD_FDR'].trim().replace('""', '')
+            : '';
+          x[2].flight_and_admin_documents.printed = res[0]['PDC_FD_FDP']
+            ? res[0]['PDC_FD_FDP'].trim().replace('""', '')
+            : '';
+          x[2].flight_and_admin_documents.notams = res[0]['PDC_FD_NOTAMS']
+            ? res[0]['PDC_FD_NOTAMS'].trim().replace('""', '')
+            : '';
+          x[2].flight_and_admin_documents.weather_info_updated = res[0][
+            'PDC_FD_WIU'
+          ]
+            ? res[0]['PDC_FD_WIU'].trim().replace('""', '')
+            : '';
+          x[2].flight_and_admin_documents.atc_flight_plan = res[0]['PDC_FD_ATC']
+            ? res[0]['PDC_FD_ATC'].trim().replace('""', '')
+            : '';
+          x[2].flight_and_admin_documents.slot_confirmed = res[0][
+            'PDC_FD_SLOTS'
+          ]
+            ? res[0]['PDC_FD_SLOTS'].trim().replace('""', '')
+            : '';
           x[5].checked = res[0]['PDC_FBO'] == 1 ? true : false;
-          x[5].remarks =
-            res[0]['PDC_FBO_REM'] == '""' ? '' : res[0]['PDC_FBO_REM'];
+          x[5].remarks = res[0]['PDC_FBO_REM']
+            ? res[0]['PDC_FBO_REM'].trim().replace('""', '')
+            : '';
           x[6].checked = res[0]['PDC_HAR'] == 1 ? true : false;
-          x[6].remarks =
-            res[0]['PDC_HAR_REM'] == '""' ? '' : res[0]['PDC_HAR_REM'];
+          x[6].remarks = res[0]['PDC_HAR_REM']
+            ? res[0]['PDC_HAR_REM'].trim().replace('""', '')
+            : '';
           x[7].checked = res[0]['PDC_CIQ'] == 1 ? true : false;
-          x[7].remarks =
-            res[0]['PDC_CIQ_REM'] == '""' ? '' : res[0]['PDC_CIQ_REM'];
+          x[7].remarks = res[0]['PDC_CIQ_REM']
+            ? res[0]['PDC_CIQ_REM'].trim().replace('""', '')
+            : '';
           x[8].checked = res[0]['PDC_ASR'] == 1 ? true : false;
-          x[8].remarks =
-            res[0]['PDC_ASR_REM'] == '""' ? '' : res[0]['PDC_ASR_REM'];
+          x[8].remarks = res[0]['PDC_ASR_REM']
+            ? res[0]['PDC_ASR_REM'].trim().replace('""', '')
+            : '';
           x[9].checked = res[0]['PDC_CAR'] == 1 ? true : false;
-          x[9].remarks =
-            res[0]['PDC_CAR_REM'] == '""' ? '' : res[0]['PDC_CAR_REM'];
+          x[9].remarks = res[0]['PDC_CAR_REM']
+            ? res[0]['PDC_CAR_REM'].trim().replace('""', '')
+            : '';
           x[10].checked = res[0]['PDC_AFR'] == 1 ? true : false;
-          x[10].remarks =
-            res[0]['PDC_AFR_REM'] == '""' ? '' : res[0]['PDC_AFR_REM'];
+          x[10].remarks = res[0]['PDC_AFR_REM']
+            ? res[0]['PDC_AFR_REM'].trim().replace('""', '')
+            : '';
           setpaxhotelactivesections(res['PDC_PTNR'] == 1 ? true : false);
           x[13].checked = res[0]['PDC_PTA'] == 1 ? true : false;
-          x[13].remarks =
-            res[0]['PDC_PTA_REM'] == '""' ? '' : res[0]['PDC_PTA_REM'];
+          x[13].remarks = res[0]['PDC_PTA_REM']
+            ? res[0]['PDC_PTA_REM'].trim().replace('""', '')
+            : '';
           x[11].checked = res[0]['PDC_CTA'] == 1 ? true : false;
-          x[11].remarks =
-            res[0]['PDC_CTA_REM'] == '""' ? '' : res[0]['PDC_CTA_REM'];
+          x[11].remarks = res[0]['PDC_CTA_REM']
+            ? res[0]['PDC_CTA_REM'].trim().replace('""', '')
+            : '';
           setcrewactivesections(res['PDC_CTNR'] == 1 ? true : false);
           x[14].checked = res[0]['PDC_PNML'] == 1 ? true : false;
-          x[14].remarks =
-            res[0]['PDC_PNML_REM'] == '""' ? '' : res[0]['PDC_PNML_REM'];
-          x[12].checked = res['PDC_CNML'] == 1 ? true : false;
-          x[12].remarks =
-            res['PDC_CNML_REM'] == '""' ? '' : res[0]['PDC_CNML_REM'];
-          console.log(x);
+          x[14].remarks = res[0]['PDC_PNML_REM']
+            ? res[0]['PDC_PNML_REM'].trim().replace('""', '')
+            : '';
+          x[12].checked = res[0]['PDC_CNML'] == 1 ? true : false;
+          x[12].remarks = res[0]['PDC_CNML_REM']
+            ? res[0]['PDC_CNML_REM'].trim().replace('""', '')
+            : '';
+          console.log('recieved', x);
           setpdeparturecheck(x);
-          setcallLoad(false);
+          // setcallLoad(false);
         } else {
-          setcallLoad(false);
-
+          // setcallLoad(false);
           setuid('');
         }
       })
       .catch(error => {
         setcallLoad(false);
-
         console.log(error, 'Function error');
       });
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable(
+        'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureTransport',
+      )()
+      .then(response => {
+        //get pax & crew transport
 
-    // firebase
-    //   .app()
-    //   .functions('asia-southeast1')
-    //   .httpsCallable(
-    //     'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureTransport',
-    //   )()
-    //   .then(response => {
-    //     var packet = JSON.parse(response.data.body);
-    //     var res = packet.Table;
-    //     console.log(res);
-    //     if (res.length > 0) {
-    //       var y = [...addedtestSectionval];
-    //       res.forEach((val, index) => {
-    //         console.log(val.PDCT_TYPE);
-    //         if (val.PDCT_TYPE == 'Crew') {
-    //           y.push({
-    //             name: null,
-    //             location: null,
-    //             hotelMap: {value: null, file: []},
-    //             time: null,
-    //             contact: null,
-    //             remarks: null,
-    //           });
-    //         }
-    //       });
-    //       setChecklist([...y]);
-    //       // setuid(res.UID);
-    //       // console.log(x);
-    //       // setcallLoad(false);
-    //     }
-    //   })
-    //   .catch(error => {
-    //     setcallLoad(false);
-    //     console.log(error, 'Function error');
-    //   });
+        var packet = JSON.parse(response.data.body);
+        var res = packet.Table;
+        console.log(res);
+        if (res && res.length > 0) {
+          var apaxTransport = [];
+          var acrewTransport = [];
+          res.forEach((val, index) => {
+            console.log(val.DES_TYPE);
+            if (val.PDCT_TYPE.trim() == 'Pax') {
+              apaxTransport.push({
+                name: val.PDCT_DN.trim().replace('""', ''),
+                location: val.PDCT_PL.trim().replace('""', ''),
+                hotelMap: {value: null, file: []},
+                time: val.PDCT_SPT.trim().replace('""', ''),
+                contact: val.PDCT_DCN.trim().replace('""', ''),
+                remarks: val.PDCT_REMARK.trim().replace('""', ''),
+                type: val.PDCT_TYPE,
+                UID: val.UID,
+              });
+            } else {
+              acrewTransport.push({
+                name: val.PDCT_DN.trim().replace('""', ''),
+                location: val.PDCT_PL.trim().replace('""', ''),
+                hotelMap: {value: null, file: []},
+                time: val.PDCT_SPT.trim().replace('""', ''),
+                contact: val.PDCT_DCN.trim().replace('""', ''),
+                remarks: val.PDCT_REMARK.trim().replace('""', ''),
+                type: val.PDCT_TYPE,
+                UID: val.UID,
+              });
+            }
+          });
+          setaddedpaxSectionval([...apaxTransport]);
+          setaddedcrewSectionval([...acrewTransport]);
+          setcallLoad(false);
+        } else {
+          setcallLoad(false);
+        }
+      })
+      .catch(error => {
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
   }, []);
 
   const getFeedback = index => {
@@ -303,12 +340,42 @@ export default function PreDepartureChecklist(props) {
   const setNowDeparture = (index, time, type, section = 'crew') => {
     var tpdeparturecheck = [...pdeparturecheck];
     tpdeparturecheck[index].time = time;
-    // tConvert(
-    //   new Date().toLocaleString('en-US', {
-    //     hour12: false,
-    //   }),
-    // );
+    tConvert(
+      new Date().toLocaleString('en-US', {
+        hour12: false,
+      }),
+    );
     setpdeparturecheck(tpdeparturecheck);
+  };
+  const setNowflight_and_admin_documents = field => {
+    var tdeparture = [...pdeparturecheck];
+    tdeparture[2].flight_and_admin_documents[field] = tConvert(
+      new Date().toLocaleString('en-US', {
+        hour12: false,
+      }),
+    );
+    console.log(tdeparture);
+    setpdeparturecheck([...tdeparture]);
+  };
+  const setNowcatering = field => {
+    var tdeparture = [...pdeparturecheck];
+    tdeparture[2].catering.delivery = tConvert(
+      new Date().toLocaleString('en-US', {
+        hour12: false,
+      }),
+    );
+    console.log(tdeparture);
+    setpdeparturecheck([...tdeparture]);
+  };
+  const setNowfuel = field => {
+    var tdeparture = [...pdeparturecheck];
+    tdeparture[2].fueling_time = tConvert(
+      new Date().toLocaleString('en-US', {
+        hour12: false,
+      }),
+    );
+    console.log(tdeparture);
+    setpdeparturecheck([...tdeparture]);
   };
   const setCheckedDeparture = index => {
     var tpdeparturecheck = [...pdeparturecheck];
@@ -422,11 +489,6 @@ export default function PreDepartureChecklist(props) {
   };
 
   const addnewpaxSection = () => {
-    //add menu section
-    var section = [...addedpaxSection];
-    var menu = {name: 'Added Test Section Field'};
-    section.push(menu);
-    setaddedpaxSection(section);
     //add menu value collection
     var val = [...addedpaxSectionval];
     var data = {
@@ -436,19 +498,19 @@ export default function PreDepartureChecklist(props) {
       time: null,
       contact: null,
       remarks: null,
+      type: 'Pax',
     };
     val.push(data);
     console.log(val);
     setaddedpaxSectionval(val);
-    setpaxmovement(true);
   };
 
   const addnewcrewSection = () => {
     //add menu section
-    var section = [...addedcrewSection];
-    var menu = {name: 'Added Test Section Field'};
-    section.push(menu);
-    setaddedcrewSection(section);
+    // var section = [...addedcrewSection];
+    // var menu = {name: 'Added Test Section Field'};
+    // section.push(menu);
+    // setaddedcrewSection(section);
     //add menu value collection
     var val = [...addedcrewSectionval];
     var data = {
@@ -458,43 +520,37 @@ export default function PreDepartureChecklist(props) {
       time: null,
       contact: null,
       remarks: null,
+      type: 'Crew',
     };
     val.push(data);
     setaddedcrewSectionval(val);
-    setcrewmovement(true);
+    // setcrewmovement(true);
   };
   const [ini, setini] = useState(false);
 
   const removepaxSection = index => {
-    console.log(index);
-    //remove section
-    var s = [...addedpaxSection];
-    s.splice(index, 1);
-    if (s.length === 0) s = [];
-    setaddedpaxSection(s);
     //remove val
     var val = [...addedpaxSectionval];
     val.splice(index, 1);
     if (val.length === 0) val = [];
     console.log(val);
     setaddedpaxSectionval(val);
-    setini(!ini);
   };
 
   const removecrewSection = index => {
-    console.log(index);
-    //remove section
-    var s = [...addedcrewSection];
-    s.splice(index, 1);
-    if (s.length === 0) s = [];
-    setaddedcrewSection(s);
+    // console.log(index);
+    // //remove section
+    // var s = [...addedcrewSection];
+    // s.splice(index, 1);
+    // if (s.length === 0) s = [];
+    // setaddedcrewSection(s);
     //remove val
     var val = [...addedcrewSectionval];
     val.splice(index, 1);
     if (val.length === 0) val = [];
     console.log(val);
     setaddedcrewSectionval(val);
-    setini(!ini);
+    // setini(!ini);
   };
 
   const setAddedcrewData = (index, data, type, section = 'crew') => {
@@ -527,7 +583,7 @@ export default function PreDepartureChecklist(props) {
       if (type === 'catering') x[index].catering.delivery = data;
       if (type === 'fueling_time') x[index].fueling_time = data;
     }
-    //console.log(x);
+    console.log(x);
     if (section === 'crew') setaddedcrewSectionval(x);
     else if (section === 'departure') setpdeparturecheck(x);
     else setaddedpaxSectionval(x);
@@ -663,68 +719,175 @@ export default function PreDepartureChecklist(props) {
     setcallLoad(true);
     let x = [...pdeparturecheck];
     const email = auth().currentUser.email;
-
+    console.log(
+      'pdeparturecheck[2].catering.delivery',
+      pdeparturecheck[2].catering.delivery,
+    );
     var payload = {
-      PDC_CCDT: x[2].catering.delivery,
-      PDC_FT: x[2].fueling_time,
-      PDC_PAGD: x[3].checked,
-      PDC_PAGD_REM: x[3].remarks,
-      PDC_FD_FDR: x[2].flight_and_admin_documents.recieved,
-      PDC_FD_FDP: x[2].flight_and_admin_documents.printed,
-      PDC_FD_NOTAMS: x[2].flight_and_admin_documents.notams,
-      PDC_FD_WIU: x[2].flight_and_admin_documents.weather_info_updated,
-      PDC_FD_ATC: x[2].flight_and_admin_documents.atc_flight_plan,
-      PDC_FD_SLOTS: x[2].flight_and_admin_documents.slot_confirmed,
-      PDC_FBO: x[5].checked,
-      PDC_FBO_REM: x[5].remarks,
-      PDC_HAR_REM: x[6].remarks,
-      PDC_HAR: x[6].checked,
-      PDC_CIQ_REM: x[7].remarks,
-      PDC_CIQ: x[7].checked,
-      PDC_ASR_REM: x[8].remarks,
-      PDC_ASR: x[8].checked,
-      PDC_CAR: x[9].checked,
-      PDC_AFR_REM: x[10].remarks,
-      PDC_AFR: x[10].checked,
-      PDC_PTA_REM: x[13].remarks,
-      PDC_PTA: x[13].checked,
-      PDC_CTA_REM: x[11].remarks,
-      PDC_CTA: x[11].checked,
-      PDC_PNML_REM: x[14].remarks,
-      PDC_PNML: x[14].checked,
-      PDC_CNML_REM: x[12].remarks,
-      PDC_CNML: x[12].checked,
-      PDC_CTNR: crewactivesections,
-      PDC_PTNR: paxhotelactivesections,
-      STATUS: '0',
+      PDC_CCDT: pdeparturecheck[2].catering.delivery
+        ? pdeparturecheck[2].catering.delivery
+        : '""',
+      // PDC_CCDD: '""',
+      // PDC_FD: '""',
+      PDC_UDGD: '""',
+      PDC_FT: pdeparturecheck[2].fueling_time
+        ? pdeparturecheck[2].fueling_time
+        : '""',
+      PDC_PAGD: pdeparturecheck[3].checked ? 1 : 0,
+      PDC_PAGD_REM: pdeparturecheck[3].remarks
+        ? pdeparturecheck[3].remarks
+        : '""',
+      PDC_FD_FDR: pdeparturecheck[2].flight_and_admin_documents.recieved
+        ? pdeparturecheck[2].flight_and_admin_documents.recieved
+        : '""',
+      PDC_FD_FDP: pdeparturecheck[2].flight_and_admin_documents.printed
+        ? pdeparturecheck[2].flight_and_admin_documents.printed
+        : '""',
+      PDC_FD_NOTAMS: pdeparturecheck[2].flight_and_admin_documents.notams
+        ? pdeparturecheck[2].flight_and_admin_documents.notams
+        : '""',
+      PDC_FD_WIU: pdeparturecheck[2].flight_and_admin_documents
+        .weather_info_updated
+        ? pdeparturecheck[2].flight_and_admin_documents.weather_info_updated
+        : '""',
+      PDC_FD_ATC: pdeparturecheck[2].flight_and_admin_documents.atc_flight_plan
+        ? pdeparturecheck[2].flight_and_admin_documents.atc_flight_plan
+        : '""',
+      PDC_FD_SLOTS: pdeparturecheck[2].flight_and_admin_documents.slot_confirmed
+        ? pdeparturecheck[2].flight_and_admin_documents.slot_confirmed
+        : '""',
+      PDC_FBO: pdeparturecheck[5].checked ? 1 : 0,
+      PDC_FBO_REM: pdeparturecheck[5].remarks
+        ? pdeparturecheck[5].remarks
+        : '""',
+      PDC_HAR_REM: pdeparturecheck[6].remarks
+        ? pdeparturecheck[6].remarks
+        : '""',
+      PDC_HAR: pdeparturecheck[6].checked ? 1 : 0,
+      PDC_CIQ_REM: pdeparturecheck[7].remarks
+        ? pdeparturecheck[7].remarks
+        : '""',
+      PDC_CIQ: pdeparturecheck[7].checked ? 1 : 0,
+      PDC_ASR_REM: pdeparturecheck[8].remarks
+        ? pdeparturecheck[8].remarks
+        : '""',
+      PDC_ASR: pdeparturecheck[8].checked ? 1 : 0,
+      PDC_CAR: pdeparturecheck[9].checked ? 1 : 0,
+      PDC_CAR_REM: pdeparturecheck[9].remarks
+        ? pdeparturecheck[9].remarks
+        : '""',
+      PDC_AFR_REM: pdeparturecheck[10].remarks
+        ? pdeparturecheck[10].remarks
+        : '""',
+      PDC_AFR: pdeparturecheck[10].checked ? 1 : 0,
+      PDC_PTA_REM: pdeparturecheck[13].remarks
+        ? pdeparturecheck[13].remarks
+        : '""',
+      PDC_PTA: pdeparturecheck[13].checked ? 1 : 0,
+      PDC_CTA_REM: pdeparturecheck[11].remarks
+        ? pdeparturecheck[11].remarks
+        : '""',
+      PDC_CTA: pdeparturecheck[11].checked ? 1 : 0,
+      PDC_PNML_REM: pdeparturecheck[14].remarks
+        ? pdeparturecheck[14].remarks
+        : '""',
+      PDC_PNML: pdeparturecheck[14].checked ? 1 : 0,
+      PDC_CNML_REM: pdeparturecheck[12].remarks
+        ? pdeparturecheck[12].remarks
+        : '""',
+      PDC_CNML: pdeparturecheck[12].checked ? 1 : 0,
+      PDC_CTNR: crewactivesections ? 1 : 0,
+      PDC_PTNR: paxhotelactivesections ? 1 : 0,
+      STATUS: 0,
       FUID: FUID,
-      UID: uid,
       UPDATE_BY: email,
     };
-    //console.log("OK",payload);
-
-    const sayHello = functions().httpsCallable('getPreDeparture');
-    sayHello(payload)
-      .then(data => {
-        console.log(data);
+    if (uid) {
+      payload.UID = uid;
+    }
+    console.log('OK', payload);
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable('updateFlightModule?module=PostPreDepartureChecklist')(
+        JSON.stringify(payload),
+      )
+      .then(response => {
+        Alert.alert('Success');
         setcallLoad(false);
+        console.log(response);
       })
-      .catch(e => {
-        console.log(e);
+      .catch(error => {
+        Alert.alert('Error in updation');
         setcallLoad(false);
+        console.log(error, 'Function error');
       });
-    // var formFields={
-    //   crewtransport:{
-    //     scheduled_pickup_time:'',
-    //     pickup_location:'',
-    //     photo_pickup_location:'',
-    //     driver_name:'',
-    //     driver_contact_num:'',
-    //     remarks:'',
-    //     additional_remarks:'',
-    //     add_transport:[]
-    //   }
-    // }
+
+    console.log('addedcrewSectionval', addedcrewSectionval);
+
+    addedcrewSectionval.map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable(
+          'updateFlightModule?module=PostPreDepartureChecklistTransport',
+        )(
+          JSON.stringify({
+            PDCT_SPT: val.time ? val.time : '""',
+            PDCT_PL: val.location ? val.location : '""',
+            PDCT_DN: val.name ? val.name : '""',
+            PDCT_DCN: val.contact ? val.contact : '""',
+            PDCT_REMARK: val.remarks ? val.remarks : '""',
+            PDCT_TYPE: val.type ? val.type : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+
+    addedpaxSectionval.map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable(
+          'updateFlightModule?module=PostPreDepartureChecklistTransport',
+        )(
+          JSON.stringify({
+            PDCT_SPT: val.time ? val.time : '""',
+            PDCT_PL: val.location ? val.location : '""',
+            PDCT_DN: val.name ? val.name : '""',
+            PDCT_DCN: val.contact ? val.contact : '""',
+            PDCT_REMARK: val.remarks ? val.remarks : '""',
+            PDCT_TYPE: val.type ? val.type : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
   };
 
   const uploadInitiator = (type, addedsection, section = 'crew') => {
@@ -889,6 +1052,7 @@ export default function PreDepartureChecklist(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
+            {/*   ------------------------------Transport Operator Reminder	 End ----------- */}
             <View
               style={{
                 flexDirection: 'row',
@@ -899,12 +1063,9 @@ export default function PreDepartureChecklist(props) {
                 onPress={event => {
                   var x = crewactivesections;
                   setcrewactivesections(!x);
-
-                  setcrewmovement(false);
-                  setaddedcrewSection([]);
-
+                  setaddedcrewSectionval([]);
                   var x = [...pdeparturecheck];
-                  x[0].hotelMap = {value: null, file: []};
+                  x[1].hotelMap = {value: null, file: []};
                   setpdeparturecheck(x);
                 }}>
                 <Icons
@@ -919,85 +1080,6 @@ export default function PreDepartureChecklist(props) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-
-            <DateTimeInput
-              label={'Scheduled Pickup Time (Local Time)'}
-              disabled={crewactivesections}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setNowDeparture}
-              size={12}
-              type={'datetime'}
-              data={pdeparturecheck[0].time}
-              index={0}
-            />
-            <LabelledInput
-              label={'Pickup Location'} //mark
-              disabled={crewactivesections}
-              data={pdeparturecheck[0].location}
-              datatype={'location'}
-              index={0}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-            <TakeCamera
-              label={'Photo of Pickup Location'}
-              disabled={crewactivesections}
-              type={0}
-              uploadInitiator={uploadInitiator}
-              removeFilePreA={(arrayIndex, index) => {
-                //removeFilePreA(arrayIndex, index, added)
-                var x = [...pdeparturecheck];
-                if (x[0].hotelMap.file.length === 1) x[0].hotelMap.file = [];
-                else x[0].hotelMap.file.splice(index, 1);
-
-                //setpdeparturecheck(x);
-                //console.log(arrayIndex,index)
-              }}
-              attachments={pdeparturecheck[0].hotelMap}
-              Icon={
-                <Icons
-                  style={{color: 'green', marginLeft: 10}}
-                  name="close"
-                  size={30}
-                />
-              }
-            />
-            {/*   ------------------------------Transport Operator Reminder	 ----------- */}
-
-            <LabelledInput
-              label={'Driver Name'}
-              disabled={crewactivesections}
-              data={pdeparturecheck[0].name}
-              datatype={'text'}
-              index={0}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <LabelledInput
-              label={'Driver Contact Number'}
-              disabled={crewactivesections}
-              data={pdeparturecheck[0].contact}
-              datatype={'contact'}
-              index={0}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-            <LabelledInput
-              label={'Remarks'}
-              disabled={crewactivesections}
-              data={pdeparturecheck[0].remarks}
-              datatype={'remarks'}
-              index={0}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            {/*   ------------------------------Transport Operator Reminder	 End ----------- */}
             <View
               style={{
                 flexDirection: 'row',
@@ -1017,105 +1099,104 @@ export default function PreDepartureChecklist(props) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {crewmovement &&
-              addedcrewSectionval.map((data, i) => {
-                return (
-                  <View key={i}>
-                    <View style={{alignItems: 'flex-end'}}>
-                      <TouchableOpacity
-                        style={styleSheet.label}
-                        onPress={() => {
-                          removecrewSection(i);
-                        }}>
-                        <Icons name="minus-box-outline" color="red" size={30} />
-                      </TouchableOpacity>
-                    </View>
-                    <View></View>
-
-                    <DateTimeInput
-                      label={'Scheduled Transport Pickup Time (Local Time)'}
-                      //crewmark
-                      showDatePickerPostDepart={showDatePickerDeparture}
-                      setNowPostDepart={setAddedcrewData}
-                      size={12}
-                      ini={ini}
-                      added={true}
-                      type={'datetime'}
-                      data={addedcrewSectionval[i].time}
-                      index={i}
-                    />
-
-                    <LabelledInput
-                      label={'Pickup Location'}
-                      data={addedcrewSectionval[i].location}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      datatype={'location'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
-
-                    <TakeCamera
-                      label={'Photo of Pickup Location'}
-                      type={i}
-                      addedsection={true}
-                      init={ini}
-                      uploadInitiator={uploadInitiator}
-                      removeFilePreA={(a, b, c) => {
-                        if (addedcrewSectionval[i].hotelMap.file.length === 1)
-                          addedcrewSectionval[i].hotelMap.file = [];
-                        else addedcrewSectionval[i].hotelMap.file.splice(b, 1);
-                      }}
-                      attachments={addedcrewSectionval[i].hotelMap}
-                      Icon={
-                        <Icons
-                          style={{color: 'green', marginLeft: 10}}
-                          name="close"
-                          size={30}
-                        />
-                      }
-                    />
-
-                    <LabelledInput
-                      label={'Driver Name'}
-                      data={addedcrewSectionval[i].name}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      datatype={'text'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
-
-                    <LabelledInput
-                      label={'Driver Contact Number'}
-                      data={addedcrewSectionval[i].contact}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      datatype={'contact'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
-
-                    <LabelledInput
-                      label={'Remarks'}
-                      data={addedcrewSectionval[i].remarks}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      datatype={'remarks'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
+            {addedcrewSectionval.map((data, i) => {
+              return (
+                <View key={i}>
+                  <View style={{alignItems: 'flex-end'}}>
+                    <TouchableOpacity
+                      style={styleSheet.label}
+                      onPress={() => {
+                        removecrewSection(i);
+                      }}>
+                      <Icons name="minus-box-outline" color="red" size={30} />
+                    </TouchableOpacity>
                   </View>
-                );
-              })}
+                  <View></View>
+
+                  <DateTimeInput
+                    label={'Scheduled Transport Pickup Time (Local Time)'}
+                    //crewmark
+                    showDatePickerPostDepart={showDatePickerDeparture}
+                    setNowPostDepart={setAddedcrewData}
+                    size={12}
+                    ini={ini}
+                    added={true}
+                    type={'datetime'}
+                    data={addedcrewSectionval[i].time}
+                    index={i}
+                  />
+
+                  <LabelledInput
+                    label={'Pickup Location'}
+                    data={addedcrewSectionval[i].location}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    datatype={'location'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <TakeCamera
+                    label={'Photo of Pickup Location'}
+                    type={i}
+                    addedsection={true}
+                    init={ini}
+                    uploadInitiator={uploadInitiator}
+                    removeFilePreA={(a, b, c) => {
+                      if (addedcrewSectionval[i].hotelMap.file.length === 1)
+                        addedcrewSectionval[i].hotelMap.file = [];
+                      else addedcrewSectionval[i].hotelMap.file.splice(b, 1);
+                    }}
+                    attachments={addedcrewSectionval[i].hotelMap}
+                    Icon={
+                      <Icons
+                        style={{color: 'green', marginLeft: 10}}
+                        name="close"
+                        size={30}
+                      />
+                    }
+                  />
+
+                  <LabelledInput
+                    label={'Driver Name'}
+                    data={addedcrewSectionval[i].name}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    datatype={'text'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <LabelledInput
+                    label={'Driver Contact Number'}
+                    data={addedcrewSectionval[i].contact}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    datatype={'contact'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <LabelledInput
+                    label={'Remarks'}
+                    data={addedcrewSectionval[i].remarks}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    datatype={'remarks'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                </View>
+              );
+            })}
           </View>
           {/**CREW END */}
           {/** PAX TRANSPort //mark */}
@@ -1201,7 +1282,7 @@ export default function PreDepartureChecklist(props) {
           {pdeparturecheck[14].remarks && (
             <View style={{flexDirection: 'row', marginBottom: 20}}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[11].remarks}</Text>
+                <Text>{pdeparturecheck[14].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(14)}>
                 <Icons
@@ -1238,10 +1319,7 @@ export default function PreDepartureChecklist(props) {
                 onPress={event => {
                   var x = paxhotelactivesections;
                   setpaxhotelactivesections(!x);
-                  console.log(x);
-
-                  setpaxmovement(false);
-                  setaddedpaxSection([]);
+                  setaddedpaxSectionval([]);
 
                   var x = [...pdeparturecheck];
                   x[1].hotelMap = {value: null, file: []};
@@ -1260,84 +1338,6 @@ export default function PreDepartureChecklist(props) {
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
 
-            <DateTimeInput
-              label={'Scheduled Pickup Time (Local Time)'}
-              disabled={paxhotelactivesections}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setNowDeparture}
-              size={12}
-              type={'datetime'}
-              data={pdeparturecheck[1].time}
-              index={1}
-            />
-
-            <LabelledInput
-              label={'Pickup Location'} //mark
-              disabled={paxhotelactivesections}
-              data={pdeparturecheck[1].location}
-              datatype={'location'}
-              index={1}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <TakeCamera
-              label={'Photo of Pickup Location'}
-              disabled={paxhotelactivesections}
-              type={1}
-              uploadInitiator={uploadInitiator}
-              removeFilePreA={(arrayIndex, index) => {
-                //removeFilePreA(arrayIndex, index, added)
-                var x = [...pdeparturecheck];
-                if (x[1].hotelMap.file.length === 1) x[1].hotelMap.file = [];
-                else x[1].hotelMap.file.splice(index, 1);
-
-                //setpdeparturecheck(x);
-                //console.log(arrayIndex,index)
-              }}
-              attachments={pdeparturecheck[1].hotelMap}
-              Icon={
-                <Icons
-                  style={{color: 'green', marginLeft: 10}}
-                  name="close"
-                  size={30}
-                />
-              }
-            />
-
-            <LabelledInput
-              label={'Driver Name'} //mark
-              disabled={paxhotelactivesections}
-              data={pdeparturecheck[1].name}
-              datatype={'text'}
-              index={1}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <LabelledInput
-              label={'Driver Contact Number'} //mark
-              disabled={paxhotelactivesections}
-              data={pdeparturecheck[1].contact}
-              datatype={'contact'}
-              index={1}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <LabelledInput
-              label={'Remarks'} //mark
-              disabled={paxhotelactivesections}
-              data={pdeparturecheck[1].remarks}
-              datatype={'remarks'}
-              index={1}
-              setText={setAddedcrewData}
-              multiline={false}
-              numberOfLines={1}
-            />
             <View
               style={{
                 flexDirection: 'row',
@@ -1363,121 +1363,120 @@ export default function PreDepartureChecklist(props) {
               </TouchableOpacity>
             </View>
 
-            {paxmovement &&
-              addedpaxSection.map((data, i) => {
-                return (
-                  <View key={i}>
-                    <View style={{alignItems: 'flex-end'}}>
-                      <TouchableOpacity
-                        style={styleSheet.label}
-                        onPress={() => {
-                          removepaxSection(i);
-                        }}>
-                        <Icons name="minus-box-outline" color="red" size={30} />
-                      </TouchableOpacity>
-                    </View>
-                    <DateTimeInput
-                      label={'Scheduled Transport Pickup Time (Local Time)'}
-                      showDatePickerPostDepart={showDatePickerDeparture}
-                      setNowPostDepart={setAddedcrewData}
-                      size={12}
-                      ini={ini}
-                      added={true}
-                      type={'datetime'}
-                      sectionName={'pax'}
-                      data={addedpaxSectionval[i].time}
-                      index={i}
-                    />
-
-                    <LabelledInput
-                      label={'Pickup Location'}
-                      data={addedpaxSectionval[i].location}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      sectionName={'pax'}
-                      datatype={'location'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
-
-                    <TakeCamera
-                      label={'Photo of Pickup Location'}
-                      type={i}
-                      addedsection={true}
-                      init={ini}
-                      sectionName={'pax'}
-                      uploadInitiator={uploadInitiator}
-                      removeFilePreA={(a, b, c) => {
-                        //removeFilePreA
-
-                        //removeFilePreA(arrayIndex, index, added)
-                        if (addedpaxSectionval[i].hotelMap.file.length === 1)
-                          addedpaxSectionval[i].hotelMap.file = [];
-                        else addedpaxSectionval[i].hotelMap.file.splice(b, 1);
-
-                        //setpdeparturecheck(x);
-                        //console.log(arrayIndex,index)
-                      }}
-                      attachments={addedpaxSectionval[i].hotelMap}
-                      Icon={
-                        <Icons
-                          style={{color: 'green', marginLeft: 10}}
-                          name="close"
-                          size={30}
-                        />
-                      }
-                    />
-
-                    <LabelledInput
-                      label={'Driver Name'}
-                      data={addedpaxSectionval[i].name}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      sectionName={'pax'}
-                      datatype={'text'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
-
-                    <LabelledInput
-                      label={'Driver Contact Number'}
-                      data={addedpaxSectionval[i].contact}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      sectionName={'pax'}
-                      datatype={'contact'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
-
-                    <LabelledInput
-                      label={'Remarks'}
-                      data={addedpaxSectionval[i].remarks}
-                      index={i}
-                      ini={ini}
-                      added={true}
-                      sectionName={'pax'}
-                      datatype={'remarks'}
-                      setText={setAddedcrewData}
-                      multiline={false}
-                      numberOfLines={1}
-                    />
+            {addedpaxSectionval.map((data, i) => {
+              return (
+                <View key={i}>
+                  <View style={{alignItems: 'flex-end'}}>
+                    <TouchableOpacity
+                      style={styleSheet.label}
+                      onPress={() => {
+                        removepaxSection(i);
+                      }}>
+                      <Icons name="minus-box-outline" color="red" size={30} />
+                    </TouchableOpacity>
                   </View>
-                );
-              })}
+                  <DateTimeInput
+                    label={'Scheduled Transport Pickup Time (Local Time)'}
+                    showDatePickerPostDepart={showDatePickerDeparture}
+                    setNowPostDepart={setAddedcrewData}
+                    size={12}
+                    ini={ini}
+                    added={true}
+                    type={'datetime'}
+                    sectionName={'pax'}
+                    data={addedpaxSectionval[i].time}
+                    index={i}
+                  />
+
+                  <LabelledInput
+                    label={'Pickup Location'}
+                    data={addedpaxSectionval[i].location}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    sectionName={'pax'}
+                    datatype={'location'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <TakeCamera
+                    label={'Photo of Pickup Location'}
+                    type={i}
+                    addedsection={true}
+                    init={ini}
+                    sectionName={'pax'}
+                    uploadInitiator={uploadInitiator}
+                    removeFilePreA={(a, b, c) => {
+                      //removeFilePreA
+
+                      //removeFilePreA(arrayIndex, index, added)
+                      if (addedpaxSectionval[i].hotelMap.file.length === 1)
+                        addedpaxSectionval[i].hotelMap.file = [];
+                      else addedpaxSectionval[i].hotelMap.file.splice(b, 1);
+
+                      //setpdeparturecheck(x);
+                      //console.log(arrayIndex,index)
+                    }}
+                    attachments={addedpaxSectionval[i].hotelMap}
+                    Icon={
+                      <Icons
+                        style={{color: 'green', marginLeft: 10}}
+                        name="close"
+                        size={30}
+                      />
+                    }
+                  />
+
+                  <LabelledInput
+                    label={'Driver Name'}
+                    data={addedpaxSectionval[i].name}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    sectionName={'pax'}
+                    datatype={'text'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <LabelledInput
+                    label={'Driver Contact Number'}
+                    data={addedpaxSectionval[i].contact}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    sectionName={'pax'}
+                    datatype={'contact'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <LabelledInput
+                    label={'Remarks'}
+                    data={addedpaxSectionval[i].remarks}
+                    index={i}
+                    ini={ini}
+                    added={true}
+                    sectionName={'pax'}
+                    datatype={'remarks'}
+                    setText={setAddedcrewData}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                </View>
+              );
+            })}
           </View>
           {/**PAX TRANS END //catering.delivery=data */}
 
           <DateTimeInput
             label={'Confirm Catering Delivery Time (Local Time)'}
             showDatePickerPostDepart={showDatePickerDeparture}
-            setNowPostDepart={setAddedcrewData}
+            setNowPostDepart={() => setNowcatering()}
             size={12}
             ini={ini}
             added={true}
@@ -1490,7 +1489,7 @@ export default function PreDepartureChecklist(props) {
           <DateTimeInput
             label={'Fueling Time (Local Time)'}
             showDatePickerPostDepart={showDatePickerDeparture}
-            setNowPostDepart={setAddedcrewData}
+            setNowPostDepart={() => setNowfuel()}
             size={12}
             ini={ini}
             added={true}
@@ -1693,8 +1692,10 @@ export default function PreDepartureChecklist(props) {
             <DateTimeInput
               label={'Flight Documents Received (Local Time)'}
               showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setAddedcrewData}
-              setflightdoc={setflightdoc}
+              setNowPostDepart={() => {
+                console.log('aya');
+                setNowflight_and_admin_documents('recieved');
+              }}
               size={12}
               ini={ini}
               added={true}
@@ -1707,8 +1708,9 @@ export default function PreDepartureChecklist(props) {
             <DateTimeInput
               label={'Flight Documents Printed (Local Time)'}
               showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setAddedcrewData}
-              setflightdoc={setprinted}
+              setNowPostDepart={() =>
+                setNowflight_and_admin_documents('printed')
+              }
               size={12}
               ini={ini}
               added={true}
@@ -1721,8 +1723,9 @@ export default function PreDepartureChecklist(props) {
             <DateTimeInput
               label={'Notams Updated (Local Time)'}
               showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setAddedcrewData}
-              setflightdoc={setnotams_updated}
+              setNowPostDepart={() =>
+                setNowflight_and_admin_documents('notams')
+              }
               size={12}
               ini={ini}
               added={true}
@@ -1735,8 +1738,9 @@ export default function PreDepartureChecklist(props) {
             <DateTimeInput
               label={'Weather Information Updated (Local Time)'}
               showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setAddedcrewData}
-              setflightdoc={setweather_information}
+              setNowPostDepart={() =>
+                setNowflight_and_admin_documents('weather_info_updated')
+              }
               size={12}
               ini={ini}
               added={true}
@@ -1752,8 +1756,9 @@ export default function PreDepartureChecklist(props) {
             <DateTimeInput
               label={'ATC Flight Plan Filed (Local Time)'}
               showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setAddedcrewData}
-              setflightdoc={setatc_flight}
+              setNowPostDepart={() =>
+                setNowflight_and_admin_documents('atc_flight_plan')
+              }
               size={12}
               ini={ini}
               added={true}
@@ -1768,8 +1773,9 @@ export default function PreDepartureChecklist(props) {
             <DateTimeInput
               label={'Slots Confirmed (Local Time)'}
               showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={setAddedcrewData}
-              setflightdoc={setslots_confirmed}
+              setNowPostDepart={() =>
+                setNowflight_and_admin_documents('slot_confirmed')
+              }
               size={12}
               ini={ini}
               added={true}
@@ -2178,6 +2184,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,
