@@ -53,6 +53,9 @@ export default function Flights({navigation}) {
     }
   };
 
+  const addFlights = () => {
+    navigation.replace('EditPageFlight', {UID: null});
+  };
   const deleteRow = (rowMap, rowKey) => {
     closeRow(rowMap, rowKey);
     const newData = [...listData];
@@ -89,18 +92,23 @@ export default function Flights({navigation}) {
             alignItems: 'center',
             marginRight: 10,
           }}>
-          <Text style={{color: 'white', fontSize: 25}}>A</Text>
+          <Text style={{color: 'white', fontSize: 25}}>
+            {data.item.FLIGHT_TYPE.substr(0, 1)}
+          </Text>
         </View>
         <View>
           <Text style={{fontSize: 15, color: 'black'}}>
             {data.item.FLIGHT_REGISTRATION}
           </Text>
           <Text style={{fontSize: 15, color: 'black'}}>
-            4 <Icons color="black" name="user-nurse" size={15} />4{' '}
+            {data.item.FLIGHT_CREW_DEPARTURE}{' '}
+            <Icons color="black" name="user-nurse" size={15} />{' '}
+            {data.item.FLIGHT_PAX_DEPARTURE}{' '}
             <Icons color="black" name="user-friends" size={15} />
           </Text>
           <Text style={{fontSize: 15, color: 'black'}}>
-            20 Aug 2022, 13:00:00
+            {data.item.LAST_UPDATE &&
+              new Date(data.item.LAST_UPDATE).toDateString()}
           </Text>
         </View>
       </View>
@@ -153,10 +161,14 @@ export default function Flights({navigation}) {
           }}>
           Flights Details
         </Text>
-        {callLoad && (
+        {callLoad ? (
           <View style={{paddingRight: 20}}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
+        ) : (
+          <TouchableOpacity onPress={addFlights} style={{marginRight: 20}}>
+            <Icons name="plus" color="#6750A4" size={30} />
+          </TouchableOpacity>
         )}
       </View>
       <SwipeListView

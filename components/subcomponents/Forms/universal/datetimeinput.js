@@ -30,9 +30,11 @@ const DateTimeInput = ({
     });
 
     if (typeof setflightdoc === 'function') {
+      console.log('setflight');
       setflightdoc(x);
     } else {
-      console.log('JOLLYYYY');
+      console.log('setnow');
+
       setNowPostDepart(index, x, 'time', sectionName);
     }
 

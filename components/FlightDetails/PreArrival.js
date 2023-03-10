@@ -2148,7 +2148,7 @@ export default function PreArrival(props) {
                   <Text style={styleSheet.label}>Hotel Name</Text>
                   <TextInput
                     style={styleSheet.input}
-                    value={checkList[15][index].name.trim()}
+                    value={checkList[15][index].name}
                     onChangeText={text => {
                       console.log(text);
                       var tcheckList = [...checkList];
