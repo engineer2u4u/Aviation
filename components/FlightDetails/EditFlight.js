@@ -259,7 +259,7 @@ const EditFlight = props => {
           />
 
           <DateTimeInput
-            label={'Arrival Date'}
+            label={'Arrival Time'}
             showDatePickerPostDepart={() => {}}
             setNowPostDepart={() => {}}
             setflightdoc={data => {
