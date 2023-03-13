@@ -170,9 +170,9 @@ const [fieldType,setfieldType]=useState(0);
   const handleConfirm = date => {
      console.log('A date has been picked: ', date, fieldType);
     var tarrival = date;
-    tarrival= Date(date).toLocaleString('en-US', {
-      hour12: false,
-    });
+    // tarrival= new Date(date).toLocaleString('en-US', {
+    //   hour12: false,
+    // });
     // if (currentPicker.current.length > 1) {
     //   tarrival[currentPicker.current[0]][currentPicker.current[1]][
     //     currentPicker.current[2]
@@ -194,7 +194,7 @@ const [fieldType,setfieldType]=useState(0);
     //     hour12: false,
     //   }),
     // );
-    
+    console.log('Check' ,tarrival);
     switch (fieldType) {
       case 0:
         setdepdate(tarrival);
@@ -212,7 +212,7 @@ const [fieldType,setfieldType]=useState(0);
         break;
     }
     
-    console.log(tarrival);
+    
     //setArrival(tarrival);
     hideDatePicker();
   };
@@ -283,10 +283,11 @@ const [fieldType,setfieldType]=useState(0);
           />
 
           <DateTimeInput
-            label={'Departure Date X'}
+            label={'Departure Date'}
             showDatePickerPostDepart={data => {
               console.log(data);
-              showDatePicker('time',0)
+              
+              showDatePicker('date',0)
             }}
             setNowPostDepart={data => {
               console.log(data);
@@ -304,7 +305,7 @@ const [fieldType,setfieldType]=useState(0);
             label={'Arrival Date'}
             showDatePickerPostDepart={data => {
               console.log(data);
-              showDatePicker('time',1)
+              showDatePicker('date',1)
             }}
             setNowPostDepart={() => {}}
             setflightdoc={data => {
