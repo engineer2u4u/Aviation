@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   Dimensions,
@@ -10,7 +10,7 @@ import {
   Modal,
   StyleSheet,
 } from 'react-native';
-import {useSafeAreaFrame} from 'react-native-safe-area-context';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
@@ -22,8 +22,12 @@ const {width, height} = Dimensions.get('window');
 const HeadingTextSize = width / 15;
 const labelTextSize = width / 25;
 const EditFlight = props => {
+  const currentPicker = useRef(0);
   const UID = props.route.params.UID;
   // console.log(UID);
+  const [mode, setMode] = useState('time');
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  
   const [refno, setrefno] = useState(null);
   const [modalVisible, setmodalVisible] = useState(false);
   const [reg, setreg] = useState(null);
@@ -39,6 +43,7 @@ const EditFlight = props => {
   const [crtby, setcrtby] = useState(null);
   const [callLoad, setcallLoad] = useState(false);
   const tConvert = dateT => {
+    console.log("HERE",dateT)
     if (dateT) {
       // console.log(typeof dateT);
       if (typeof dateT !== 'string') {
@@ -150,6 +155,68 @@ const EditFlight = props => {
         console.log(error, 'Function error');
       });
   };
+const [fieldType,setfieldType]=useState(0);
+  const showDatePicker = (type, index, pos, field) => {
+    pos != undefined
+      ? (currentPicker.current = [index, pos, field])
+      : (currentPicker.current = [index]);
+    setMode(type);
+    setfieldType(index);
+    setDatePickerVisibility(true);
+  };
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+  const handleConfirm = date => {
+     console.log('A date has been picked: ', date, fieldType);
+    var tarrival = date;
+    tarrival= Date(date).toLocaleString('en-US', {
+      hour12: false,
+    });
+    // if (currentPicker.current.length > 1) {
+    //   tarrival[currentPicker.current[0]][currentPicker.current[1]][
+    //     currentPicker.current[2]
+    //   ] = tConvert(
+    //     new Date(date).toLocaleString('en-US', {
+    //       hour12: false,
+    //     }),
+    //   );
+    // } else {
+    //   tarrival[currentPicker.current[0]] = tConvert(
+    //     new Date(date).toLocaleString('en-US', {
+    //       hour12: false,
+    //     }),
+    //   );
+    // }
+    // console.log(
+    //   'A date has been picked: ',
+    //   new Date(date).toLocaleString('en-US', {
+    //     hour12: false,
+    //   }),
+    // );
+    
+    switch (fieldType) {
+      case 0:
+        setdepdate(tarrival);
+        break;
+      case 1:
+        setarrdate(tarrival);
+        break;
+      case 2:
+        setdeptime(tarrival);
+        break;
+      case 3:
+        setarrtime(tarrival);
+        break;
+      default:
+        break;
+    }
+    
+    console.log(tarrival);
+    //setArrival(tarrival);
+    hideDatePicker();
+  };
+  
   return (
     <View>
       <Header
@@ -216,9 +283,10 @@ const EditFlight = props => {
           />
 
           <DateTimeInput
-            label={'Departure Date'}
+            label={'Departure Date X'}
             showDatePickerPostDepart={data => {
               console.log(data);
+              showDatePicker('time',0)
             }}
             setNowPostDepart={data => {
               console.log(data);
@@ -234,7 +302,10 @@ const EditFlight = props => {
 
           <DateTimeInput
             label={'Arrival Date'}
-            showDatePickerPostDepart={() => {}}
+            showDatePickerPostDepart={data => {
+              console.log(data);
+              showDatePicker('time',1)
+            }}
             setNowPostDepart={() => {}}
             setflightdoc={data => {
               setarrdate(ISOconvert(data));
@@ -247,7 +318,10 @@ const EditFlight = props => {
 
           <DateTimeInput
             label={'Departure Time'}
-            showDatePickerPostDepart={() => {}}
+            showDatePickerPostDepart={data => {
+              console.log(data);
+              showDatePicker('time',2)
+            }}
             setNowPostDepart={() => {}}
             setflightdoc={data => {
               setdeptime(ISOconvert());
@@ -260,7 +334,10 @@ const EditFlight = props => {
 
           <DateTimeInput
             label={'Arrival Time'}
-            showDatePickerPostDepart={() => {}}
+            showDatePickerPostDepart={data => {
+              console.log(data);
+              showDatePicker('time',3)
+            }}
             setNowPostDepart={() => {}}
             setflightdoc={data => {
               setarrtime(ISOconvert(data));
@@ -396,6 +473,13 @@ const EditFlight = props => {
           </TouchableOpacity>
         </View>
       </Modal>
+      <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode={mode}
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+          is24Hour={true}
+        />
     </View>
   );
 };
