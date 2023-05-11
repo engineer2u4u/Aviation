@@ -1,18 +1,22 @@
 import React from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import ScreenMenues from '../../constants/flightdetailsmenuoptions';
-import Icons from 'react-native-vector-icons/MaterialIcons';
+import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import Icons from 'react-native-vector-icons/Ionicons';
 
-export default function FlightMenu({navigation}) {
+export default function FlightMenu(props) {
   return (
     <View style={styles.container}>
       {ScreenMenues.map((data, i) => {
+        console.log(data);
         return (
           <TouchableOpacity
             key={i}
-            onPress={() => navigation.navigate(data.route)}
+            onPress={() =>
+              props.navigation.navigate(data.route, {UID: props.uid})
+            }
             style={styles.card}>
-            <Icons color="white" name={data.icon} size={50} />
+            <Icons color="white" name="airplane" size={50} />
             <Text style={{color: 'white'}}>{data.name}</Text>
           </TouchableOpacity>
         );

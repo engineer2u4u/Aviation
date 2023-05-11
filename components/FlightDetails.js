@@ -21,11 +21,6 @@ import Feedback from './Feedback';
 export default function FlightDetails({navigation}) {
   const ListRef = useRef();
   const FormRef = useRef();
-  const currentPicker = useRef(0);
-  const currentDeparture = useRef(0);
-  const currentDepart = useRef(0);
-  const currentFeedback = useRef(0);
-  const currentPostDepart = useRef(0);
   const [dataSourceCords, setDataSourceCords] = useState([]);
   const [loading, setloading] = useState(false);
   const [vFeedback, setvFeedback] = useState(false);
@@ -50,7 +45,6 @@ export default function FlightDetails({navigation}) {
       id: '5',
       name: 'Pre-Departure Checklist',
     },
-
     {
       id: '6',
       name: 'Departure',
@@ -226,6 +220,7 @@ const styleSheet = StyleSheet.create({
     marginVertical: 10,
     textAlignVertical: 'top',
     color: 'black',
+    fontSize: 20,
   },
   picker: {
     flex: 1,

@@ -5,13 +5,52 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
-import React, {useState} from 'react';
-
+import React, {useState, useEffect} from 'react';
+import functions from '@react-native-firebase/functions';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {ActivityIndicator} from 'react-native';
+import {firebase} from '@react-native-firebase/functions';
+import auth from '@react-native-firebase/auth';
 
-export default function InterimService({navigation}) {
+export default function InterimService(props) {
+  const FUID = props.route.params.UID;
+  const [uid, setuid] = useState(null);
+
   const [Iservices, setIservices] = useState([]);
+  useEffect(() => {
+    setcallLoad(true);
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable(
+        'getFlightModule?fuid=' + FUID + '&module=GetInterimServices',
+      )()
+      .then(response => {
+        setcallLoad(false);
+
+        var packet = JSON.parse(response.data.body);
+        var res = packet.Table;
+        console.log(res);
+        if (res.length > 0) {
+          var y = [...Iservices];
+          y = [];
+          res.forEach((val, index) => {
+            y.push({
+              service: val.INS_SERVICE.trim().replace('""', ''),
+              remarks: val.INS_REM.trim().replace('""', ''),
+              UID: val.UID,
+            });
+          });
+          setIservices([...y]);
+        }
+      })
+      .catch(error => {
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
+  }, []);
 
   const onAddServices = () => {
     setIservices([...Iservices, {service: null, remarks: null}]);
@@ -27,6 +66,36 @@ export default function InterimService({navigation}) {
     service[index][type] = text;
     setIservices(service);
   };
+  const [callLoad, setcallLoad] = useState(false);
+  const sendForm = () => {
+    const email = auth().currentUser.email;
+    setcallLoad(true);
+    Iservices.map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostInterimServices')(
+          JSON.stringify({
+            INS_SERVICE: val.service ? val.service : '""',
+            INS_REM: val.remarks ? val.remarks : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+  };
   return (
     <View>
       <View
@@ -36,16 +105,27 @@ export default function InterimService({navigation}) {
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-      
-        <Text style={{fontSize: 24, fontWeight: 'bold', color: 'black',paddingLeft:20}}>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: 'black',
+            paddingLeft: 20,
+          }}>
           Interim Services
         </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
+        {callLoad ? (
+          <View style={{paddingRight: 20}}>
+            <ActivityIndicator color="green" size={'small'} />
+          </View>
+        ) : (
+          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+            <Icons name="content-save" color="green" size={30} />
+          </TouchableOpacity>
+        )}
       </View>
       <ScrollView>
-        <View style={{padding: 10}}>
+        <View style={{padding: 10, paddingBottom: 100}}>
           <View
             style={{
               flexDirection: 'row',
@@ -191,6 +271,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,

@@ -6,26 +6,27 @@
  * @flow
  */
 
-import React, {Component, useState, useEffect} from 'react';
+import React, {Component, useState, useEffect, useContext, useRef} from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  Modal,
-  Button,
   TouchableOpacity,
-  Alert,
-  NativeModules,
-  NativeEventEmitter,
   Image,
   Dimensions,
   ScrollView,
-  TextInput,
   PermissionsAndroid,
   StatusBar,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
+import {UserContext} from './context/userContext';
+import {UserDetails} from './context/userDetailsContext';
 const {width, height} = Dimensions.get('window');
+import NotifService from '../components/methods/notifService';
+import getData from './methods/read';
+import storeData from './methods/store';
+import auth from '@react-native-firebase/auth';
+import functions from '@react-native-firebase/functions';
 // const MrzScanner = NativeModules.RNMrzscannerlib;
 // // import MrzScanner from 'react-native-mrzscannerlib';
 // MrzScanner.registerWithLicenseKey(
@@ -33,35 +34,107 @@ const {width, height} = Dimensions.get('window');
 // );
 // const EventEmitter = new NativeEventEmitter(MrzScanner);
 
-
 const requestCameraPermission = async () => {
   try {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.CAMERA,
       {
-        title: "Cool Photo App Camera Permission",
+        title: 'Cool Photo App Camera Permission',
         message:
-          "Cool Photo App needs access to your camera " +
-          "so you can take awesome pictures.",
-        buttonNeutral: "Ask Me Later",
-        buttonNegative: "Cancel",
-        buttonPositive: "OK"
-      }
+          'Cool Photo App needs access to your camera ' +
+          'so you can take awesome pictures.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log("You can use the camera");
+      console.log('You can use the camera');
     } else {
-      console.log("Camera permission denied");
+      console.log('Camera permission denied');
     }
   } catch (err) {
     console.warn(err);
   }
 };
 
+const DEV = true;
+
 export default function Home({navigation}) {
+  const nf = useRef(null);
+
+  const [prompt, setprompt] = useState(false);
   const [details, setdetails] = useState(null);
-  
+  const {loggedIn, setloggedIn} = useContext(UserContext);
+  const {user, setUser} = useContext(UserDetails);
+
+  const onRegister = token => {
+    console.log('OKOK');
+    console.log('tok', token);
+    //setonReg({registerToken: token.token, fcmRegistered: true});
+  };
+
+  const onNotif = notif => {
+    console.log('RECIEVED NOTI', notif);
+    return notif;
+  };
+
+  const logOut = async () => {
+    try {
+      var data = await getData('@token');
+      if (data.login === false) {
+        data.login = false;
+        storeData('@token', data);
+      }
+      console.log(data);
+
+      const sayHello = functions().httpsCallable('addUserToken');
+      sayHello({deviceRegisteration: data, user: uid})
+        .then(data => {
+          console.log(data.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+
+    return auth()
+      .signOut()
+      .then(() => {
+        setloggedIn(false);
+      });
+  };
+
+  const requestNotificationAndFunctions = async uid => {
+    try {
+      var data = await getData('@token');
+      if (data.login === false) {
+        data.login = true;
+        storeData('@token', data);
+      }
+      console.log(data);
+
+      const sayHello = functions().httpsCallable('addUserToken');
+      sayHello({deviceRegisteration: data, user: uid})
+        .then(data => {
+          console.log(data.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
+    const uid = auth().currentUser.uid;
+    nf.current = new NotifService(onRegister, onNotif);
+    console.log(nf.current);
+    //console.log('asdsd',nf.current);
+    requestNotificationAndFunctions(uid);
     requestCameraPermission();
     // var subscription;
     // subscription = EventEmitter.addListener(
@@ -112,15 +185,44 @@ export default function Home({navigation}) {
       contentContainerStyle={{minHeight: Dimensions.get('window').height}}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
       <View style={styles.container}>
-        <Text
-          style={{
-            textAlign: 'left',
-            fontSize: width / 15,
-            fontWeight: 'bold',
-            color: 'black',
-          }}>
-          Hello,Bob
-        </Text>
+        <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+          <View style={{flex: 1, justifyContent: 'center'}}>
+            <Text
+              style={{
+                textAlign: 'left',
+                fontSize: width / 15,
+                fontWeight: 'bold',
+                color: 'black',
+              }}>
+              Aviation
+            </Text>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'flex-end',
+              alignContent: 'flex-end',
+              alignItems: 'flex-end',
+            }}>
+            <TouchableOpacity
+              onPress={() => setprompt(true)}
+              style={{
+                width: 55,
+                height: 55,
+                borderRadius: parseInt(55 / 2),
+                backgroundColor: '#d3d3d3',
+                justifyContent: 'center',
+                alignContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={{color: 'black', fontSize: 28}}>
+                {typeof user === 'object' &&
+                  user.email != undefined &&
+                  user.email.charAt(0).toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <View style={{backgroundColor: 'black', height: 5, flex: 1}}></View>
           <Image
@@ -131,7 +233,6 @@ export default function Home({navigation}) {
         <View
           style={{
             flexDirection: 'row',
-            flex: 1,
             justifyContent: 'flex-start',
             marginTop: 20,
           }}>
@@ -148,119 +249,94 @@ export default function Home({navigation}) {
             <Text style={{color: 'white'}}>Ground Handling</Text>
           </TouchableOpacity>
         </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            marginTop: 20,
+          }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('LogDetails')}
+            style={[styles.card, {marginRight: 10}]}>
+            <Icons color="white" name="sticky-note-2" size={50} />
+            <Text style={{color: 'white'}}>Flight Log</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0}
+            style={{flex: 1}}></TouchableOpacity>
+        </View>
       </View>
-      {/* <View style={styles.container}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Calendar')}
-          style={{position: 'absolute', top: 10, right: 10}}>
-          <Icons name="calendar-month" size={50} color="#3b5998" />
-        </TouchableOpacity>
-        <Icons.Button
-          onPress={() => {
-            MrzScanner.setMaxThreads(2);
-            MrzScanner.setPassportActive(true);
-            MrzScanner.setScannerType(0);
-            MrzScanner.toggleFlash(false);
-            MrzScanner.startScanner();
-          }}
-          backgroundColor="#3b5998"
-          name="credit-card-scan"
-          size={30}
-          color="white">
-          <Text style={{fontSize: 15, color: 'white'}}>Scan passportsdsds</Text>
-        </Icons.Button>
-        {details && Object.keys(details).length > 0 && (
+
+      {prompt && (
+        <View
+          style={{
+            position: 'absolute',
+            width: width,
+            height: height + 100,
+            backgroundColor: '#40404034',
+            justifyContent: 'center',
+            paddingHorizontal: 20,
+          }}>
           <View
             style={{
-              width: '90%',
-              marginHorizontal: 20,
-              marginBottom: 10,
-              marginTop: 10,
-              backgroundColor: '#002e71',
-              // borderRadius: 15,
+              width: width - 40,
+              height: 200,
+              backgroundColor: '#FFF',
               padding: 10,
             }}>
+            <Text style={{color: '#000', fontSize: 25, fontWeight: '600'}}>
+              Logout
+            </Text>
             <Text
               style={{
-                color: 'white',
-                fontSize: 20,
-                textAlign: 'center',
-                marginBottom: 10,
+                color: '#808080',
+                fontSize: 16,
+                fontWeight: '500',
+                marginTop: 20,
               }}>
-              Click to edit
+              Are you sure you want to logout ?
             </Text>
-            {Object.keys(details).map((value, index) => {
-              return (
-                <View
-                  key={index}
+            <View
+              style={{
+                marginTop: 'auto',
+                marginBottom: 10,
+                marginRight: 20,
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  logOut();
+                  setprompt(false);
+                }}
+                style={{marginRight: 60}}>
+                <Text
                   style={{
-                    flexDirection: 'row',
-                    display:
-                      (value == 'passport image' ||
-                        value == 'passport sign' ||
-                        value == 'passport portrait') &&
-                      !details['passport image']
-                        ? 'none'
-                        : 'flex',
+                    color: 'cornflowerblue',
+                    fontSize: 20,
+                    fontWeight: '600',
                   }}>
-                  <View
-                    style={{
-                      flex: 1,
-                      justifyContent: 'center',
-                      alignItems: 'flex-end',
-                      padding: 10,
-                      paddingRight: 10,
-                    }}>
-                    <Text
-                      style={{
-                        textAlign: 'right',
-                        color: 'white',
-                        fontSize: Dimensions.get('window').width / 25,
-                      }}>
-                      {value.toUpperCase() + ':'}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flex: 1,
-                      // borderTopStartRadius: index > 0 ? 0 : 10,
-                      // borderTopEndRadius: index > 0 ? 0 : 10,
-                      backgroundColor: 'white',
-                      justifyContent: 'center',
-                      padding: 10,
-                      paddingHorizontal: 10,
-                    }}>
-                    {(value == 'passport image' ||
-                      value == 'passport sign' ||
-                      value == 'passport portrait') &&
-                    details['passport image'] ? (
-                      <Image
-                        style={{width: '100%', height: 150}}
-                        resizeMode="contain"
-                        source={{
-                          uri: `data:image/png;base64,${details[value]}`,
-                        }}
-                      />
-                    ) : (
-                      <TextInput
-                        style={{
-                          fontSize: Dimensions.get('window').width / 25,
-                          backgroundColor: 'rgba(0,0,0,0.1)',
-                          padding: 0,
-                          paddingHorizontal: 5,
-                          margin: 0,
-                        }}
-                        value={details[value]}
-                        onChangeText={(text) => onChange(value, text)}
-                      />
-                    )}
-                  </View>
-                </View>
-              );
-            })}
+                  Yes
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setprompt(false);
+                }}
+                style={{}}>
+                <Text
+                  style={{
+                    color: 'cornflowerblue',
+                    fontSize: 20,
+                    fontWeight: '600',
+                  }}>
+                  No
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
-      </View> */}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -269,7 +345,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     // alignItems: 'center',
     backgroundColor: '#FFF',
   },

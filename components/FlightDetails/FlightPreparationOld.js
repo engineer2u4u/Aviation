@@ -6,9 +6,9 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
-  Touchable
+  Touchable,
 } from 'react-native';
-import React, {useState,useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import Loader from '../Loader';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -21,9 +21,8 @@ const {height} = Dimensions.get('window');
 
 export default function FlightPreparation({navigation}) {
   const refRBSheet = useRef();
-    //upload funcs
-    const [uploadSection,setuploadSection]=useState(0);
-
+  //upload funcs
+  const [uploadSection, setuploadSection] = useState(0);
 
   const [loading, setloading] = useState(false);
   const [fpreparation, setfpreparation] = useState([
@@ -76,61 +75,62 @@ export default function FlightPreparation({navigation}) {
     setfpreparation(tfpreparation);
   };
 
-  const onPressDocPreA_New = async (index,res) => {
-
+  const onPressDocPreA_New = async (index, res) => {
     setloading(false);
     RNFetchBlob.fs
-  .readFile(res.uri, 'base64')
-  .then(encoded => {
-    // console.log(encoded, 'reports.base64');
-    setloading(false);
-    var tfpreparation = [...fpreparation];
-    tfpreparation[index].file.push({
-      name: res.fileName.replace('rn_image_picker_lib_temp_',''),
-      base64: 'data:' + res.type + ';base64,' + encoded,
-    });
-    setfpreparation(tfpreparation);
-})
-  .catch(error => {
-    setloading(false);
-    console.log(error);
-  });
+      .readFile(res.uri, 'base64')
+      .then(encoded => {
+        // console.log(encoded, 'reports.base64');
+        setloading(false);
+        var tfpreparation = [...fpreparation];
+        tfpreparation[index].file.push({
+          name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
+          base64: 'data:' + res.type + ';base64,' + encoded,
+        });
+        setfpreparation(tfpreparation);
+      })
+      .catch(error => {
+        setloading(false);
+        console.log(error);
+      });
 
-  refRBSheet.current.close();
+    refRBSheet.current.close();
+  };
 
-}
+  const getImage = async type => {
+    console.log('HERE', uploadSection);
+    var options = {
+      mediaType: 'image',
+      includeBase64: false,
+      maxHeight: 800,
+      maxWidth: 800,
+    };
+    console.log(options);
+    switch (type) {
+      case true:
+        try {
+          options.mediaType = 'photo';
+          const result = await ImagePicker.launchImageLibrary(options);
+          const file = result.assets[0];
 
-const getImage=async (type)=>{
-console.log("HERE",uploadSection)
-var options={mediaType:'image',includeBase64: false,maxHeight: 800,maxWidth: 800};
-console.log(options);
-switch(type){
-case true:
-  try {
-    options.mediaType='photo';
-    const result = await ImagePicker.launchImageLibrary(options);  
-    const file=result.assets[0];
-    
-    onPressDocPreA_New(uploadSection,file)
-
-  } catch (error) {
-    console.log(error);
-  }
-  break;
-  case false:
-    try {
-      const result = await ImagePicker.launchCamera(options);  
-      const file=result.assets[0];
-      onPressDocPreA_New(uploadSection,file)
-    } catch (error) {
-      console.log(error);
+          onPressDocPreA_New(uploadSection, file);
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      case false:
+        try {
+          const result = await ImagePicker.launchCamera(options);
+          const file = result.assets[0];
+          onPressDocPreA_New(uploadSection, file);
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      default:
+        break;
     }
-    break;
-    default:
-      break;
-}
-
-}
+  };
 
   return (
     <ScrollView>
@@ -142,13 +142,12 @@ case true:
           justifyContent: 'space-between',
           marginVertical: 20,
         }}>
-       
         <Text
           style={{
             fontSize: Dimensions.get('window').width / 15,
             fontWeight: 'bold',
             color: 'black',
-            paddingLeft:20
+            paddingLeft: 20,
           }}>
           Flight Preparation
         </Text>
@@ -206,13 +205,12 @@ case true:
               setfpreparation(tfpreparation);
             }}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             //onPress={() => onPressDocFPreparation(3)}
             onPress={() => {
               setuploadSection(3);
               refRBSheet.current.open();
-            }}
-          >
+            }}>
             <Icons
               style={{color: 'green', marginLeft: 10}}
               name="upload"
@@ -274,13 +272,12 @@ case true:
               setfpreparation(tfpreparation);
             }}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             //onPress={() => onPressDocFPreparation(4)}
             onPress={() => {
               setuploadSection(4);
               refRBSheet.current.open();
-            }}
-          >
+            }}>
             <Icons
               style={{color: 'green', marginLeft: 10}}
               name="upload"
@@ -340,13 +337,12 @@ case true:
               setfpreparation(tfpreparation);
             }}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             //onPress={() => onPressDocFPreparation(5)}
             onPress={() => {
               setuploadSection(5);
               refRBSheet.current.open();
-            }}
-          >
+            }}>
             <Icons
               style={{color: 'green', marginLeft: 10}}
               name="upload"
@@ -403,7 +399,7 @@ case true:
             <Text style={{color: 'white', textAlign: 'center'}}>Submit</Text>
           </TouchableOpacity>
         </View> */}
-         <RBSheet
+        <RBSheet
           ref={refRBSheet}
           closeOnDragDown={true}
           closeOnPressMask={true}
@@ -416,39 +412,39 @@ case true:
               backgroundColor: '#000',
             },
           }}>
-            <View style={{flex: 1, paddingLeft: 20}}>
-              <View style={{flex: 1}}>
-                <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
-              </View>
-              <View style={{flex: 1.5, flexDirection: 'column'}}>
-                <TouchableOpacity
-                onPress={()=>getImage(false)} 
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'flex-start',
-                  }}>
-                  <Icons name="camera-outline" size={25} color={'black'} />
-                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
-                   Upload from Camera
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  //onPress={() => onPressDocPreA(6)}
-                  onPress={()=>getImage(true)} 
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'flex-start',
-                  }}>
-                  <Icons name="image-outline" size={25} color={'black'} />
-                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
-                    Upload from Gallery
-                  </Text>
-                </TouchableOpacity>
-              </View>
+          <View style={{flex: 1, paddingLeft: 20}}>
+            <View style={{flex: 1}}>
+              <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
             </View>
-          </RBSheet>
+            <View style={{flex: 1.5, flexDirection: 'column'}}>
+              <TouchableOpacity
+                onPress={() => getImage(false)}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}>
+                <Icons name="camera-outline" size={25} color={'black'} />
+                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  Upload from Camera
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                //onPress={() => onPressDocPreA(6)}
+                onPress={() => getImage(true)}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}>
+                <Icons name="image-outline" size={25} color={'black'} />
+                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  Upload from Gallery
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </RBSheet>
       </View>
     </ScrollView>
   );
@@ -487,6 +483,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,

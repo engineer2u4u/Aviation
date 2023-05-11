@@ -5,16 +5,18 @@ import {SideDrawer} from './SideDrawer';
 
 const Drawer = createDrawerNavigator();
 
-const FlightDetailsRoute = () => {
+const FlightDetailsRoute = (props) => {
   return (
     <Drawer.Navigator
       drawerContent={props => <SideDrawer {...props} />}
       unmountOnBlur={true}>
       <Drawer.Screen
         name="DashboardStack"
-        component={MainStackNavigator}
+        
         options={{headerShown: false}}
-      />
+      >
+        {()=><MainStackNavigator  {...props} />}
+        </Drawer.Screen>
     </Drawer.Navigator>
   );
 };

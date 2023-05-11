@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   Button,
-  Switch,
+  Alert,
   ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -21,13 +21,16 @@ import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
-
+import {firebase} from '@react-native-firebase/functions';
+import {ActivityIndicator} from 'react-native';
 const {width, height} = Dimensions.get('window');
-
-export default function ArrivalService({navigation}) {
+import auth from '@react-native-firebase/auth';
+import s from '../subcomponents/Forms/FlightPreparation/form.styles';
+export default function ArrivalService(props) {
   const currentPicker = useRef(0);
   const refRBSheet = useRef();
-
+  const [uid, setuid] = useState(null);
+  const FUID = props.route.params.UID;
   //upload funcs
   const [uploadSection, setuploadSection] = useState(0);
 
@@ -50,45 +53,45 @@ export default function ArrivalService({navigation}) {
     null,
     null,
     null,
+    {value: '', file: []},
+    null,
+    null,
+    {checked: false},
+    null, //10
+    null,
+    {checked: false},
+    {checked: false},
+    null,
+    null,
+    {value: null, file: []},
     {value: null, file: []},
     null,
     null,
     {checked: false},
-    null,//10
+    null,
+    null,
     null,
     {checked: false},
+    null,
+    null,
+    null,
     {checked: false},
     null,
     null,
-    {value: null, file: []},
-    {value: null, file: []},
-    null,
-    null,
-    {checked: true},
-    null,
-    null,
-    null,
-    {checked: true},
-    null,
-    null,
-    null,
-    {checked: true},
-    null,
-    null,
-    {checked: true},
+    {checked: false},
     null,
     null,
     null,
     {value: null, file: []},
     'For remarks; if the fuel truck needs to  come around a second time, they can put the details of the second time it comes around into the remarks here',
-    {checked: true},
+    {checked: false},
     null,
     null,
     {value: null, file: []},
     null, //41
-    {checked: true},
+    {checked: false},
     null,
-    {checked: true},
+    {checked: false},
     null,
     null,
     {checked: false},
@@ -107,23 +110,215 @@ export default function ArrivalService({navigation}) {
     [],
     [], //61
     [], //62
-    {},//63
-    null
+    {}, //63
+    null, //64
+    null, //65
   ]);
   const addMovement = () => {
     var tarrival = [...arrival];
     tarrival[60] = [
       ...arrival[60],
-      {arrival: null, boarded: null, departed: null, remarks: null},
+      {arrival: null, departed: null, remarks: null, type: 'Pax'},
     ];
-    setArrival(tarrival);
+    setArrival([...tarrival]);
   };
   const onRemoveMovement = index => {
     var service = [...arrival];
     service[60].splice(index, 1);
     setArrival(service);
   };
-  useEffect(() => {}, []);
+  useEffect(() => {
+    setcallLoad(true);
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable(
+        'getFlightModule?fuid=' + FUID + '&module=GetArrivalServices',
+      )()
+      .then(response => {
+        // console.log(response);
+        var packet = JSON.parse(response.data.body);
+        var res = [...packet.Table];
+        if (res) {
+          console.log(res[0]);
+          setuid(res[0].UID);
+          let x = [...arrival];
+          x[0] = res[0].ARS_MOVACLANDED
+            ? res[0].ARS_MOVACLANDED.toString().trim().replace('""', '')
+            : '';
+          x[1] = res[0].ARS_MOVCHOCKIN
+            ? res[0].ARS_MOVCHOCKIN.toString().trim().replace('""', '')
+            : '';
+          x[2] = res[0].ARS_GPU_START
+            ? res[0].ARS_GPU_START.toString().trim().replace('""', '')
+            : '';
+          x[3] = res[0].ARS_GPU_STOP
+            ? res[0].ARS_GPU_STOP.toString().trim().replace('""', '')
+            : '';
+          x[4] = res[0].ARS_PAX
+            ? res[0].ARS_PAX.toString().trim().replace('""', '')
+            : '';
+          x[5] = res[0].ARS_CREW
+            ? res[0].ARS_CREW.toString().trim().replace('""', '')
+            : '';
+          x[6].value = res[0].ARS_BAGGAGE
+            ? res[0].ARS_BAGGAGE.toString().toString().trim().replace('""', '')
+            : '';
+          x[7] = res[0].ARS_MOV_PXDA
+            ? res[0].ARS_MOV_PXDA.toString().trim().replace('""', '')
+            : '';
+          x[8] = res[0].ARS_MOV_PXTAT
+            ? res[0].ARS_MOV_PXTAT.toString().trim().replace('""', '')
+            : '';
+          x[9].checked = res[0].ARS_MOV_PXVA;
+          x[10] = res[0].ARS_MOV_PXCIQ
+            ? res[0].ARS_MOV_PXCIQ.toString().trim().replace('""', '')
+            : '';
+          // x[11] = res[0].ARS_MOV_PXDT?res[0].ARS_MOV_PXDT.toString().trim().replace('""', ''): '';
+          x[12].checked = res[0].ARS_MOV_VOA == 1 ? true : false;
+          // x[14] = res[0].ARS_MOV_PXDT?res[0].ARS_MOV_PXDT.toString().trim().replace('""', ''): '';
+          x[15] = res[0].ARS_CTR_CEO
+            ? res[0].ARS_CTR_CEO.toString().trim().replace('""', '')
+            : '';
+          // x[16] = res[0].ARS_CTR_CEL?res[0].ARS_CTR_CEL.toString().trim().replace('""', ''): '';
+          // x[17] = res[0].ARS_CTR_NCO?res[0].ARS_CTR_NCO.toString().trim().replace('""', ''): '';
+          x[18] = res[0].ARS_CTR_CDT
+            ? res[0].ARS_CTR_CDT.toString().trim().replace('""', '')
+            : '';
+          x[19] = res[0].ARS_CTR_REM
+            ? res[0].ARS_CTR_REM.toString().trim().replace('""', '')
+            : '';
+          x[20].checked = res[0].ARS_CTR_REQ == 1 ? true : false;
+          x[21] = res[0].ARS_WAS_CT
+            ? res[0].ARS_WAS_CT.toString().trim().replace('""', '')
+            : '';
+          x[22] = res[0].ARS_WAS_ET
+            ? res[0].ARS_WAS_ET.toString().trim().replace('""', '')
+            : '';
+          x[23] = res[0].ARS_WAS_REM
+            ? res[0].ARS_WAS_REM.toString().trim().replace('""', '')
+            : '';
+          x[24].checked = res[0].ARS_WAS_REQ == 1 ? true : false;
+          x[25] = res[0].ARS_LAS_CT
+            ? res[0].ARS_LAS_CT.toString().trim().replace('""', '')
+            : '';
+          x[26] = res[0].ARS_LAS_ET
+            ? res[0].ARS_LAS_ET.toString().trim().replace('""', '')
+            : '';
+          x[27] = res[0].ARS_LAS_REM
+            ? res[0].ARS_LAS_REM.toString().trim().replace('""', '')
+            : '';
+          x[28].checked = res[0].ARS_LAS_REQ == 1 ? true : false;
+          x[29] = res[0].ARS_RUS_CT
+            ? res[0].ARS_RUS_CT.toString().trim().replace('""', '')
+            : '';
+          x[30] = res[0].ARS_RUS_REM
+            ? res[0].ARS_RUS_REM.toString().trim().replace('""', '')
+            : '';
+          x[31].checked = res[0].ARS_RUS_REQ == 1 ? true : false;
+          x[32] = res[0].ARS_FOA_FTAT
+            ? res[0].ARS_FOA_FTAT.toString().trim().replace('""', '')
+            : '';
+          x[33] = res[0].ARS_FOA_START
+            ? res[0].ARS_FOA_START.toString().trim().replace('""', '')
+            : '';
+          x[34] = res[0].ARS_FOA_END
+            ? res[0].ARS_FOA_END.toString().trim().replace('""', '')
+            : '';
+          // x[35] = res[0].ARS_FOA_RECEIPT?res[0].ARS_FOA_RECEIPT.toString().trim().replace('""', ''): '';
+          x[36] = res[0].ARS_FOA_REM
+            ? res[0].ARS_FOA_REM.toString().trim().replace('""', '')
+            : '';
+          x[37].checked = res[0].ARS_FOA_REQ == 1 ? true : false;
+          x[38] = res[0].ARS_TOS_START
+            ? res[0].ARS_TOS_START.toString().trim().replace('""', '')
+            : '';
+          x[39] = res[0].ARS_TOS_END
+            ? res[0].ARS_TOS_END.toString().trim().replace('""', '')
+            : '';
+          // x[40] = res[0].ARS_TOS_PHOTO?res[0].ARS_TOS_PHOTO.toString().trim().replace('""', ''): '';
+          x[41] = res[0].ARS_TOS_REM
+            ? res[0].ARS_TOS_REM.toString().trim().replace('""', '')
+            : '';
+          x[42].checked = res[0].ARS_TOS_REQ == 1 ? true : false;
+          x[43] = res[0].ARS_OVB_NUMBER
+            ? res[0].ARS_OVB_NUMBER.toString().trim().replace('""', '')
+            : '';
+          x[44].checked = res[0].ARS_OVB_REQ == 1 ? true : false;
+          x[46] = res[0].ARS_CRM_CAT
+            ? res[0].ARS_CRM_CAT.toString().trim().replace('""', '')
+            : '';
+          x[48] = res[0].ARS_CRM_CCIQ
+            ? res[0].ARS_CRM_CCIQ.toString().trim().replace('""', '')
+            : '';
+          x[45] = res[0].ARS_CRM_CDA
+            ? res[0].ARS_CRM_CDA.toString().trim().replace('""', '')
+            : '';
+          x[47] = res[0].ARS_CRM_CVA
+            ? res[0].ARS_CRM_CVA.toString().trim().replace('""', '')
+            : '';
+          // console.log([...x]);
+          setArrival([...x]);
+          firebase
+            .app()
+            .functions('asia-southeast1')
+            .httpsCallable(
+              'getFlightModule?fuid=' + FUID + '&module=GetArrivalServicesPM',
+            )()
+            .then(response => {
+              var packet = JSON.parse(response.data.body);
+              var res = packet.Table;
+              console.log(res, 'res');
+              if (res && res.length > 0) {
+                x[60] = [];
+                x[62] = [];
+                res.forEach((val, index) => {
+                  if (val.ARS_PM_TYPE == 'Pax') {
+                    x[60].push({
+                      arrival: val.ARS_PM_ATAT.trim().replace('""', ''),
+                      departed: val.ARS_PM_PDFT.trim().replace('""', ''),
+                      remarks: val.ARS_PM_REMARK.trim().replace('""', ''),
+                      type: val.ARS_PM_TYPE,
+                      UID: val.UID,
+                    });
+                  } else {
+                    x[62].push({
+                      arrival: val.ARS_PM_ATAT.trim().replace('""', ''),
+                      departed: val.ARS_PM_PDFT.trim().replace('""', ''),
+                      remarks: val.ARS_PM_REMARK.trim().replace('""', ''),
+                      type: val.ARS_PM_TYPE,
+                      UID: val.UID,
+                    });
+                  }
+                });
+                console.log(x, 'res');
+
+                setArrival([...x]);
+              } else {
+                console.log(x, 'res');
+
+                setArrival([...x]);
+              }
+              setcallLoad(false);
+            })
+            .catch(error => {
+              setcallLoad(false);
+              console.log(error, 'Function error');
+              setArrival([...x]);
+            });
+        } else {
+          setcallLoad(false);
+          setuid('');
+        }
+      })
+      .catch(error => {
+        setcallLoad(false);
+
+        console.log(error, 'Function error');
+      });
+
+    // pax crew movement
+  }, []);
   const setArrivalcheck = index => {
     var tarrival = [...arrival];
     tarrival[index].checked = !tarrival[index].checked;
@@ -298,26 +493,151 @@ export default function ArrivalService({navigation}) {
   const [crewmove, setcrewmove] = useState(false);
   const [crewmovenum, setcrewmovenum] = useState(0);
   const addCrewMovement = () => {
-    setcrewmove(true);
-    setcrewmovenum(crewmovenum + 1);
+    var tarrival = [...arrival];
+    tarrival[62] = [
+      ...arrival[62],
+      {arrival: null, departed: null, remarks: null, type: 'Crew'},
+    ];
+    setArrival([...tarrival]);
+  };
+  const removeCrewMovement = index => {
+    var service = [...arrival];
+    service[62].splice(index, 1);
+    setArrival(service);
   };
 
-  const removeCrewMovement = () => {
-    var x = crewmovenum;
-    x = x - 1;
-    if (x == 0) {
-      setcrewmove(false);
-      setcrewmovenum(0);
-    } else {
-      setcrewmovenum(x);
-    }
-  };
-
-  const setArrivalData=(index,text,type,section)=>{
+  const setArrivalData = (index, text, type, section) => {
     var tarrival = [...arrival];
     tarrival[index] = text;
-    setArrival(tarrival);  
-  }
+    setArrival(tarrival);
+  };
+  const [callLoad, setcallLoad] = useState(false);
+  const sendForm = () => {
+    const email = auth().currentUser.email;
+    const payload = {
+      ARS_MOVACLANDED: arrival[0] ? arrival[0] : '""',
+      ARS_MOVCHOCKIN: arrival[1] ? arrival[1] : '""',
+      ARS_GPU_REQ: 0,
+      ARS_GPU_START: arrival[2] ? arrival[2] : '""',
+      ARS_GPU_STOP: arrival[3] ? arrival[3] : '""',
+      ARS_PAX: arrival[4] ? arrival[4] : '""',
+      ARS_CREW: arrival[5] ? arrival[5] : '""',
+      ARS_BAGGAGE: arrival[6].value ? arrival[6].value : '""',
+      ARS_CTR_CEO: arrival[15] ? arrival[15] : '""',
+      ARS_CTR_CDT: arrival[18] ? arrival[18] : '""',
+      ARS_CTR_REM: arrival[19] ? arrival[19] : '""',
+      ARS_CTR_REQ: arrival[20].checked == true ? 1 : 0,
+      ARS_WAS_CT: arrival[21] ? arrival[21] : '""',
+      ARS_WAS_ET: arrival[22] ? arrival[22] : '""',
+      ARS_WAS_REM: arrival[23] ? arrival[23] : '""',
+      ARS_WAS_REQ: arrival[24].checked == true ? 1 : 0,
+      ARS_LAS_ST: arrival[25] ? arrival[25] : '""',
+      ARS_LAS_CT: '""',
+      ARS_LAS_ET: arrival[26] ? arrival[26] : '""',
+      ARS_LAS_REM: arrival[27] ? arrival[27] : '""',
+      ARS_LAS_REQ: arrival[28].checked == true ? 1 : 0,
+      ARS_RUS_CT: arrival[29] ? arrival[29] : '""',
+      ARS_RUS_REM: arrival[30] ? arrival[30] : '""',
+      ARS_RUS_REQ: arrival[31].checked == true ? 1 : 0,
+      ARS_FOA_FTAT: arrival[32] ? arrival[32] : '""',
+      ARS_FOA_START: arrival[33] ? arrival[33] : '""',
+      ARS_FOA_END: arrival[34] ? arrival[34] : '""',
+      ARS_FOA_REM: arrival[36] ? arrival[36] : '""',
+      ARS_FOA_REQ: arrival[37].checked == true ? 1 : 0,
+      ARS_TOS_START: arrival[38] ? arrival[38] : '""',
+      ARS_TOS_END: arrival[39] ? arrival[39] : '""',
+      ARS_TOS_REM: arrival[41] ? arrival[41] : '""',
+      ARS_TOS_REQ: arrival[42].checked == true ? 1 : 0,
+      ARS_OVB_NUMBER: arrival[43] ? arrival[43] : '""',
+      ARS_OVB_REQ: arrival[44].checked == true ? 1 : 0,
+      STATUS: 0,
+      UID: uid ? uid : '',
+      FUID: FUID,
+      UPDATE_BY: email,
+      ARS_CRM_CAT: arrival[46] ? arrival[46] : '""',
+      ARS_CRM_CCIQ: arrival[48] ? arrival[48] : '""',
+      ARS_CRM_CDA: arrival[45] ? arrival[45] : '""',
+      ARS_CRM_CVA: arrival[47].checked == true ? 1 : 0,
+      ARS_CRM_REM: '""',
+      ARS_MOV_PXAT: arrival[8] ? arrival[8] : '""',
+      ARS_MOV_PXCIQ: arrival[10] ? arrival[10] : '""',
+      ARS_MOV_PXDA: arrival[7] ? arrival[7] : '""',
+      ARS_MOV_PXVA: arrival[9].checked == true ? 1 : 0,
+      ARS_MOV_VOA: arrival[12].checked == true ? 1 : 0,
+    };
+    console.log(payload, 'payload');
+    setcallLoad(true);
+    firebase
+      .app()
+      .functions('asia-southeast1')
+      .httpsCallable('updateFlightModule?module=PostArrivalServices')(
+        JSON.stringify(payload),
+      )
+      .then(response => {
+        Alert.alert('Success');
+        setcallLoad(false);
+        console.log(response);
+      })
+      .catch(error => {
+        Alert.alert('Error in updation');
+        setcallLoad(false);
+        console.log(error, 'Function error');
+      });
+    arrival[60].map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostArrivalServicesPM')(
+          JSON.stringify({
+            ARS_PM_PDFT: val.departed ? val.departed : '""',
+            ARS_PM_ATAT: val.arrival ? val.arrival : '""',
+            ARS_PM_REMARK: val.remarks ? val.remarks : '""',
+            ARS_PM_TYPE: val.type ? val.type : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+    arrival[62].map(val => {
+      firebase
+        .app()
+        .functions('asia-southeast1')
+        .httpsCallable('updateFlightModule?module=PostArrivalServicesPM')(
+          JSON.stringify({
+            ARS_PM_PDFT: val.departed ? val.departed : '""',
+            ARS_PM_ATAT: val.arrival ? val.arrival : '""',
+            ARS_PM_REMARK: val.remarks ? val.remarks : '""',
+            ARS_PM_TYPE: val.type ? val.type : '""',
+            UID: val.UID ? val.UID : '',
+            STATUS: 0,
+            FUID: FUID,
+            UPDATE_BY: email,
+          }),
+        )
+        .then(response => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(response);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+  };
 
   return (
     <View>
@@ -337,70 +657,44 @@ export default function ArrivalService({navigation}) {
           }}>
           Arrival Services
         </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
+        {callLoad ? (
+          <View style={{paddingRight: 20}}>
+            <ActivityIndicator color="green" size={'small'} />
+          </View>
+        ) : (
+          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+            <Icons name="content-save" color="green" size={30} />
+          </TouchableOpacity>
+        )}
       </View>
       <ScrollView>
         <Loader visible={loading} />
 
         <View style={{padding: 20, marginBottom: 100}}>
-        <DateTimeInput 
-                label={'Movement (AC Landed (Local Time))'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 0)}}
-                setNowPostDepart={()=>setNow(0)}
-                size={12}
-                type={'time'}
-                data={arrival[0]}
-                index={12}
-              />
-          {/* <Text style={styleSheet.label}>Movement (AC Landed (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePicker('time', 0)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[0] ? arrival[0] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setNow(0)} style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
-          <DateTimeInput 
-                label={'Movement (Checks In (Local Time))'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 1)}}
-                setNowPostDepart={()=>setNow(1)}
-                size={12}
-                type={'time'}
-                data={arrival[1]}
-                index={12}
-              />
-          {/* <Text style={styleSheet.label}>Movement (Chocks in (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePicker('time', 1)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[1] ? arrival[1] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setNow(1)} style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+          <DateTimeInput
+            label={'Movement (AC Landed) (Local Time)'}
+            showDatePickerPostDepart={() => {
+              showDatePicker('time', 0);
+            }}
+            setNowPostDepart={() => setNow(0)}
+            size={12}
+            type={'time'}
+            data={arrival[0]}
+            index={12}
+          />
+
+          <DateTimeInput
+            label={'Movement (Checks In) (Local Time)'}
+            showDatePickerPostDepart={() => {
+              showDatePicker('time', 1);
+            }}
+            setNowPostDepart={() => setNow(1)}
+            size={12}
+            type={'time'}
+            data={arrival[1]}
+            index={12}
+          />
+
           <Text style={styleSheet.label}>Ground Power Unit (GPU):</Text>
           <View
             style={{
@@ -410,104 +704,64 @@ export default function ArrivalService({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-              <DateTimeInput 
-                label={'Start Time (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 2)}}
-                setNowPostDepart={()=>setNow(2)}
-                size={12}
-                type={'time'}
-                data={arrival[2]}
-                index={12}
-              />
-            {/* //mark <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 2)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[2] ? arrival[2] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setNow(2)} style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            <DateTimeInput 
-                label={'Stop Time (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 3)}}
-                setNowPostDepart={()=>setNow(3)}
-                size={12}
-                type={'time'}
-                data={arrival[3]}
-              />
-            {/* <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 3)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[3] ? arrival[3] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setNow(3)} style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
+            <DateTimeInput
+              label={'Start Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 2);
+              }}
+              setNowPostDepart={() => setNow(2)}
+              size={12}
+              type={'time'}
+              data={arrival[2]}
+              index={12}
+            />
+            <DateTimeInput
+              label={'Stop Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 3);
+              }}
+              setNowPostDepart={() => setNow(3)}
+              size={12}
+              type={'time'}
+              data={arrival[3]}
+            />
+          </View>
+
+          {/* <LabelledInput
+            label={'Number of Pax'} //mark
+            data={arrival[4]}
+            datatype={'text'}
+            index={4}
+            setText={(index, text, type, section) => {
+              var tarrival = [...arrival];
+              tarrival[index] = text;
+              setArrival(tarrival);
+            }}
+            multiline={false}
+            numberOfLines={1}
+          /> */}
+          <Text style={s.label}>{'Number of Pax'}</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <TextInput
+              style={[s.input, {backgroundColor: 'white'}]}
+              editable={true}
+              value={arrival[4] ? arrival[4].toString() : ''}
+              onChangeText={text => {
+                var tarrival = [...arrival];
+                tarrival[4] = text;
+                setArrival(tarrival);
+              }}
+            />
           </View>
           <LabelledInput
-                label={'Number of Pax'} //mark
-                data={arrival[4]}
-                datatype={'text'}
-                index={4}
-                setText={(index,text,type,section)=>{
-                  var tarrival = [...arrival];
-                  tarrival[index] = text;
-                  setArrival(tarrival);  
-                }} 
-                multiline={false}
-                numberOfLines={1}
-              />
-          {/* <Text style={styleSheet.label}>Number of Pax</Text>
-          <TextInput
-            style={styleSheet.input}
-            value={arrival[4]}
-            onChangeText={text => {
-              var tarrival = [...arrival];
-              tarrival[4] = text;
-              setArrival(tarrival);
-            }}
-          /> //mark */}
-          <LabelledInput
-                label={'Number of Crew'} //mark
-                data={arrival[5]}
-                datatype={'text'}
-                index={5}
-                setText={setArrivalData} 
-                multiline={false}
-                numberOfLines={1}
-              />
-          {/* <Text style={styleSheet.label}>Number of Crew</Text>
-          <TextInput
-            style={styleSheet.input}
-            value={arrival[5]}
-            onChangeText={text => {
-              var tarrival = [...arrival];
-              tarrival[5] = text;
-              setArrival(tarrival);
-            }}
-          /> */}
+            label={'Number of Crew'} //mark
+            data={arrival[5]}
+            datatype={'text'}
+            index={5}
+            setText={setArrivalData}
+            multiline={false}
+            numberOfLines={1}
+          />
           <Text style={styleSheet.label}>Baggage:</Text>
           <View
             style={{
@@ -521,7 +775,7 @@ export default function ArrivalService({navigation}) {
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
                 style={styleSheet.input}
-                value={arrival[6].value}
+                value={arrival[6].value ? arrival[6].value.toString() : ''}
                 onChangeText={text => {
                   var tarrival = [...arrival];
                   tarrival[6].value = text;
@@ -601,68 +855,30 @@ export default function ArrivalService({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
+            <DateTimeInput
+              label={'Pax Departed from Aircraft (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 7);
+              }}
+              setNowPostDepart={() => setNow(7)}
+              size={12}
+              type={'time'}
+              data={arrival[7]}
+              index={12}
+            />
 
-<DateTimeInput 
-                label={'Pax Departed from Aircraft (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 7)}}
-                setNowPostDepart={()=>setNow(7)}
-                size={12}
-                type={'time'}
-                data={arrival[7]}
-                index={12}
-              />
+            <DateTimeInput
+              label={'Pax Arrived at Terminal (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 8);
+              }}
+              setNowPostDepart={() => setNow(8)}
+              size={12}
+              type={'time'}
+              data={arrival[8]}
+              index={12}
+            />
 
-            {/* <Text style={styleSheet.label}>
-              Pax Departed from Aircraft (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 7)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[7] ? arrival[7] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setNow(7)} style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            <DateTimeInput 
-                label={'Pax Arrived at Terminal (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 8)}}
-                setNowPostDepart={()=>setNow(8)}
-                size={12}
-                type={'time'}
-                data={arrival[8]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Pax Arrived at Terminal (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 8)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[8] ? arrival[8] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setNow(8)} style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
             <View
               style={{
                 flexDirection: 'row',
@@ -701,150 +917,52 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>VOA Not Required</Text>
             </View>
-            <DateTimeInput 
-                label={'Pax Completed CIQ (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 10)}}
-                setNowPostDepart={()=>setNow(10)}
-                size={12}
-                type={'time'}
-                data={arrival[10]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>Pax Completed CIQ (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 10)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[10] ? arrival[10] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(10)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            
-            <DateTimeInput 
-                label={'Actual Transport Arrival Time at Airport (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 58)}}
-                setNowPostDepart={()=>setNow(58)}
-                size={12}
-                type={'time'}
-                data={arrival[58]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Actual Transport Arrival Time at Airport (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 58)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[58] ? arrival[58] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(58)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            
-            {/* <Text style={styleSheet.label}>
-              Time Pax Boarded Transport at Airport (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 59)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[59] ? arrival[59] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(59)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            <DateTimeInput 
-                label={'Pax Departed from Terminal (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 11)}}
-                setNowPostDepart={()=>setNow(11)}
-                size={12}
-                type={'time'}
-                data={arrival[11]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Pax Departed from Terminal (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 11)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[11] ? arrival[11] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(11)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
+            <DateTimeInput
+              label={'Pax Completed CIQ (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 10);
+              }}
+              setNowPostDepart={() => setNow(10)}
+              size={12}
+              type={'time'}
+              data={arrival[10]}
+              index={12}
+            />
+            {/* <DateTimeInput
+              label={'Actual Transport Arrival Time at Airport (Local Time)'}
+              notrequiredSection={true}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 58);
+              }}
+              setNowPostDepart={() => setNow(58)}
+              size={12}
+              type={'time'}
+              data={arrival[58]}
+              index={12}
+            />
+
+            <DateTimeInput
+              label={'Pax Departed from Terminal (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 11);
+              }}
+              setNowPostDepart={() => setNow(11)}
+              size={12}
+              type={'time'}
+              data={arrival[11]}
+              index={12}
+            />
 
             <LabelledInput
               label={'Remarks'} //mark
               data={arrival[14]}
               datatype={'text'}
               index={14}
-              setText={setArrivalData} 
+              setText={setArrivalData}
               multiline={true}
               numberOfLines={2}
             />
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={styleSheet.input}
-                multiline={true}
-                placeholder="Pax Name"
-                numberOfLines={2}
-                value={arrival[14]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[14] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View> */}
+            */}
             <View
               style={{
                 flexDirection: 'row',
@@ -868,15 +986,11 @@ export default function ArrivalService({navigation}) {
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                    {
-                      //remove old fields
-
-
-                      //add 
-
-                      //
-
-                    }
+                  {
+                    //remove old fields
+                    //add
+                    //
+                  }
                   <View style={{alignItems: 'flex-end'}}>
                     <TouchableOpacity
                       style={styleSheet.label}
@@ -884,6 +998,22 @@ export default function ArrivalService({navigation}) {
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
+
+                  <DateTimeInput
+                    label={
+                      'Actual Transport Arrival Time at Airport (Local Time)'
+                    }
+                    //come here
+                    notrequiredSection={false}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', 60, index);
+                    }}
+                    setNowPostDepart={() => setNow(60, index, 'arrival')}
+                    size={12}
+                    type={'time'}
+                    data={val.arrival}
+                    index={60}
+                  />
                   <Text style={styleSheet.label}>
                     Pax Departed from Terminal (Local Time)
                   </Text>
@@ -915,7 +1045,7 @@ export default function ArrivalService({navigation}) {
                     <TextInput
                       style={styleSheet.input}
                       multiline={true}
-                      placeholder="Pax Name"
+                      placeholder=""
                       numberOfLines={2}
                       value={val.remarks}
                       onChangeText={text => {
@@ -947,7 +1077,18 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(20)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(20);
+                  var x = [...arrival];
+                  //come here
+                  x[15] = null;
+                  x[16] = {value: null, file: []};
+                  x[17] = {value: null, file: []};
+                  x[18] = null;
+                  x[19] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[20].checked
@@ -1122,7 +1263,9 @@ export default function ArrivalService({navigation}) {
                 })}
               </View>
             )}
-            <Text style={styleSheet.label}>Catering Delivey Time</Text>
+            <Text style={styleSheet.label}>
+              Catering Delivey Time (Local Time)
+            </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[20].checked}
@@ -1190,7 +1333,15 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(24)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(24);
+                  var x = [...arrival];
+                  x[21] = null;
+                  x[22] = null;
+                  x[23] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[24].checked
@@ -1203,7 +1354,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[24].checked}
@@ -1233,7 +1384,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local TIme)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[24].checked}
@@ -1263,36 +1414,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* <Text style={styleSheet.label}>Completion Time</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              disabled={arrival[24].checked}
-              style={[
-                styleSheet.picker,
-                {
-                  backgroundColor: arrival[24].checked
-                    ? 'rgba(0,0,0,0.1)'
-                    : 'white',
-                },
-              ]}
-              onPress={() => showDatePicker('time', 21)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[21] ? arrival[21] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={arrival[24].checked}
-              onPress={() => setNow(21)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+
             <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -1331,7 +1453,15 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(28)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(28);
+                  var x = [...arrival];
+                  x[25] = null;
+                  x[26] = null;
+                  x[27] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[28].checked
@@ -1344,7 +1474,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[28].checked}
@@ -1374,7 +1504,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local TIme)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[28].checked}
@@ -1404,36 +1534,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* <Text style={styleSheet.label}>Completion Time</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              disabled={arrival[26].checked}
-              style={[
-                styleSheet.picker,
-                {
-                  backgroundColor: arrival[26].checked
-                    ? 'rgba(0,0,0,0.1)'
-                    : 'white',
-                },
-              ]}
-              onPress={() => showDatePicker('time', 25)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {arrival[25] ? arrival[25] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              disabled={arrival[26].checked}
-              onPress={() => setNow(25)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+
             <Text style={styleSheet.label}>Remarks</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TextInput
@@ -1472,7 +1573,14 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(31)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(31);
+                  var x = [...arrival];
+                  x[29] = null;
+                  x[30] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[31].checked
@@ -1485,7 +1593,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Completion Time</Text>
+            <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[31].checked}
@@ -1555,7 +1663,17 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(37)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(37);
+                  var x = [...arrival];
+                  x[32] = null;
+                  x[33] = null;
+                  x[34] = null;
+                  x[35] = {value: false, file: []};
+                  x[36] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[37].checked
@@ -1568,7 +1686,9 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Fuel Truck Arrival Time</Text>
+            <Text style={styleSheet.label}>
+              Fuel Truck Arrival Time (Local Time)
+            </Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[37].checked}
@@ -1598,7 +1718,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[37].checked}
@@ -1628,7 +1748,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[37].checked}
@@ -1766,7 +1886,17 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(42)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(42);
+                  var x = [...arrival];
+                  //x[34]=null;
+                  x[38] = null;
+                  x[39] = null;
+                  x[40] = {value: false, file: []};
+                  x[41] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[42].checked
@@ -1779,7 +1909,7 @@ export default function ArrivalService({navigation}) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time</Text>
+            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[42].checked}
@@ -1809,7 +1939,7 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styleSheet.label}>End Time</Text>
+            <Text style={styleSheet.label}>End Time (Local Time)</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <TouchableOpacity
                 disabled={arrival[42].checked}
@@ -1948,7 +2078,13 @@ export default function ArrivalService({navigation}) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(44)}>
+              <TouchableOpacity
+                onPress={event => {
+                  setArrivalcheck(44);
+                  var x = [...arrival];
+                  x[43] = null;
+                  setArrival(x);
+                }}>
                 <Icons
                   name={
                     arrival[44].checked
@@ -1994,70 +2130,29 @@ export default function ArrivalService({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-              <DateTimeInput 
-                label={'Crew Departed from Aircraft (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 45)}}
-                setNowPostDepart={()=>setNow(45)}
-                size={12}
-                type={'time'}
-                data={arrival[45]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Crew Departed from Aircraft (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 45)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[45] ? arrival[45] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(45)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            <DateTimeInput 
-                label={'Crew Arrived at Terminal (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 46)}}
-                setNowPostDepart={()=>setNow(46)}
-                size={12}
-                type={'time'}
-                data={arrival[46]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Crew Arrived at Terminal (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 46)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[46] ? arrival[46] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(46)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
+            <DateTimeInput
+              label={'Crew Departed from Aircraft (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 45);
+              }}
+              setNowPostDepart={() => setNow(45)}
+              size={12}
+              type={'time'}
+              data={arrival[45]}
+              index={12}
+            />
+
+            <DateTimeInput
+              label={'Crew Arrived at Terminal (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 46);
+              }}
+              setNowPostDepart={() => setNow(46)}
+              size={12}
+              type={'time'}
+              data={arrival[46]}
+              index={12}
+            />
 
             <View
               style={{
@@ -2098,153 +2193,17 @@ export default function ArrivalService({navigation}) {
               <Text style={styleSheet.label}>VOA Not Required</Text>
             </View>
 
-            <DateTimeInput 
-                label={'Crew Completed CIQ (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 48)}}
-                setNowPostDepart={()=>setNow(48)}
-                size={12}
-                type={'time'}
-                data={arrival[48]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Crew Completed CIQ (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 48)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[48] ? arrival[48] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(48)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-          
-
-            <DateTimeInput 
-                label={'Actual Transport Arrival Time at Terminal (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 49)}}
-                setNowPostDepart={()=>setNow(49)}
-                size={12}
-                type={'time'}
-                data={arrival[49]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Actual Transport Arrival Time (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 49)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[49] ? arrival[49] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(49)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-
-
-            {/* <Text style={styleSheet.label}>
-              Time Crew Boarded Transport (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 50)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[50] ? arrival[50] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(50)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-
-<DateTimeInput 
-                label={'Crew Departed from Terminal (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 61)}}
-                setNowPostDepart={()=>setNow(61)}
-                size={12}
-                type={'time'}
-                data={arrival[61]}
-                index={12}
-              />
-            {/* <Text style={styleSheet.label}>
-              Crew Departed from Terminal (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                style={styleSheet.picker}
-                onPress={() => showDatePicker('time', 61)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[61] ? arrival[61] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setNow(61)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View> */}
-            <LabelledInput
-                label={'Remarks'} //mark
-                data={arrival[41]}
-                datatype={'text'}
-                index={41}
-                setText={setArrivalData} 
-                multiline={false}
-                numberOfLines={1}
-              />
-            {/* <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={[styleSheet.input]}
-                multiline={true}
-                numberOfLines={2}
-                value={arrival[41]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[41] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View> */}
+            <DateTimeInput
+              label={'Crew Completed CIQ (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 48);
+              }}
+              setNowPostDepart={() => setNow(48)}
+              size={12}
+              type={'time'}
+              data={arrival[48]}
+              index={12}
+            />
 
             <View
               style={{
@@ -2260,179 +2219,73 @@ export default function ArrivalService({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {crewmove &&
-              [...Array(crewmovenum)].map((data, index) => {
-                return (
-                  <View key={index} style={{marginTop: 20}}>
-                    <View
-                      style={{
-                        borderBottomWidth: 1,
-                        borderBottomColor: 'rgba(0,0,0,0.4)',
-                        marginBottom: 20,
-                      }}></View>
-                    <View style={{alignItems: 'flex-end'}}>
-                      <TouchableOpacity
-                        style={styleSheet.label}
-                        onPress={() => removeCrewMovement()}>
-                        <Icons name="minus-box-outline" color="red" size={30} />
-                      </TouchableOpacity>
-                    </View>
-                    
-                    <DateTimeInput 
-                label={'Actual Transport Arrival Time at Airport (Local Time)'}
-                showDatePickerPostDepart={()=>{showDatePicker('time', 62, index, 'arrival')}}
-                setNowPostDepart={(a,time)=>{
-                  var options={
-                    arrival:time
-                  }
-                  var x=[...arrival];
-                  x[62][index]=options;
-                  setArrival(x);
-                }}
-                size={12}
-                type={'time'}
-                data={null}
-                index={index}
-              />
-                    {/* <Text style={styleSheet.label}>
-                      Actual Transport Arrival Time at Terminal (Local Time)
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TouchableOpacity
-                        style={styleSheet.picker}
-                        onPress={() =>
-                          showDatePicker('time', 60, index, 'arrival')
-                        }>
-                        <Text style={{fontSize: 20, color: 'black'}}>
-                          {'dd/mm/yy'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setNow(60, index, 'arrival')}
-                        style={{padding: 10}}>
-                        <Text
-                          style={{
-                            fontSize: Dimensions.get('window').width / 25,
-                            color: 'green',
-                          }}>
-                          Time Now
-                        </Text>
-                      </TouchableOpacity>
-                    </View> */}
-                    {/* <Text style={styleSheet.label}>
-                      Crew Departed from Terminal (Local Time)
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TouchableOpacity
-                        style={styleSheet.picker}
-                        onPress={() =>
-                          showDatePicker('time', 61, index, 'arrival')
-                        }>
-                        <Text style={{fontSize: 20, color: 'black'}}>
-                          {//arrival[61][index]!==null 
-                          false? arrival[61][index] :'dd/mm/yy here'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setNow(61, index, 'arrival')}
-                        style={{padding: 10}}>
-                        <Text
-                          style={{
-                            fontSize: Dimensions.get('window').width / 25,
-                            color: 'green',
-                          }}>
-                          Time Now
-                        </Text>
-                      </TouchableOpacity>
-                    </View> */}
-                    <DateTimeInput 
-                      label={'Crew Departed from Terminal (Local Time)'}
-                      showDatePickerPostDepart={()=>{showDatePicker('time', 62, index, 'departed')}}
-                      setNowPostDepart={(a,time)=>{
-                        var options={
-                          departed:time
-                        }
-                        var x=[...arrival];
-                        x[62][index]=options;
-                        setArrival(x);
-                      }}
-                      size={12}
-                      type={'time'}
-                      data={null}
-                      index={index}
-                    />
-<LabelledInput
-              label={'Remarks'} //mark
-              data={arrival[64]}
-              datatype={'text'}
-              index={64}
-              setText={setArrivalData} 
-              multiline={true}
-              numberOfLines={2}
-            />
-                    
-                    
+            {arrival[62].map((data, index) => {
+              return (
+                <View key={index} style={{marginTop: 20}}>
+                  <View
+                    style={{
+                      borderBottomWidth: 1,
+                      borderBottomColor: 'rgba(0,0,0,0.4)',
+                      marginBottom: 20,
+                    }}></View>
+                  <View style={{alignItems: 'flex-end'}}>
+                    <TouchableOpacity
+                      style={styleSheet.label}
+                      onPress={() => removeCrewMovement(index)}>
+                      <Icons name="minus-box-outline" color="red" size={30} />
+                    </TouchableOpacity>
                   </View>
-                );
-              })}
-          </View>
-          {/** CREW MOVE END 
-          */}
-         
-          {/* <Text style={styleSheet.label}>Driver Contact Number</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              value={arrival[51]}
-              onChangeText={text => {
-                var tarrival = [...arrival];
-                tarrival[51] = text;
-                setArrival(tarrival);
-              }}
-            />
-          </View> */}
-         
-          {/* <Text style={styleSheet.label}>Hotel Name</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              value={arrival[52]}
-              onChangeText={text => {
-                var tarrival = [...arrival];
-                tarrival[52] = text;
-                setArrival(tarrival);
-              }}
-            />
-          </View> */}
-      
-          {/* <Text style={styleSheet.label}>Hotel Location</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              value={arrival[53]}
-              onChangeText={text => {
-                var tarrival = [...arrival];
-                tarrival[53] = text;
-                setArrival(tarrival);
-              }}
-            />
-          </View> */}
-         
 
-          {/* <Text style={styleSheet.label}>Additional Remarks</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={styleSheet.input}
-              multiline={true}
-              numberOfLines={2}
-              value={arrival[57]}
-              onChangeText={text => {
-                var tarrival = [...arrival];
-                tarrival[57] = text;
-                setArrival(tarrival);
-              }}
-            />
-          </View> */}
+                  <DateTimeInput
+                    label={
+                      'Actual Transport Arrival Time at Airport (Local Time)'
+                    }
+                    notrequiredSection={false}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', 62, index, 'arrival');
+                    }}
+                    setNowPostDepart={() => {
+                      setNow(62, index, 'arrival');
+                    }}
+                    size={12}
+                    type={'time'}
+                    data={data.arrival}
+                    index={62}
+                  />
+                  <DateTimeInput
+                    label={'Crew Departed from Terminal (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', 62, index, 'departed');
+                    }}
+                    setNowPostDepart={() => {
+                      setNow(62, index, 'departed');
+                    }}
+                    size={12}
+                    type={'time'}
+                    data={data.departed}
+                    index={index}
+                  />
+                  <Text style={styleSheet.label}>Remarks</Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <TextInput
+                      style={styleSheet.input}
+                      multiline={true}
+                      placeholder="Remarks"
+                      numberOfLines={2}
+                      value={data.remarks}
+                      onChangeText={text => {
+                        var tarrival = [...arrival];
+                        tarrival[62][index].remarks = text;
+                        setArrival(tarrival);
+                      }}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+          {/** CREW MOVE END
+           */}
         </View>
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
@@ -2550,6 +2403,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,

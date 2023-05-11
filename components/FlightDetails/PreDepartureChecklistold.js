@@ -308,20 +308,20 @@ export default function PreDepartureChecklist({navigation}) {
     }
   };
 
-  const sendForm=()=>{
-    var formFields={
-      crewtransport:{
-        scheduled_pickup_time:'',
-        pickup_location:'',
-        photo_pickup_location:'',
-        driver_name:'',
-        driver_contact_num:'',
-        remarks:'',
-        additional_remarks:'',
-        add_transport:[]
-      }
-    }
-  }
+  const sendForm = () => {
+    var formFields = {
+      crewtransport: {
+        scheduled_pickup_time: '',
+        pickup_location: '',
+        photo_pickup_location: '',
+        driver_name: '',
+        driver_contact_num: '',
+        remarks: '',
+        additional_remarks: '',
+        add_transport: [],
+      },
+    };
+  };
 
   return (
     <View>
@@ -355,7 +355,7 @@ export default function PreDepartureChecklist({navigation}) {
 
         <View style={{padding: 20, marginBottom: 80}}>
           {/** CREW TRANSPPORT */}
-          
+
           <Text style={styleSheet.label}>Crew Transport :</Text>
           <View
             style={{
@@ -365,15 +365,15 @@ export default function PreDepartureChecklist({navigation}) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-              <DateTimeInput 
-          label={'Scheduled Pickup Time (Local Time)'}
-          showDatePickerPostDepart={showDatePickerDeparture}
-          setNowPostDepart={setNowDeparture}
-          size={12}
-          type={'datetime'}
-          data={pdeparturecheck[3]}
-          index={3}
-          />
+            <DateTimeInput
+              label={'Scheduled Pickup Time (Local Time)'}
+              showDatePickerPostDepart={showDatePickerDeparture}
+              setNowPostDepart={setNowDeparture}
+              size={12}
+              type={'datetime'}
+              data={pdeparturecheck[3]}
+              index={3}
+            />
             <Text style={styleSheet.label}>
               Scheduled Pickup Time (Local Time)
             </Text>
@@ -1804,6 +1804,7 @@ const styleSheet = StyleSheet.create({
     color: 'black',
     backgroundColor: 'white',
     marginBottom: 20,
+    fontSize: 20,
   },
   picker: {
     flex: 1,
