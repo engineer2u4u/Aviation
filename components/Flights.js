@@ -33,7 +33,7 @@ export default function Flights({navigation}) {
       .functions('asia-southeast1')
       .httpsCallable('getFlights')()
       .then(response => {
-        console.log(response);
+        console.log(JSON.parse(response.data.body).Table[0]);
         setcallLoad(false);
 
         var packet = JSON.parse(response.data.body);
@@ -64,6 +64,18 @@ export default function Flights({navigation}) {
     setListData(newData);
   };
 
+  const getColor = val => {
+    // return '#000';
+    switch (val) {
+      case 'Departure':
+        return 'green';
+      case 'Arrival':
+        return 'orange';
+      case 'Full Ground Handling':
+        return '#000';
+    }
+  };
+
   const onRowDidOpen = rowKey => {
     console.log('This row opened', rowKey);
   };
@@ -76,15 +88,16 @@ export default function Flights({navigation}) {
           dataOne: 4,
           dataTwo: 2,
           uid: data.item.UID,
+          flights: data.item,
         })
       }
-      style={styles.rowFront}
+      style={[styles.rowFront]}
       underlayColor={'#AAA'}
       activeOpacity={2}>
       <View style={{flexDirection: 'row'}}>
         <View
           style={{
-            backgroundColor: '#6750A4',
+            backgroundColor: getColor(data.item.FLIGHT_TYPE),
             borderRadius: 30,
             height: 50,
             width: 50,
@@ -97,22 +110,22 @@ export default function Flights({navigation}) {
           </Text>
         </View>
         <View>
-          <Text style={{fontSize: 15, color: 'black'}}>
-            {data.item.FLIGHT_REGISTRATION}
+          <Text style={{fontSize: 15, color: 'white'}}>
+            {data.item.FLIGHT_REGISTRATION + ' (' + data.item.REF_NO + ')'}
           </Text>
-          <Text style={{fontSize: 15, color: 'black'}}>
+          <Text style={{fontSize: 15, color: 'white'}}>
             {data.item.FLIGHT_CREW_DEPARTURE}{' '}
-            <Icons color="black" name="user-nurse" size={15} />{' '}
+            <Icons color="white" name="user-nurse" size={15} />{' '}
             {data.item.FLIGHT_PAX_DEPARTURE}{' '}
-            <Icons color="black" name="user-friends" size={15} />
+            <Icons color="white" name="user-friends" size={15} />
           </Text>
-          <Text style={{fontSize: 15, color: 'black'}}>
+          <Text style={{fontSize: 15, color: 'white'}}>
             {data.item.LAST_UPDATE &&
               new Date(data.item.LAST_UPDATE).toDateString()}
           </Text>
         </View>
       </View>
-      <Icons color="black" name="chevron-right" size={20} />
+      <Icons color="white" name="chevron-right" size={20} />
     </TouchableOpacity>
   );
 
@@ -196,7 +209,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   rowFront: {
-    backgroundColor: '#E4E7FF',
+    backgroundColor: '#3b7dfc',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 10,
