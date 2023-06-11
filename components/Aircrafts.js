@@ -2,28 +2,43 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableHighlight,
+  ActivityIndicator,
+  Dimensions,
   View,
 } from 'react-native';
 
-import React, {useState} from 'react';
-import {SwipeListView} from 'react-native-swipe-list-view';
+import React, { useState, useEffect } from 'react';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import Icons from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5Icons from 'react-native-vector-icons/FontAwesome5';
+const { width, height } = Dimensions.get('window');
 
-export default function Aircrafts() {
-  const [listData, setListData] = useState(
-    Array(20)
-      .fill('')
-      .map((_, i) => ({key: `${i}`, text: `item #${i}`})),
-  );
+const HeadingTextSize = width / 15;
+const labelTextSize = width / 25;
+export default function Aircrafts(props) {
+  const [listData, setListData] = useState([]);
+  const [callLoad, setcallLoad] = useState(false);
 
   const closeRow = (rowMap, rowKey) => {
     if (rowMap[rowKey]) {
       rowMap[rowKey].closeRow();
     }
   };
+  useEffect(() => {
+    setcallLoad(true)
+    var myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+    };
 
+    fetch("https://demo.vellas.net:94/arrowdemoapi/api/Values/GetAlAviationAirCraft?_token=AF8C96FB-6D64-4E5D-91C2-F2282EA7DB7C&_opco=&_uid=", requestOptions)
+      .then(response => response.text())
+      .then(result => { setListData(JSON.parse(result)); setcallLoad(false) })
+      .catch(error => { console.log('error', error); setcallLoad(false) });
+  }, []);
   const deleteRow = (rowMap, rowKey) => {
     closeRow(rowMap, rowKey);
     const newData = [...listData];
@@ -38,16 +53,16 @@ export default function Aircrafts() {
 
   const renderItem = data => (
     <TouchableOpacity
-      onPress={() => console.log('You touched me')}
+      onPress={() => { props.navigation.navigate('AircraftDetails', { UID: data.item.UID }); console.log(data.item) }}
       style={styles.rowFront}
       underlayColor={'#AAA'}
       activeOpacity={2}>
-      <View style={{flexDirection: 'row'}}>
-        <View style={{paddingLeft: 20}}>
-          <Text style={{fontSize: 15, color: 'white'}}>B1234</Text>
-          <Text style={{fontSize: 15, color: 'white'}}>A330, ZSPD</Text>
-          <Text style={{fontSize: 15, color: 'white'}}>
-            Aviation Five Pte Ltd
+      <View style={{ flexDirection: 'row' }}>
+        <View style={{ paddingLeft: 20 }}>
+          <Text style={{ fontSize: 15, color: 'white' }}>{data.item.AIRCRAFT_REGISTRATION}</Text>
+          <Text style={{ fontSize: 15, color: 'white' }}>{data.item.AIRCRAFT_ICAO} {data.item.AIRCRAFT_TYPE}</Text>
+          <Text style={{ fontSize: 15, color: 'white' }}>
+            {data.item.AIRCRAFT_MODEL}
           </Text>
         </View>
       </View>
@@ -76,9 +91,29 @@ export default function Aircrafts() {
   );
   return (
     <View style={styles.container}>
-      <Text style={{fontSize: 30, marginLeft: 10, color: 'black'}}>
-        Aircraft Details
-      </Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <TouchableOpacity
+          style={{ marginLeft: 20 }}
+          onPress={() => { props.navigation.navigate("Home") }}
+        >
+          <FontAwesome5Icons name="caret-left" color={'black'} size={40} />
+        </TouchableOpacity>
+
+        <Text style={{
+          fontSize: HeadingTextSize, fontWeight: 'bold',
+          color: 'black',
+          paddingLeft: 10
+        }}> Aircrafts </Text>
+        {callLoad ? (
+          <View style={{ paddingRight: 20 }}>
+            <ActivityIndicator color="green" size={'small'} />
+          </View>
+        ) : (
+          <TouchableOpacity onPress={() => props.navigation.navigate('AircraftDetails')} style={{ marginRight: 20 }}>
+            <Icons name="plus" color="#6750A4" size={30} />
+          </TouchableOpacity>
+        )}
+      </View>
       <SwipeListView
         data={listData}
         renderItem={renderItem}
@@ -117,7 +152,7 @@ const styles = StyleSheet.create({
     shadowColor: '#ccc',
     shadowOpacity: 0.5,
     elevation: 10,
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: { width: 0, height: 3 },
   },
   rowBack: {
     alignItems: 'center',
@@ -165,4 +200,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 8,
     borderBottomLeftRadius: 8,
   },
+  headingText: {
+    fontWeight: 'bold',
+    color: 'black',
+    paddingLeft: 10
+  }
 });

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Dimensions,
@@ -14,37 +14,110 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
-import {firebase} from '@react-native-firebase/functions';
+import { firebase } from '@react-native-firebase/functions';
 import Header from '../subcomponents/Forms/Header';
 import auth from '@react-native-firebase/auth';
-const {width, height} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const HeadingTextSize = width / 15;
-const labelTextSize = width / 25;
 const EditFlight = props => {
-  const currentPicker = useRef(0);
   const UID = props.route.params.UID;
   // console.log(UID);
   const [mode, setMode] = useState('time');
   const [regList, setregList] = useState([]);
+  const [hasUnsavedChanges, sethasUnsavedChanges] = useState(false);
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const [refno, setrefno] = useState(null);
   const [modalVisible, setmodalVisible] = useState(false);
   const [modalVisibleList, setmodalVisibleList] = useState(false);
   const [reg, setreg] = useState(null);
-  const [type, settype] = useState(null);
-  const [depdate, setdepdate] = useState(null);
-  const [arrdate, setarrdate] = useState(null);
-  const [deptime, setdeptime] = useState(null);
-  const [arrtime, setarrtime] = useState(null);
-  const [crewdep, setcrewdep] = useState(0);
-  const [crewarr, setcrewArr] = useState(0);
-  const [paxdep, setpaxdep] = useState(null);
-  const [paxarr, setpaxarr] = useState(null);
-  const [crtby, setcrtby] = useState(null);
   const [callLoad, setcallLoad] = useState(false);
+
+
+  const [formpayload, setformpayload] = useState({
+
+    "MAINFOLDER": "",
+    "DESCRIPTION": "",
+    "FULLPATH": "",
+    "SYSTEMNO": "",
+    "REF_NO": "",
+    "BOOKING_NO": "",
+    "SCHEDULED_FLIGHT": "",
+    "SCHEDULED_TIME": "",
+    "SCHEDULED_FLIGHT_NO": "",
+    "SCHEDULED_AIRBUS": "",
+    "SCHEDULED_AIRBUS_NAME": "",
+    "ACTUAL_FLIGHT": "",
+    "ACTUAL_FLIGHT_NO": "",
+    "ACTUAL_TIME": "",
+    "ACTUAL_AIRBUS": "",
+    "ACTUAL_AIRBUS_NAME": "",
+    "FLIGHT_REGISTRATION": "",
+    "AIRCRAFT_TYPE": "",
+    "AIRCRAFT_OPERATOR": "",
+    "FLIGHT_NO": "",
+    "FLIGHT_BILLING_PARTY": "",
+    "FLIGHT_PURPOSE": "",
+    "FLIGHT_ARRIVAL_ORIGIN": "",
+    "FLIGHT_ARRIVAL_DESTINATION": "",
+    "FLIGHT_ARRIVAL_FROM_ICAO": "",
+    "FLIGHT_ARRIVAL_TO_ICAO": "",
+    "FLIGHT_ARRIVAL_TO_HANDLER": "",
+    "FLIGHT_ARRIVAL_FROM_HANDLER": "",
+    "FLIGHT_ARRIVAL_EDD": "",
+    "FLIGHT_ARRIVAL_EDA": "",
+    "FLIGHT_DEPARTURE_ORIGIN": "",
+    "FLIGHT_DEPARTURE_DESTINATION": "",
+    "FLIGHT_DEPARTURE_FROM_ICAO": "",
+    "FLIGHT_DEPARTURE_TO_ICAO": "",
+    "FLIGHT_DEPARTURE_TO_HANDLER": "",
+    "FLIGHT_DEPARTURE_FROM_HANDLER": "",
+    "FLIGHT_DEPARTURE_EDD": "",
+    "FLIGHT_DEPARTURE_EDA": "",
+    "FLIGHT_ARRIVAL_CREW": "",
+    "FLIGHT_DEPARTURE_CREW": "",
+    "FLIGHT_ARRIVAL_PAX": null,
+    "FLIGHT_DEPARTURE_PAX": null,
+    "FLIGHT_TYPE": "",
+    "STATUS": "Active",
+    "CREATED_BY": "",
+    "CREATED_DATE": "",
+    "UPDATE_BY": "",
+    "LAST_UPDATE": ""
+  })
+
+
+  useEffect(
+    () =>
+      props.navigation.addListener('beforeRemove', (e) => {
+        if (!hasUnsavedChanges) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+
+        // Prompt the user before leaving the screen
+        Alert.alert(
+          'Discard changes?',
+          'You have unsaved changes. Are you sure to discard them and leave the screen?',
+          [
+            { text: "Don't leave", style: 'cancel', onPress: () => { } },
+            {
+              text: 'Discard',
+              style: 'destructive',
+              // If the user confirmed, then we dispatch the action we blocked earlier
+              // This will continue the action that had triggered the removal of the screen
+              onPress: () => props.navigation.dispatch(e.data.action),
+            },
+          ]
+        );
+      }),
+    [props.navigation, hasUnsavedChanges]
+  );
+
   const tConvert = dateT => {
     // console.log('HERE', dateT);
     if (dateT) {
@@ -87,25 +160,16 @@ const EditFlight = props => {
       const url =
         'https://demo.vellas.net:94/arrowdemoapi/api/Values/GetGroundHandlingList?_token=66D64C12-2055-4F11-BCF1-9F563ACB032F&_opco=&_uid=' +
         UID;
-      fetch(url, {method: 'GET'})
+      fetch(url, { method: 'GET' })
         .then(data => {
           return data.json();
         })
         .then(data => {
           var res = data.Table;
-          console.log(res);
-          setrefno(res[0].REF_NO);
-          setreg(res[0].FLIGHT_REGISTRATION);
-          setdepdate(res[0].FLIGHT_DEPARTURE_TIME);
-          setarrdate(res[0].FLIGHT_ARRIVAL_DATE);
-          setdeptime(res[0].FLIGHT_DEPARTURE_TIME);
-          setarrtime(res[0].FLIGHT_ARRIVAL_TIME);
-          setcrewdep(res[0].FLIGHT_CREW_DEPARTURE);
-          setcrewArr(res[0].FLIGHT_CREW_ARRIVAL);
-          setpaxarr(res[0].FLIGHT_PAX_ARRIVAL);
-          setpaxdep(res[0].FLIGHT_PAX_DEPARTURE);
-          settype(res[0].FLIGHT_TYPE);
-          setcrtby(res[0].CREATED_BY);
+          console.log(res[0].FLIGHT_TYPE);
+          if (res[0]) {
+            setformpayload(res[0])
+          }
           setcallLoad(false);
         })
         .catch(e => {
@@ -118,7 +182,7 @@ const EditFlight = props => {
 
       const url =
         'https://demo.vellas.net:94/arrowdemoapi/api/Values/getAIRCRAFT?_token=CB9A5812-B894-469A-8CA4-15055DA6D7D6&_opco=&_an=';
-      fetch(url, {method: 'GET'})
+      fetch(url, { method: 'GET' })
         .then(data => {
           return data.json();
         })
@@ -130,7 +194,6 @@ const EditFlight = props => {
         })
         .catch(e => {
           setcallLoad(false);
-
           console.log(e);
         });
     }
@@ -139,22 +202,7 @@ const EditFlight = props => {
   const sendForm = () => {
     setcallLoad(true);
     const email = auth().currentUser.email;
-    var payload = {
-      REF_NO: refno,
-      FLIGHT_REGISTRATION: reg,
-      FLIGHT_DEPARTURE_DATE: depdate,
-      FLIGHT_ARRIVAL_DATE: arrdate,
-      FLIGHT_DEPARTURE_TIME: depdate,
-      FLIGHT_ARRIVAL_TIME: arrdate,
-      FLIGHT_CREW_DEPARTURE: crewdep ? crewdep.toString() : 0,
-      FLIGHT_CREW_ARRIVAL: crewarr ? crewarr.toString() : 0,
-      FLIGHT_PAX_ARRIVAL: paxarr ? paxarr.toString() : 0,
-      FLIGHT_PAX_DEPARTURE: paxdep ? paxdep.toString() : 0,
-      FLIGHT_TYPE: type,
-      STATUS: 0,
-      UPDATE_BY: email,
-      CREATED_BY: crtby,
-    };
+    var payload = formpayload;
     if (UID) {
       payload.UID = UID;
     } else {
@@ -169,22 +217,11 @@ const EditFlight = props => {
       )
       .then(response => {
         setcallLoad(false);
-        Alert.alert('Success');
-        // Alert.alert(
-        //   'Success',
-        //   '',
-        //   [
-        //     {
-        //       text: 'Ok',
-        //       onPress: () => props.navigation.navigate('Home'),
-        //     },
-        //   ],
-        //   {
-        //     cancelable: true,
-        //     onDismiss: () => props.navigation.navigate('Home'),
-        //   },
-        // );
+        Alert.alert('Success', 'Flight successfully created', [
+          { text: 'OK', onPress: () => console.log('OK Pressed') },
+        ]);
         console.log(response);
+        sethasUnsavedChanges(false)
       })
       .catch(error => {
         setcallLoad(false);
@@ -194,9 +231,9 @@ const EditFlight = props => {
   };
   const [fieldType, setfieldType] = useState(0);
   const showDatePicker = (type, index, pos, field) => {
-    pos != undefined
-      ? (currentPicker.current = [index, pos, field])
-      : (currentPicker.current = [index]);
+    // pos != undefined
+    //   ? (currentPicker.current = [index, pos, field])
+    //   : (currentPicker.current = [index]);
     setMode(type);
     setfieldType(index);
     setDatePickerVisibility(true);
@@ -207,51 +244,29 @@ const EditFlight = props => {
   const handleConfirm = date => {
     console.log('A date has been picked: ', date, fieldType);
     var tarrival = date;
-    // tarrival= new Date(date).toLocaleString('en-US', {
-    //   hour12: false,
-    // });
-    // if (currentPicker.current.length > 1) {
-    //   tarrival[currentPicker.current[0]][currentPicker.current[1]][
-    //     currentPicker.current[2]
-    //   ] = tConvert(
-    //     new Date(date).toLocaleString('en-US', {
-    //       hour12: false,
-    //     }),
-    //   );
-    // } else {
-    //   tarrival[currentPicker.current[0]] = tConvert(
-    //     new Date(date).toLocaleString('en-US', {
-    //       hour12: false,
-    //     }),
-    //   );
-    // }
-    // console.log(
-    //   'A date has been picked: ',
-    //   new Date(date).toLocaleString('en-US', {
-    //     hour12: false,
-    //   }),
-    // );
     console.log('Check', tarrival);
-    switch (fieldType) {
-      case 0:
-        setdepdate(tarrival);
-        break;
-      case 1:
-        setarrdate(tarrival);
-        break;
-      case 2:
-        setdeptime(tarrival);
-        break;
-      case 3:
-        setarrtime(tarrival);
-        break;
-      default:
-        break;
-    }
+    setformpayload({ ...formpayload, [fieldType]: tarrival });
+    // switch (fieldType) {
+    //   case 0:
+    //     setdepdate(tarrival);
+    //     break;
+    //   case 1:
+    //     setarrdate(tarrival);
+    //     break;
+    //   case 2:
+    //     setdeptime(tarrival);
+    //     break;
+    //   case 3:
+    //     setarrtime(tarrival);
+    //     break;
+    //   default:
+    //     break;
+    // }
 
     //setArrival(tarrival);
     hideDatePicker();
   };
+
 
   return (
     <View>
@@ -259,6 +274,8 @@ const EditFlight = props => {
         headingSize={HeadingTextSize}
         heading={'Edit Flight'}
         sendForm={sendForm}
+        nav={"GroundHandling"}
+        navigation={props.navigation}
         Icon={
           callLoad ? (
             <ActivityIndicator size={'small'} color="green" />
@@ -267,26 +284,6 @@ const EditFlight = props => {
           )
         }
       />
-      {/* <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginVertical: 20,
-        }}>
-        <Text
-          style={{
-            fontSize: Dimensions.get('window').width / 15,
-            fontWeight: 'bold',
-            color: 'black',
-            paddingLeft: 20,
-          }}>
-          Edit Flight
-        </Text>
-        <TouchableOpacity style={{marginRight: 20}}>
-          <Icons name="content-save" color="green" size={30} />
-        </TouchableOpacity>
-      </View> */}
       <ScrollView>
         <View
           style={{
@@ -296,11 +293,11 @@ const EditFlight = props => {
           <LabelledInput
             label={'Reference No.'} //mark
             datatype={'text'}
-            data={refno}
+            data={formpayload.REF_NO}
             disabled={false}
-            index={57}
             setText={(index, text, type, section) => {
-              setrefno(text);
+              sethasUnsavedChanges(true);
+              setformpayload({ ...formpayload, REF_NO: text });
             }}
             multiline={true}
             numberOfLines={1}
@@ -308,11 +305,12 @@ const EditFlight = props => {
           {UID ? (
             <LabelledInput
               label={'Registration'} //mark
-              data={reg}
+              data={formpayload.FLIGHT_REGISTRATION}
               datatype={'text'}
               index={57}
               setText={(index, text, type, section) => {
-                setreg(text);
+                sethasUnsavedChanges(true);
+                setformpayload({ ...formpayload, FLIGHT_REGISTRATION: text });
               }}
               multiline={true}
               numberOfLines={1}
@@ -327,146 +325,228 @@ const EditFlight = props => {
                     console.log(regList);
                     setmodalVisibleList(true);
                   }}>
-                  <Text style={{fontSize: 20, color: 'black'}}>{reg}</Text>
+                  <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_REGISTRATION}</Text>
                 </TouchableOpacity>
               </View>
             </>
           )}
-          <DateTimeInput
-            label={'Departure Date Time'}
-            showDatePickerPostDepart={data => {
-              console.log(data);
+          {reg && (<View
 
-              showDatePicker('datetime', 0);
-            }}
-            setNowPostDepart={data => {
-              console.log(data);
-            }}
-            setflightdoc={data => {
-              setdepdate(ISOconvert(data));
-            }}
-            size={12}
-            added={true}
-            type={'time'}
-            data={tConvert(depdate)}
-          />
-
-          <DateTimeInput
-            label={'Arrival Date Time'}
-            showDatePickerPostDepart={data => {
-              console.log(data);
-              showDatePicker('datetime', 1);
-            }}
-            setNowPostDepart={() => {}}
-            setflightdoc={data => {
-              setarrdate(ISOconvert(data));
-            }}
-            size={12}
-            added={true}
-            type={'time'}
-            data={tConvert(arrdate)}
-          />
-
-          {/* <DateTimeInput
-            label={'Departure Time'}
-            showDatePickerPostDepart={data => {
-              console.log(data);
-              showDatePicker('time', 2);
-            }}
-            setNowPostDepart={() => {}}
-            setflightdoc={data => {
-              setdeptime(ISOconvert());
-            }}
-            size={12}
-            added={true}
-            type={'time'}
-            data={tConvert(deptime)}
-          />
-
-          <DateTimeInput
-            label={'Arrival Time'}
-            showDatePickerPostDepart={data => {
-              console.log(data);
-              showDatePicker('time', 3);
-            }}
-            setNowPostDepart={() => {}}
-            setflightdoc={data => {
-              setarrtime(ISOconvert(data));
-            }}
-            size={12}
-            added={true}
-            type={'time'}
-            data={tConvert(arrtime)}
-          /> */}
-
+            style={[styleSheet.rowFront]}
+            underlayColor={'#AAA'}
+            activeOpacity={2}>
+            <View >
+              <Text style={{ color: 'white' }}>
+                {reg.AIRCRAFT_TYPE} {reg.AIRCRAFT_MODEL ? '(' + reg.AIRCRAFT_MODEL + ')' : ''}
+              </Text>
+              <Text style={{ color: 'white' }}>
+                {reg.AIRCRAFT_OWNER}
+              </Text>
+              <Text style={{ color: 'white' }}>
+                {reg.AIRCRAFT_PHONE}
+              </Text>
+            </View>
+          </View>)}
           <LabelledInput
-            label={'Crew (Departure)'} //mark
+            label={'Billing Party'} //mark
+            data={formpayload.FLIGHT_BILLING_PARTY}
             datatype={'text'}
-            data={crewdep}
-            disabled={false}
             index={57}
             setText={(index, text, type, section) => {
-              setcrewdep(text);
+              sethasUnsavedChanges(true);
+              setformpayload({ ...formpayload, FLIGHT_BILLING_PARTY: text });
             }}
             multiline={true}
             numberOfLines={1}
           />
-
-          <LabelledInput
-            label={'Crew (Arrival)'} //mark
-            data={crewarr}
-            datatype={'text'}
-            index={57}
-            setText={(index, text, type, section) => {
-              setcrewArr(text);
-            }}
-            multiline={true}
-            numberOfLines={1}
-          />
-
-          <LabelledInput
-            label={'Pax (Departure)'} //mark
-            data={paxdep}
-            datatype={'text'}
-            index={57}
-            setText={(index, text, type, section) => {
-              setpaxdep(text);
-            }}
-            multiline={true}
-            numberOfLines={1}
-          />
-
-          <LabelledInput
-            label={'Pax (Arrival)'} //mark
-            data={paxarr}
-            datatype={'text'}
-            index={57}
-            setText={(index, text, type, section) => {
-              setpaxarr(text);
-            }}
-            multiline={true}
-            numberOfLines={1}
-          />
-
-          <Text style={styleSheet.label}>Type</Text>
+          <Text style={styleSheet.label}>Handling Service required</Text>
           <View>
             <TouchableOpacity
               style={styleSheet.input}
               onPress={() => setmodalVisible(true)}>
-              <Text style={{fontSize: 20, color: 'black'}}>{type}</Text>
+              <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_TYPE}</Text>
             </TouchableOpacity>
           </View>
-          {/* <LabelledInput
-            label={'Type'} //mark
-            data={type}
-            datatype={'text'}
-            index={57}
-            setText={(index, text, type, section) => {
-              settype(text);
-            }}
-            multiline={true}
-            numberOfLines={1}
-          /> */}
+          {(formpayload.FLIGHT_TYPE == 'Full Ground Handling' || formpayload.FLIGHT_TYPE == 'Arrival') && <><Text style={styleSheet.label}>Arrival Schedule</Text>
+            <View style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}>
+              <LabelledInput
+                label={'Origin'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_ARRIVAL_ORIGIN}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_ORIGIN: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+              <LabelledInput
+                label={'Destination'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_ARRIVAL_DESTINATION}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_DESTINATION: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+              <DateTimeInput
+                label={'Departure Date Time'}
+                showDatePickerPostDepart={data => {
+                  showDatePicker('datetime', 'FLIGHT_ARRIVAL_EDD');
+                }}
+                setNowPostDepart={data => {
+                  console.log(data, "sfsdfsd");
+                }}
+                setflightdoc={data => {
+                  console.log(data, "sfsdfsd");
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_EDD: ISOconvert(data) });
+                }}
+                size={12}
+                added={true}
+                type={'time'}
+                data={tConvert(formpayload.FLIGHT_ARRIVAL_EDD)}
+              />
+
+              <DateTimeInput
+                label={'Arrival Date Time'}
+                showDatePickerPostDepart={data => {
+                  console.log(data);
+                  showDatePicker('datetime', 'FLIGHT_ARRIVAL_EDA');
+                }}
+                setNowPostDepart={() => { }}
+                setflightdoc={data => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_EDA: ISOconvert(data) });
+                }}
+                size={12}
+                added={true}
+                type={'time'}
+                data={tConvert(formpayload.FLIGHT_ARRIVAL_EDA)}
+              />
+              <LabelledInput
+                label={'No. of Crew'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_ARRIVAL_CREW}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_CREW: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+              <LabelledInput
+                label={'No. of Pax'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_ARRIVAL_PAX}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_PAX: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+            </View></>}
+          {(formpayload.FLIGHT_TYPE == 'Full Ground Handling' || formpayload.FLIGHT_TYPE == 'Departure') && <><Text style={styleSheet.label}>Departure Schedule</Text>
+            <View style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}>
+              <LabelledInput
+                label={'Origin'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_DEPARTURE_ORIGIN}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_ORIGIN: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+              <LabelledInput
+                label={'Destination'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_DEPARTURE_DESTINATION}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_DESTINATION: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+              <DateTimeInput
+                label={'Departure Date Time'}
+                showDatePickerPostDepart={data => {
+                  showDatePicker('datetime', 'FLIGHT_DEPARTURE_EDD');
+                }}
+                setNowPostDepart={data => {
+                  console.log(data);
+                }}
+                setflightdoc={data => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_EDD: ISOconvert(data) });
+                }}
+                size={12}
+                added={true}
+                type={'time'}
+                data={tConvert(formpayload.FLIGHT_DEPARTURE_EDD)}
+              />
+
+              <DateTimeInput
+                label={'Arrival Date Time'}
+                showDatePickerPostDepart={data => {
+                  console.log(data);
+                  showDatePicker('datetime', 'FLIGHT_DEPARTURE_EDA');
+                }}
+                setNowPostDepart={() => { }}
+                setflightdoc={data => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_EDA: ISOconvert(data) });
+                }}
+                size={12}
+                added={true}
+                type={'time'}
+                data={tConvert(formpayload.FLIGHT_DEPARTURE_EDA)}
+              />
+              <LabelledInput
+                label={'No. of Crew'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_DEPARTURE_CREW}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_CREW: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+              <LabelledInput
+                label={'No. of Pax'} //mark
+                datatype={'text'}
+                data={formpayload.FLIGHT_DEPARTURE_PAX}
+                disabled={false}
+                index={57}
+                setText={(index, text, type, section) => {
+                  sethasUnsavedChanges(true);
+                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_PAX: text });
+                }}
+                multiline={true}
+                numberOfLines={1}
+              />
+            </View></>}
+
         </View>
       </ScrollView>
       <Modal animationType="fade" transparent={true} visible={modalVisible}>
@@ -480,7 +560,7 @@ const EditFlight = props => {
             padding: 10,
           }}
           onPress={() => setmodalVisible(false)}>
-          <Text style={{color: 'black', fontSize: 20}}>Close</Text>
+          <Text style={{ color: 'black', fontSize: 20 }}>Close</Text>
         </TouchableOpacity>
         <View
           style={{
@@ -490,10 +570,11 @@ const EditFlight = props => {
             backgroundColor: 'rgba(0,0,0,0.8)',
             paddingTop: 80,
           }}>
-          <ScrollView contentContainerStyle={{flex: 1}}>
+          <ScrollView contentContainerStyle={{ flex: 1 }}>
             <TouchableOpacity
               onPress={() => {
-                settype('Full Ground Handling');
+                sethasUnsavedChanges(true);
+                setformpayload({ ...formpayload, FLIGHT_TYPE: 'Full Ground Handling' });
                 setmodalVisible(false);
               }}
               style={{
@@ -502,13 +583,14 @@ const EditFlight = props => {
                 padding: 20,
                 borderBottomWidth: 2,
               }}>
-              <Text style={{color: 'black', fontSize: width / 20}}>
+              <Text style={{ color: 'black', fontSize: width / 20 }}>
                 Full Ground Handling
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                settype('Arrival Handling Only');
+                sethasUnsavedChanges(true);
+                setformpayload({ ...formpayload, FLIGHT_TYPE: 'Arrival' });
                 setmodalVisible(false);
               }}
               style={{
@@ -517,13 +599,14 @@ const EditFlight = props => {
                 padding: 20,
                 borderBottomWidth: 2,
               }}>
-              <Text style={{color: 'black', fontSize: width / 20}}>
+              <Text style={{ color: 'black', fontSize: width / 20 }}>
                 Arrival Handling Only
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                settype('Departure Handling Only');
+                sethasUnsavedChanges(true);
+                setformpayload({ ...formpayload, FLIGHT_TYPE: 'Departure' });
                 setmodalVisible(false);
               }}
               style={{
@@ -531,7 +614,7 @@ const EditFlight = props => {
                 width: width * 0.9,
                 padding: 20,
               }}>
-              <Text style={{color: 'black', fontSize: width / 20}}>
+              <Text style={{ color: 'black', fontSize: width / 20 }}>
                 Departure Handling Only
               </Text>
             </TouchableOpacity>
@@ -549,7 +632,7 @@ const EditFlight = props => {
             padding: 10,
           }}
           onPress={() => setmodalVisibleList(false)}>
-          <Text style={{color: 'black', fontSize: 20}}>Close</Text>
+          <Text style={{ color: 'black', fontSize: 20 }}>Close</Text>
         </TouchableOpacity>
         <View
           style={{
@@ -559,27 +642,28 @@ const EditFlight = props => {
             backgroundColor: 'rgba(0,0,0,0.8)',
             paddingTop: 80,
           }}>
-          <ScrollView contentContainerStyle={{flex: 1}}>
+          <ScrollView contentContainerStyle={{ flex: 1 }}>
             {regList.map((val, index) => {
               return (
-                <>
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => {
-                      setreg(val.AIRCRAFT_REGISTRATION);
-                      setmodalVisibleList(false);
-                    }}
-                    style={{
-                      backgroundColor: 'white',
-                      width: width * 0.9,
-                      padding: 20,
-                      borderBottomWidth: 2,
-                    }}>
-                    <Text style={{color: 'black', fontSize: width / 20}}>
-                      {val.AIRCRAFT_REGISTRATION}
-                    </Text>
-                  </TouchableOpacity>
-                </>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    sethasUnsavedChanges(true);
+                    setformpayload({ ...formpayload, FLIGHT_REGISTRATION: val.AIRCRAFT_REGISTRATION });
+                    setreg(val);
+                    console.log(val)
+                    setmodalVisibleList(false);
+                  }}
+                  style={{
+                    backgroundColor: 'white',
+                    width: width * 0.9,
+                    padding: 20,
+                    borderBottomWidth: 2,
+                  }}>
+                  <Text style={{ color: 'black', fontSize: width / 20 }}>
+                    {val.AIRCRAFT_REGISTRATION}
+                  </Text>
+                </TouchableOpacity>
               );
             })}
           </ScrollView>
@@ -609,8 +693,23 @@ const styleSheet = StyleSheet.create({
     padding: 10,
   },
   label: {
-    fontSize: Dimensions.get('window').width / 25,
+    // fontSize: Dimensions.get('window').width / 25,
     color: 'black',
+  },
+  rowFront: {
+    backgroundColor: '#3b7dfc',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    height: 100,
+    borderColor: '#000',
+    borderRadius: 8,
+    flexDirection: 'row',
+    shadowColor: '#ccc',
+    shadowOpacity: 0.5,
+    elevation: 10,
+    shadowOffset: { width: 0, height: 3 },
+    marginBottom: 20,
   },
 });
 export default EditFlight;

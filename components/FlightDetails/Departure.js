@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import * as ImagePicker from 'react-native-image-picker';
@@ -22,11 +22,11 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import Loader from '../Loader';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
-import {firebase} from '@react-native-firebase/functions';
-import {ActivityIndicator} from 'react-native';
+import { firebase } from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export default function Departure(props) {
   const FUID = props.route.params.UID;
@@ -61,7 +61,7 @@ export default function Departure(props) {
     null,
     null,
     null,
-    {value: null, file: []},
+    { value: null, file: [] },
     null,
     null,
     null,
@@ -71,36 +71,32 @@ export default function Departure(props) {
     null,
     null,
     null,
-    {checked: false, remarks: null},
+    { checked: false, remarks: null },
     null,
     null,
     null,
-    {value: null, file: []},
-    {checked: false, remarks: null},
+    { value: null, file: [] },
+    { checked: false, remarks: null },
     null,
     null,
-    {checked: false, remarks: null},
+    { checked: false, remarks: null },
     null,
     null,
-    {checked: false, remarks: null},
+    { checked: false, remarks: null },
     null,
     null,
-    {checked: false, remarks: null},
+    { checked: false, remarks: null },
     null,
-    {value: null, file: []},
-    null,
-    null,
-    {checked: false, remarks: null},
+    { value: null, file: [] },
     null,
     null,
-    null,
-    {value: null, file: []},
-    null,
-    {checked: false, remarks: null},
+    { checked: false, remarks: null },
     null,
     null,
     null,
+    { value: null, file: [] },
     null,
+    { checked: false, remarks: null },
     null,
     null,
     null,
@@ -108,7 +104,11 @@ export default function Departure(props) {
     null,
     null,
     null,
-    {value: null, file: []},
+    null,
+    null,
+    null,
+    null,
+    { value: null, file: [] },
     null,
     null,
     null,
@@ -125,7 +125,7 @@ export default function Departure(props) {
     null, //61
     null, //..2
     null, //..3
-    {checked: false, remarks: null}, //..4
+    { checked: false, remarks: null }, //..4
   ]);
   const [isDatePickerVisibleDepart, setDatePickerVisibilityDepart] =
     useState(false);
@@ -305,8 +305,8 @@ export default function Departure(props) {
           .functions('asia-southeast1')
           .httpsCallable(
             'getFlightModule?fuid=' +
-              FUID +
-              '&module=GetDepartureServicesMovement',
+            FUID +
+            '&module=GetDepartureServicesMovement',
           )()
           .then(response => {
             //get pax & crew transport
@@ -815,19 +815,53 @@ export default function Departure(props) {
           Departure
         </Text>
         {callLoad ? (
-          <View style={{paddingRight: 20}}>
+          <View style={{ paddingRight: 20 }}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
         ) : (
-          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+          <TouchableOpacity onPress={sendForm} style={{ marginRight: 20 }}>
             <Icons name="content-save" color="green" size={30} />
           </TouchableOpacity>
         )}
       </View>
       <ScrollView>
-        <View style={{padding: 20, marginBottom: 100}}>
+        <View style={{ padding: 20, marginBottom: 100 }}>
+          {/* <Text style={styleSheet.label}>Duty Supervisor Details:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <LabelledInput
+              disabled={false}
+              label={'Name'} //mark
+              data={aService.ARS_DS_NAME}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_DS_NAME: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+            <LabelledInput
+              disabled={false}
+              label={'Contact No.'} //mark
+              data={aService.ARS_DS_CONTACT_NO}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_DS_CONTACT_NO: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View> */}
           <Text style={styleSheet.label}>Number of Crew</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TextInput
               style={styleSheet.input}
               value={departure[0]}
@@ -839,7 +873,7 @@ export default function Departure(props) {
             />
           </View>
           {/*   ------------------------------Crew Movement	 ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>
             Crew Movement:
           </Text>
           <View
@@ -873,21 +907,21 @@ export default function Departure(props) {
               <TouchableOpacity
                 onPress={addCrewTransport}
                 style={[styleSheet.button]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
             </View>
             {crewTransport.map((val, index) => {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveCrewTransport(index)}>
@@ -944,7 +978,7 @@ export default function Departure(props) {
                     index={index}
                   />
                   <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                       style={[styleSheet.input]}
                       multiline={true}
@@ -977,17 +1011,17 @@ export default function Departure(props) {
             <Text style={[styleSheet.label]}>
               Flight Documents Handover to Crew (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 style={styleSheet.picker}
                 onPress={() => showDatePickerDepart('time', 6)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[6] ? departure[6] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setNowDepart(6)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1000,17 +1034,17 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Crew Cleared CIQ (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 style={styleSheet.picker}
                 onPress={() => showDatePickerDepart('time', 7)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[7] ? departure[7] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setNowDepart(7)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1023,17 +1057,17 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Crew Cleared Airport Security (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 style={styleSheet.picker}
                 onPress={() => showDatePickerDepart('time', 8)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[8] ? departure[8] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setNowDepart(8)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1046,17 +1080,17 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Crew Boarded Transport to Aircraft (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 style={styleSheet.picker}
                 onPress={() => showDatePickerDepart('time', 9)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[9] ? departure[9] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setNowDepart(9)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1069,17 +1103,17 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Crew Boarded Aircraft (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 style={styleSheet.picker}
                 onPress={() => showDatePickerDepart('time', 10)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[10] ? departure[10] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setNowDepart(10)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1106,7 +1140,7 @@ export default function Departure(props) {
           {/*   ------------------------------Crew Movement	 End ----------- */}
 
           {/*   ------------------------------Ground Power Unit(GPU) start ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>
             Ground Power Unit(GPU):
           </Text>
           <View
@@ -1144,7 +1178,7 @@ export default function Departure(props) {
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
             <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[13].checked}
                 style={[
@@ -1156,14 +1190,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 11)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[11] ? departure[11] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[13].checked}
                 onPress={() => setNowDepart(11)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1174,7 +1208,7 @@ export default function Departure(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[13].checked}
                 style={[
@@ -1186,14 +1220,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 12)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[12] ? departure[12] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[13].checked}
                 onPress={() => setNowDepart(12)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1207,7 +1241,7 @@ export default function Departure(props) {
           {/*   ------------------------------Ground Power Unit(GPU) end ----------- */}
 
           {/*   ------------------------------Fuel on Departure start ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>
             Fuel on Departure:
           </Text>
           <View
@@ -1231,7 +1265,7 @@ export default function Departure(props) {
                   x[14] = null;
                   x[15] = null;
                   x[16] = null;
-                  x[17] = {value: false, file: []};
+                  x[17] = { value: false, file: [] };
                   x[58] = null;
                   setdeparture(x);
                 }}>
@@ -1250,7 +1284,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Fuel Truck Arrived (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[18].checked}
                 style={[
@@ -1262,14 +1296,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 14)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[14] ? departure[14] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[18].checked}
                 onPress={() => setNowDepart(14)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1280,7 +1314,7 @@ export default function Departure(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[18].checked}
                 style={[
@@ -1292,14 +1326,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 15)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[15] ? departure[15] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[18].checked}
                 onPress={() => setNowDepart(15)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1310,7 +1344,7 @@ export default function Departure(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>End Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[18].checked}
                 style={[
@@ -1322,14 +1356,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 16)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[16] ? departure[16] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[18].checked}
                 onPress={() => setNowDepart(16)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1365,11 +1399,11 @@ export default function Departure(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{color: 'green'}}>Take Camera</Text>
+                <Text style={{ color: 'green' }}>Take Camera</Text>
               </TouchableOpacity>
             </View>
             {departure[17].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+              <View style={{ marginBottom: 20 }}>
                 {departure[17].file.map((value, index) => {
                   return (
                     <View
@@ -1386,7 +1420,7 @@ export default function Departure(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -1395,11 +1429,11 @@ export default function Departure(props) {
                           },
                         }),
                       }}>
-                      <Text style={{color: 'black'}}>{value.name}</Text>
+                      <Text style={{ color: 'black' }}>{value.name}</Text>
                       <TouchableOpacity
                         onPress={() => removeFilePreA(17, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -1427,7 +1461,7 @@ export default function Departure(props) {
           {/*   ------------------------------Fuel on Departure end ----------- */}
 
           {/*   ------------------------------Water Service ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>
             Water Service:
           </Text>
           <View
@@ -1465,7 +1499,7 @@ export default function Departure(props) {
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
             <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[21].checked}
                 style={[
@@ -1477,14 +1511,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 19)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[19] ? departure[19] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[21].checked}
                 onPress={() => setNowDepart(19)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1495,7 +1529,7 @@ export default function Departure(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[21].checked}
                 style={[
@@ -1507,14 +1541,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 19)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[59] ? departure[59] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[21].checked}
                 onPress={() => setNowDepart(59)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1542,7 +1576,7 @@ export default function Departure(props) {
           {/*   ------------------------------Water Service end ----------- */}
 
           {/*   ------------------------------Lavatory Service ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>
             Lavatory Service:
           </Text>
           <View
@@ -1580,7 +1614,7 @@ export default function Departure(props) {
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
             <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[24].checked}
                 style={[
@@ -1592,14 +1626,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 22)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[22] ? departure[22] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[24].checked}
                 onPress={() => setNowDepart(22)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1610,7 +1644,7 @@ export default function Departure(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>Stop Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[24].checked}
                 style={[
@@ -1622,14 +1656,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 22)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[60] ? departure[60] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[24].checked}
                 onPress={() => setNowDepart(60)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1657,7 +1691,7 @@ export default function Departure(props) {
           {/*   ------------------------------Lavatory Service end ----------- */}
 
           {/*   ------------------------------Rubbish Service ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>
             Rubbish Service:
           </Text>
           <View
@@ -1694,7 +1728,7 @@ export default function Departure(props) {
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
             <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[27].checked}
                 style={[
@@ -1706,14 +1740,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 25)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[25] ? departure[25] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[27].checked}
                 onPress={() => setNowDepart(25)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1741,7 +1775,7 @@ export default function Departure(props) {
           {/*   ------------------------------Rubbish Service end ----------- */}
 
           {/*   ------------------------------Catering ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>Catering:</Text>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>Catering:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -1761,7 +1795,7 @@ export default function Departure(props) {
                   setCheckedDepart(32);
                   var x = [...departure];
                   x[28] = null;
-                  x[29] = {value: false, file: []};
+                  x[29] = { value: false, file: [] };
                   x[30] = null;
                   setdeparture(x);
                 }}>
@@ -1778,7 +1812,7 @@ export default function Departure(props) {
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
             <Text style={styleSheet.label}>Catering Equipment Loaded</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 editable={!departure[32].checked}
                 style={[
@@ -1825,11 +1859,11 @@ export default function Departure(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{color: 'green'}}>Take Camera</Text>
+                <Text style={{ color: 'green' }}>Take Camera</Text>
               </TouchableOpacity>
             </View>
             {departure[29].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+              <View style={{ marginBottom: 20 }}>
                 {departure[29].file.map((value, index) => {
                   return (
                     <View
@@ -1846,7 +1880,7 @@ export default function Departure(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -1866,7 +1900,7 @@ export default function Departure(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(29, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -1879,7 +1913,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Catering Delivery Time (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[32].checked}
                 style={[
@@ -1891,14 +1925,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 30)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[30] ? departure[30] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[32].checked}
                 onPress={() => setNowDepart(30)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1929,17 +1963,17 @@ export default function Departure(props) {
           <Text style={styleSheet.label}>
             Aircraft Ready For Boarding (Local Time)
           </Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={styleSheet.picker}
               onPress={() => showDatePickerDepart('time', 33)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
+              <Text style={{ fontSize: 20, color: 'black' }}>
                 {departure[33] ? departure[33] : 'dd/mm/yy, -- : --'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setNowDepart(33)}
-              style={{padding: 10}}>
+              style={{ padding: 10 }}>
               <Text
                 style={{
                   fontSize: Dimensions.get('window').width / 25,
@@ -1950,7 +1984,7 @@ export default function Departure(props) {
             </TouchableOpacity>
           </View>
           <Text style={styleSheet.label}>Number of Pax</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TextInput
               style={styleSheet.input}
               value={departure[34]}
@@ -1962,7 +1996,7 @@ export default function Departure(props) {
             />
           </View>
           {/*   ------------------------------Baggage ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>Baggage:</Text>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>Baggage:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -1972,7 +2006,7 @@ export default function Departure(props) {
               marginVertical: 10,
             }}>
             <Text style={styleSheet.label}>Number of Baggage Offloaded</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 style={styleSheet.input}
                 value={departure[35]}
@@ -2005,11 +2039,11 @@ export default function Departure(props) {
                   borderWidth: 1,
                   borderRadius: 8,
                 }}>
-                <Text style={{color: 'green'}}>Take Camera</Text>
+                <Text style={{ color: 'green' }}>Take Camera</Text>
               </TouchableOpacity>
             </View>
             {departure[36].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+              <View style={{ marginBottom: 20 }}>
                 {departure[36].file.map((value, index) => {
                   return (
                     <View
@@ -2026,7 +2060,7 @@ export default function Departure(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -2046,7 +2080,7 @@ export default function Departure(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(36, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -2060,7 +2094,7 @@ export default function Departure(props) {
           {/*   ------------------------------Baggage end ----------- */}
 
           {/*   ------------------------------Pax Movement //here ----------- */}
-          <Text style={[styleSheet.label, {marginTop: 10}]}>Pax Movement:</Text>
+          <Text style={[styleSheet.label, { marginTop: 10 }]}>Pax Movement:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -2078,7 +2112,7 @@ export default function Departure(props) {
               <TouchableOpacity
                 onPress={addpaxTransport}
                 style={[styleSheet.button]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Movement
                 </Text>
               </TouchableOpacity>
@@ -2086,14 +2120,14 @@ export default function Departure(props) {
             {paxTransport.map((val, index) => {
               var arr = [];
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemovePaxTransport(index)}>
@@ -2121,7 +2155,7 @@ export default function Departure(props) {
 
                   <DateTimeInput
                     label={
-                      'Time Pax Boarded Transport at Terminal (Local Time)'
+                      'Time Pax Boarded Transport at Pickup Location (Local Time)'
                     }
                     notrequiredSection={true}
                     disabled={false}
@@ -2149,7 +2183,7 @@ export default function Departure(props) {
                   />
 
                   <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                       style={[styleSheet.input]}
                       multiline={true}
@@ -2183,7 +2217,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Crew Informed of Pax Arrival and Details (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 style={[
@@ -2195,14 +2229,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 40)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[40] ? departure[40] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 onPress={() => setNowDepart(40)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -2215,7 +2249,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               VAT/GST Refund Completed (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 style={[
@@ -2227,14 +2261,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 41)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[41] ? departure[41] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 onPress={() => setNowDepart(41)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -2247,7 +2281,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Pax Cleared CIQ (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 style={[
@@ -2259,14 +2293,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 42)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[42] ? departure[42] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 onPress={() => setNowDepart(42)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -2279,7 +2313,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Pax Cleared Airport Security (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 style={[
@@ -2291,14 +2325,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 43)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[43] ? departure[43] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 onPress={() => setNowDepart(43)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -2311,7 +2345,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Pax Boarded Transport to Aircraft (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 style={[
@@ -2323,14 +2357,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 44)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[44] ? departure[44] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 onPress={() => setNowDepart(44)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -2344,7 +2378,7 @@ export default function Departure(props) {
             <Text style={styleSheet.label}>
               Time Pax Boarded Aircraft (Local Time)
             </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 style={[
@@ -2356,14 +2390,14 @@ export default function Departure(props) {
                   },
                 ]}
                 onPress={() => showDatePickerDepart('time', 45)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {departure[45] ? departure[45] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={departure[38].checked}
                 onPress={() => setNowDepart(45)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -2374,7 +2408,7 @@ export default function Departure(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 style={[styleSheet.input]}
                 multiline={true}
@@ -2396,17 +2430,17 @@ export default function Departure(props) {
           {/*   ------------------------------Pax Movement end ----------- */}
 
           <Text style={styleSheet.label}>Door Close Time (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={styleSheet.picker}
               onPress={() => showDatePickerDepart('time', 46)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
+              <Text style={{ fontSize: 20, color: 'black' }}>
                 {departure[46] ? departure[46] : 'dd/mm/yy, -- : --'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setNowDepart(46)}
-              style={{padding: 10}}>
+              style={{ padding: 10 }}>
               <Text
                 style={{
                   fontSize: Dimensions.get('window').width / 25,
@@ -2419,17 +2453,17 @@ export default function Departure(props) {
           <Text style={styleSheet.label}>
             Movement (Chocks Off) (Local Time)
           </Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={styleSheet.picker}
               onPress={() => showDatePickerDepart('time', 47)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
+              <Text style={{ fontSize: 20, color: 'black' }}>
                 {departure[47] ? departure[47] : 'dd/mm/yy, -- : --'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setNowDepart(47)}
-              style={{padding: 10}}>
+              style={{ padding: 10 }}>
               <Text
                 style={{
                   fontSize: Dimensions.get('window').width / 25,
@@ -2442,17 +2476,17 @@ export default function Departure(props) {
           <Text style={styleSheet.label}>
             Movement (Push Back) (Local Time)
           </Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={styleSheet.picker}
               onPress={() => showDatePickerDepart('time', 48)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
+              <Text style={{ fontSize: 20, color: 'black' }}>
                 {departure[48] ? departure[48] : 'dd/mm/yy, -- : --'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setNowDepart(48)}
-              style={{padding: 10}}>
+              style={{ padding: 10 }}>
               <Text
                 style={{
                   fontSize: Dimensions.get('window').width / 25,
@@ -2463,17 +2497,17 @@ export default function Departure(props) {
             </TouchableOpacity>
           </View>
           <Text style={styleSheet.label}>Movement (Take Off) (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity
               style={styleSheet.picker}
               onPress={() => showDatePickerDepart('time', 49)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
+              <Text style={{ fontSize: 20, color: 'black' }}>
                 {departure[49] ? departure[49] : 'dd/mm/yy, -- : --'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setNowDepart(49)}
-              style={{padding: 10}}>
+              style={{ padding: 10 }}>
               <Text
                 style={{
                   fontSize: Dimensions.get('window').width / 25,
@@ -2484,7 +2518,7 @@ export default function Departure(props) {
             </TouchableOpacity>
           </View>
           <Text style={styleSheet.label}>Additional Remarks</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TextInput
               style={[styleSheet.input]}
               multiline={true}
@@ -2518,11 +2552,11 @@ export default function Departure(props) {
               backgroundColor: '#000',
             },
           }}>
-          <View style={{flex: 1, paddingLeft: 20}}>
-            <View style={{flex: 1}}>
-              <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+          <View style={{ flex: 1, paddingLeft: 20 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: 'black', fontSize: 22 }}>Upload Image</Text>
             </View>
-            <View style={{flex: 1.5, flexDirection: 'column'}}>
+            <View style={{ flex: 1.5, flexDirection: 'column' }}>
               <TouchableOpacity
                 onPress={() => getImage(false)}
                 style={{
@@ -2531,7 +2565,7 @@ export default function Departure(props) {
                   justifyContent: 'flex-start',
                 }}>
                 <Icons name="camera-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                   Upload from Camera
                 </Text>
               </TouchableOpacity>
@@ -2544,7 +2578,7 @@ export default function Departure(props) {
                   justifyContent: 'flex-start',
                 }}>
                 <Icons name="image-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                   Upload from Gallery
                 </Text>
               </TouchableOpacity>
@@ -2561,7 +2595,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
+  imgName: { color: 'black', fontSize: 12, fontWeight: '600' },
   checkbox: {
     width: 40,
     height: 40,

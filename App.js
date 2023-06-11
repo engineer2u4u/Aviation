@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Home from './components/Home';
 import LogDetails from './components/LogDetails';
 import Risk from './components/Risk';
@@ -6,12 +6,12 @@ import Log2 from './components/Log2';
 import Rectification from './components/Rectification';
 import Log1 from './components/Log1';
 import GroundHandling from './components/GroundHandling';
-import FlightDetails from './components/FlightDetails';
+import AircraftDetails from './components/AircraftDetails';
 import Scanner from './components/Scanner';
 import FlightDetailsRoute from './components/FlightDetailsRoute';
-import {NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import auth from '@react-native-firebase/auth';
 
@@ -22,8 +22,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import {UserContext} from './components/context/userContext';
-import {UserDetails} from './components/context/userDetailsContext';
+import { UserContext } from './components/context/userContext';
+import { UserDetails } from './components/context/userDetailsContext';
 import SplashScreen from 'react-native-splash-screen';
 import EditFlight from './components/FlightDetails/EditFlight';
 
@@ -165,7 +165,7 @@ const Login = props => {
           }}>
           Sign In
         </Text>
-        <View style={{flex: 5, marginTop: 20}}>
+        <View style={{ flex: 5, marginTop: 20 }}>
           {err && (
             <View
               style={{
@@ -175,13 +175,13 @@ const Login = props => {
                 justifyContent: 'center',
                 backgroundColor: '#d3d3d360',
               }}>
-              <Text style={{color: 'red', fontSize: 14}}>&bull; {errmsg}</Text>
+              <Text style={{ color: 'red', fontSize: 14 }}>&bull; {errmsg}</Text>
             </View>
           )}
-          <View style={{flex: 1, marginTop: 20}}>
-            <Text style={{color: '#000', fontSize: 18}}>Email Address</Text>
+          <View style={{ flex: 1, marginTop: 20 }}>
+            <Text style={{ color: '#000', fontSize: 18 }}>Email Address</Text>
             {emailinvalid && (
-              <Text style={{color: 'red', fontSize: 12, marginTop: 10}}>
+              <Text style={{ color: 'red', fontSize: 12, marginTop: 10 }}>
                 {email.length === 0
                   ? 'Email Required'
                   : 'Invalid Email Address'}
@@ -215,7 +215,7 @@ const Login = props => {
               }}
             />
 
-            <Text style={{color: '#000', fontSize: 18, marginTop: 20}}>
+            <Text style={{ color: '#000', fontSize: 18, marginTop: 20 }}>
               Password
             </Text>
             <TextInput
@@ -257,7 +257,7 @@ const Login = props => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <Text style={{fontSize: 22}}>Login</Text>
+                <Text style={{ fontSize: 22 }}>Login</Text>
               </TouchableOpacity>
             )}
 
@@ -268,7 +268,7 @@ const Login = props => {
                 alignContent: 'center',
                 marginTop: 40,
               }}>
-              <Text style={{color: 'black', fontSize: 18, paddingTop: 10}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingTop: 10 }}>
                 Im a new user,{' '}
               </Text>
               <TouchableOpacity
@@ -279,7 +279,7 @@ const Login = props => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <Text style={{fontSize: 18, paddingTop: 5, color: 'navy'}}>
+                <Text style={{ fontSize: 18, paddingTop: 5, color: 'navy' }}>
                   Sign Up
                 </Text>
               </TouchableOpacity>
@@ -303,7 +303,7 @@ const Login = props => {
 
   return (
     <View>
-      <Text style={{color: 'black'}}>Welcome {user.email}</Text>
+      <Text style={{ color: 'black' }}>Welcome {user.email}</Text>
       <TouchableOpacity
         onPress={logOut}
         style={{
@@ -321,8 +321,8 @@ const Login = props => {
 };
 
 const SignUp = props => {
-  const {user, setUser} = useContext(UserDetails);
-  const {loggedIn, setloggedIn} = useContext(UserContext);
+  const { user, setUser } = useContext(UserDetails);
+  const { loggedIn, setloggedIn } = useContext(UserContext);
 
   const [loading, setloading] = useState(false);
   const [email, setemail] = useState('');
@@ -399,7 +399,7 @@ const SignUp = props => {
         }}>
         Create Account
       </Text>
-      <View style={{flex: 5, marginTop: 20}}>
+      <View style={{ flex: 5, marginTop: 20 }}>
         {err && (
           <View
             style={{
@@ -409,13 +409,13 @@ const SignUp = props => {
               justifyContent: 'center',
               backgroundColor: '#d3d3d360',
             }}>
-            <Text style={{color: 'red', fontSize: 14}}>&bull; {errmsg}</Text>
+            <Text style={{ color: 'red', fontSize: 14 }}>&bull; {errmsg}</Text>
           </View>
         )}
-        <View style={{flex: 1, marginTop: 20}}>
-          <Text style={{color: '#000', fontSize: 18}}>Email</Text>
+        <View style={{ flex: 1, marginTop: 20 }}>
+          <Text style={{ color: '#000', fontSize: 18 }}>Email</Text>
           {emailinvalid && (
-            <Text style={{color: 'red', fontSize: 12, marginTop: 10}}>
+            <Text style={{ color: 'red', fontSize: 12, marginTop: 10 }}>
               {email.length === 0 ? 'Email Required' : 'Invalid Email Address'}
             </Text>
           )}
@@ -447,7 +447,7 @@ const SignUp = props => {
             }}
           />
 
-          <Text style={{color: '#000', fontSize: 18, marginTop: 20}}>
+          <Text style={{ color: '#000', fontSize: 18, marginTop: 20 }}>
             Password
           </Text>
           <TextInput
@@ -466,7 +466,7 @@ const SignUp = props => {
             }}
           />
 
-          <Text style={{color: '#000', fontSize: 18, marginTop: 20}}>
+          <Text style={{ color: '#000', fontSize: 18, marginTop: 20 }}>
             Confirm Password
           </Text>
           <TextInput
@@ -507,7 +507,7 @@ const SignUp = props => {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text style={{fontSize: 22}}>Create Account</Text>
+              <Text style={{ fontSize: 22 }}>Create Account</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -536,12 +536,12 @@ const App = () => {
   if (initializing) return null;
 
   return (
-    <UserContext.Provider value={{loggedIn, setloggedIn}}>
-      <UserDetails.Provider value={{user, setUser}}>
+    <UserContext.Provider value={{ loggedIn, setloggedIn }}>
+      <UserDetails.Provider value={{ user, setUser }}>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName={loggedIn ? 'Home' : 'Login'}
-            screenOptions={{headerShown: false}}>
+            screenOptions={{ headerShown: false }}>
             {loggedIn ? (
               <Stack.Screen name="Home" component={Home} />
             ) : (
@@ -566,6 +566,7 @@ const App = () => {
             />
             <Stack.Screen name="Scanner" component={Scanner} />
             <Stack.Screen name="EditPageFlight" component={EditFlight} />
+            <Stack.Screen name="AircraftDetails" component={AircraftDetails} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserDetails.Provider>

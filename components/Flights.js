@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -7,22 +7,23 @@ import {
   TouchableHighlight,
   ActivityIndicator,
   View,
+  Dimensions
 } from 'react-native';
 
-import {SwipeListView} from 'react-native-swipe-list-view';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import Icons from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
-import {firebase} from '@react-native-firebase/functions';
+import { firebase } from '@react-native-firebase/functions';
+import FontAwesome5Icons from 'react-native-vector-icons/FontAwesome5';
+const { width, height } = Dimensions.get('window');
 
-export default function Flights({navigation}) {
+const HeadingTextSize = width / 15;
+const labelTextSize = width / 25;
+export default function Flights({ navigation }) {
   const [callLoad, setcallLoad] = useState(false);
 
-  const [listData, setListData] = useState(
-    Array(20)
-      .fill('')
-      .map((_, i) => ({key: `${i}`, text: `item #${i}`})),
-  );
+  const [listData, setListData] = useState([]);
 
   const [flightlist, setflightlist] = useState([]);
 
@@ -33,16 +34,17 @@ export default function Flights({navigation}) {
       .functions('asia-southeast1')
       .httpsCallable('getFlights')()
       .then(response => {
-        console.log(JSON.parse(response.data.body).Table[0]);
+
         setcallLoad(false);
 
         var packet = JSON.parse(response.data.body);
-        // //console.log(packet.Table);
-        setflightlist(packet.Table);
+        // console.log(response);
+        if (packet) {
+          setflightlist(packet.Table);
+        }
       })
       .catch(error => {
         setcallLoad(false);
-
         console.log(error, 'Function error');
       });
   }, []);
@@ -54,7 +56,7 @@ export default function Flights({navigation}) {
   };
 
   const addFlights = () => {
-    navigation.replace('EditPageFlight', {UID: null});
+    navigation.replace('EditPageFlight', { UID: null });
   };
   const deleteRow = (rowMap, rowKey) => {
     closeRow(rowMap, rowKey);
@@ -94,7 +96,7 @@ export default function Flights({navigation}) {
       style={[styles.rowFront]}
       underlayColor={'#AAA'}
       activeOpacity={2}>
-      <View style={{flexDirection: 'row'}}>
+      <View style={{ flexDirection: 'row' }}>
         <View
           style={{
             backgroundColor: getColor(data.item.FLIGHT_TYPE),
@@ -105,21 +107,21 @@ export default function Flights({navigation}) {
             alignItems: 'center',
             marginRight: 10,
           }}>
-          <Text style={{color: 'white', fontSize: 25}}>
+          <Text style={{ color: 'white', fontSize: 25 }}>
             {data.item.FLIGHT_TYPE.substr(0, 1)}
           </Text>
         </View>
         <View>
-          <Text style={{fontSize: 15, color: 'white'}}>
+          <Text style={{ fontSize: 15, color: 'white' }}>
             {data.item.FLIGHT_REGISTRATION + ' (' + data.item.REF_NO + ')'}
           </Text>
-          <Text style={{fontSize: 15, color: 'white'}}>
+          <Text style={{ fontSize: 15, color: 'white' }}>
             {data.item.FLIGHT_CREW_DEPARTURE}{' '}
             <Icons color="white" name="user-nurse" size={15} />{' '}
             {data.item.FLIGHT_PAX_DEPARTURE}{' '}
             <Icons color="white" name="user-friends" size={15} />
           </Text>
-          <Text style={{fontSize: 15, color: 'white'}}>
+          <Text style={{ fontSize: 15, color: 'white' }}>
             {data.item.LAST_UPDATE &&
               new Date(data.item.LAST_UPDATE).toDateString()}
           </Text>
@@ -147,7 +149,7 @@ export default function Flights({navigation}) {
         onPress={() => {
           deleteRow(rowMap, data.item.key);
           //console.log("HHERERERR",data.item.UID);
-          navigation.navigate('EditPageFlight', {UID: data.item.UID});
+          navigation.navigate('EditPageFlight', { UID: data.item.UID });
         }}>
         <MaterialIcons color="white" name="edit" size={40} />
       </TouchableOpacity>
@@ -155,31 +157,26 @@ export default function Flights({navigation}) {
   );
   return (
     <View style={styles.container}>
-      {/* <Text style={{fontSize: 30, marginLeft: 10, color: 'black'}}>
-        Flights Details
-      </Text> */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginVertical: 20,
-        }}>
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: 'bold',
-            color: 'black',
-            paddingLeft: 20,
-          }}>
-          Flights Details
-        </Text>
+
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <TouchableOpacity
+          style={{ marginLeft: 20 }}
+          onPress={() => { props.navigation.navigate("Home") }}
+        >
+          <FontAwesome5Icons name="caret-left" color={'black'} size={40} />
+        </TouchableOpacity>
+
+        <Text style={{
+          fontSize: HeadingTextSize, fontWeight: 'bold',
+          color: 'black',
+          paddingLeft: 10
+        }}>  Flights Details </Text>
         {callLoad ? (
-          <View style={{paddingRight: 20}}>
+          <View style={{ paddingRight: 20 }}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
         ) : (
-          <TouchableOpacity onPress={addFlights} style={{marginRight: 20}}>
+          <TouchableOpacity onPress={addFlights} style={{ marginRight: 20 }}>
             <Icons name="plus" color="#6750A4" size={30} />
           </TouchableOpacity>
         )}
@@ -222,7 +219,7 @@ const styles = StyleSheet.create({
     shadowColor: '#ccc',
     shadowOpacity: 0.5,
     elevation: 10,
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: { width: 0, height: 3 },
   },
   rowBack: {
     alignItems: 'center',

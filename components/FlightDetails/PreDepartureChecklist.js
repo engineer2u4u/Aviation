@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -23,10 +23,10 @@ import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import TakeCamera from '../subcomponents/Forms/takecamera';
 import Header from '../subcomponents/Forms/Header';
-import {firebase} from '@react-native-firebase/functions';
+import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const HeadingTextSize = width / 15;
 
 export default function PreDepartureChecklist(props) {
@@ -58,7 +58,7 @@ export default function PreDepartureChecklist(props) {
     {
       name: null,
       location: null,
-      hotelMap: {value: null, file: []},
+      hotelMap: { value: null, file: [] },
       time: null,
       contact: null,
       remarks: null,
@@ -66,7 +66,7 @@ export default function PreDepartureChecklist(props) {
     {
       name: null,
       location: null,
-      hotelMap: {value: null, file: []},
+      hotelMap: { value: null, file: [] },
       time: null,
       contact: null,
       remarks: null,
@@ -85,18 +85,18 @@ export default function PreDepartureChecklist(props) {
       },
       fueling_time: null,
     }, //2 -> 2 for flight and admin documentation time - Local
-    {checked: false, remarks: null}, //3 -> 3 gendec
-    {hotelMap: {value: null, file: []}}, //4 -> 4 gendec upload <- 1 issue noted
-    {checked: false, remarks: null}, //5 FBO -> 5
-    {checked: false, remarks: null}, //6 -> 6 Handling Agent
-    {checked: false, remarks: null}, //7 -> 7 CIQ
-    {checked: false, remarks: null}, //8 -> 8 Airport sec
-    {checked: false, remarks: null}, //9 -> 9 Catering agent
-    {checked: false, remarks: null}, //10 -> 10 Aircraft Fueller
-    {checked: false, remarks: null}, //11
-    {checked: false, remarks: null}, //12
-    {checked: false, remarks: null},
-    {checked: false, remarks: null},
+    { checked: false, remarks: null }, //3 -> 3 gendec
+    { hotelMap: { value: null, file: [] } }, //4 -> 4 gendec upload <- 1 issue noted
+    { checked: false, remarks: null }, //5 FBO -> 5
+    { checked: false, remarks: null }, //6 -> 6 Handling Agent
+    { checked: false, remarks: null }, //7 -> 7 CIQ
+    { checked: false, remarks: null }, //8 -> 8 Airport sec
+    { checked: false, remarks: null }, //9 -> 9 Catering agent
+    { checked: false, remarks: null }, //10 -> 10 Aircraft Fueller
+    { checked: false, remarks: null }, //11
+    { checked: false, remarks: null }, //12
+    { checked: false, remarks: null },
+    { checked: false, remarks: null },
   ]);
 
   useEffect(() => {
@@ -221,7 +221,7 @@ export default function PreDepartureChecklist(props) {
               apaxTransport.push({
                 name: val.PDCT_DN.trim().replace('""', ''),
                 location: val.PDCT_PL.trim().replace('""', ''),
-                hotelMap: {value: null, file: []},
+                hotelMap: { value: null, file: [] },
                 time: val.PDCT_SPT.trim().replace('""', ''),
                 contact: val.PDCT_DCN.trim().replace('""', ''),
                 remarks: val.PDCT_REMARK.trim().replace('""', ''),
@@ -232,7 +232,7 @@ export default function PreDepartureChecklist(props) {
               acrewTransport.push({
                 name: val.PDCT_DN.trim().replace('""', ''),
                 location: val.PDCT_PL.trim().replace('""', ''),
-                hotelMap: {value: null, file: []},
+                hotelMap: { value: null, file: [] },
                 time: val.PDCT_SPT.trim().replace('""', ''),
                 contact: val.PDCT_DCN.trim().replace('""', ''),
                 remarks: val.PDCT_REMARK.trim().replace('""', ''),
@@ -494,7 +494,7 @@ export default function PreDepartureChecklist(props) {
     var data = {
       name: null,
       location: null,
-      hotelMap: {value: null, file: []},
+      hotelMap: { value: null, file: [] },
       time: null,
       contact: null,
       remarks: null,
@@ -516,7 +516,7 @@ export default function PreDepartureChecklist(props) {
     var data = {
       name: null,
       location: null,
-      hotelMap: {value: null, file: []},
+      hotelMap: { value: null, file: [] },
       time: null,
       contact: null,
       remarks: null,
@@ -597,7 +597,7 @@ export default function PreDepartureChecklist(props) {
   const addnewtestSection = () => {
     //add menu section
     var section = [...addedtestSection];
-    var menu = {name: 'Added Test Section Field'};
+    var menu = { name: 'Added Test Section Field' };
     section.push(menu);
     setaddedtestsection(section);
     //add menu value collection
@@ -605,7 +605,7 @@ export default function PreDepartureChecklist(props) {
     var data = {
       name: null,
       location: null,
-      hotelMap: {value: null, file: []},
+      hotelMap: { value: null, file: [] },
       time: null,
       remarks: null,
     };
@@ -675,7 +675,7 @@ export default function PreDepartureChecklist(props) {
     pdeparturecheck[index].push({
       name: null,
       location: null,
-      hotelMap: {value: null, file: []},
+      hotelMap: { value: null, file: [] },
       time: null,
       remarks: null,
     });
@@ -908,6 +908,8 @@ export default function PreDepartureChecklist(props) {
       <Header
         headingSize={HeadingTextSize}
         heading={'Pre-Departure Checklist'}
+        nav={"IntialScreenView"}
+        navigation={props.navigation}
         sendForm={() => sendForm(pdeparturecheck[2])}
         Icon={
           callLoad ? (
@@ -929,7 +931,7 @@ export default function PreDepartureChecklist(props) {
         />
         <Loader visible={loading} />
 
-        <View style={[styleSheet.toggleContainer, {paddingHorizontal: 20}]}>
+        <View style={[styleSheet.toggleContainer, { paddingHorizontal: 20 }]}>
           <TouchableOpacity
             onPress={event => setCheckedDeparture(11)}
             style={[
@@ -953,7 +955,7 @@ export default function PreDepartureChecklist(props) {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => getFeedback(11)}>
             <Icons
-              style={{marginLeft: 10}}
+              style={{ marginLeft: 10 }}
               name="comment-processing-outline"
               color={'green'}
               size={30}
@@ -972,7 +974,7 @@ export default function PreDepartureChecklist(props) {
             </View>
             <TouchableOpacity onPress={() => removeFeedback(11)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="delete-circle-outline"
                 color="red"
                 size={30}
@@ -981,7 +983,7 @@ export default function PreDepartureChecklist(props) {
           </View>
         )}
 
-        <View style={[styleSheet.toggleContainer, {paddingHorizontal: 20}]}>
+        <View style={[styleSheet.toggleContainer, { paddingHorizontal: 20 }]}>
           <TouchableOpacity
             onPress={event => setCheckedDeparture(12)}
             style={[
@@ -1005,7 +1007,7 @@ export default function PreDepartureChecklist(props) {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => getFeedback(12)}>
             <Icons
-              style={{marginLeft: 10}}
+              style={{ marginLeft: 10 }}
               name="comment-processing-outline"
               color={'green'}
               size={30}
@@ -1024,7 +1026,7 @@ export default function PreDepartureChecklist(props) {
             </View>
             <TouchableOpacity onPress={() => removeFeedback(12)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="delete-circle-outline"
                 color="red"
                 size={30}
@@ -1033,7 +1035,7 @@ export default function PreDepartureChecklist(props) {
           </View>
         )}
 
-        <View style={{padding: 20, marginBottom: 80}}>
+        <View style={{ padding: 20, marginBottom: 80 }}>
           {/** CREW TRANSPPORT
            *
            * ADD
@@ -1065,7 +1067,7 @@ export default function PreDepartureChecklist(props) {
                   setcrewactivesections(!x);
                   setaddedcrewSectionval([]);
                   var x = [...pdeparturecheck];
-                  x[1].hotelMap = {value: null, file: []};
+                  x[1].hotelMap = { value: null, file: [] };
                   setpdeparturecheck(x);
                 }}>
                 <Icons
@@ -1092,9 +1094,9 @@ export default function PreDepartureChecklist(props) {
                 onPress={addnewcrewSection}
                 style={[
                   styleSheet.button,
-                  {backgroundColor: crewactivesections ? '#80808080' : 'green'},
+                  { backgroundColor: crewactivesections ? '#80808080' : 'green' },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
@@ -1102,7 +1104,7 @@ export default function PreDepartureChecklist(props) {
             {addedcrewSectionval.map((data, i) => {
               return (
                 <View key={i}>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => {
@@ -1152,7 +1154,7 @@ export default function PreDepartureChecklist(props) {
                     attachments={addedcrewSectionval[i].hotelMap}
                     Icon={
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
@@ -1225,7 +1227,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(13)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1233,13 +1235,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[13].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[13].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(13)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1272,7 +1274,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(14)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1280,13 +1282,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[14].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[14].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(14)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1322,7 +1324,7 @@ export default function PreDepartureChecklist(props) {
                   setaddedpaxSectionval([]);
 
                   var x = [...pdeparturecheck];
-                  x[1].hotelMap = {value: null, file: []};
+                  x[1].hotelMap = { value: null, file: [] };
                   setpdeparturecheck(x);
                 }}>
                 <Icons
@@ -1357,7 +1359,7 @@ export default function PreDepartureChecklist(props) {
                       : 'green',
                   },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
@@ -1366,7 +1368,7 @@ export default function PreDepartureChecklist(props) {
             {addedpaxSectionval.map((data, i) => {
               return (
                 <View key={i}>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => {
@@ -1422,7 +1424,7 @@ export default function PreDepartureChecklist(props) {
                     attachments={addedpaxSectionval[i].hotelMap}
                     Icon={
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
@@ -1567,7 +1569,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(3)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1575,13 +1577,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[3].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[3].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(3)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1608,7 +1610,7 @@ export default function PreDepartureChecklist(props) {
             attachments={pdeparturecheck[4].hotelMap}
             Icon={
               <Icons
-                style={{color: 'green', marginLeft: 10}}
+                style={{ color: 'green', marginLeft: 10 }}
                 name="close"
                 size={30}
               />
@@ -1813,7 +1815,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(5)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1821,13 +1823,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[5].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[5].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(5)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1859,7 +1861,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(6)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1867,13 +1869,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[6].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[6].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(6)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1905,7 +1907,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(7)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1913,13 +1915,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[7].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[7].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(7)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1951,7 +1953,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(8)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1959,13 +1961,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[8].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[8].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(8)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1997,7 +1999,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(9)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -2005,13 +2007,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[9].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[9].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(9)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -2044,7 +2046,7 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(10)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -2052,13 +2054,13 @@ export default function PreDepartureChecklist(props) {
             </TouchableOpacity>
           </View>
           {pdeparturecheck[10].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{pdeparturecheck[10].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(10)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -2080,11 +2082,11 @@ export default function PreDepartureChecklist(props) {
                 backgroundColor: '#000',
               },
             }}>
-            <View style={{flex: 1, paddingLeft: 20}}>
-              <View style={{flex: 1}}>
-                <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
+            <View style={{ flex: 1, paddingLeft: 20 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: 'black', fontSize: 22 }}>Upload</Text>
               </View>
-              <View style={{flex: 1.5, flexDirection: 'column'}}>
+              <View style={{ flex: 1.5, flexDirection: 'column' }}>
                 <TouchableOpacity
                   onPress={() => getImage(false)}
                   style={{
@@ -2093,7 +2095,7 @@ export default function PreDepartureChecklist(props) {
                     justifyContent: 'flex-start',
                   }}>
                   <Icons name="camera-outline" size={25} color={'black'} />
-                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                     Upload from Camera
                   </Text>
                 </TouchableOpacity>
@@ -2106,7 +2108,7 @@ export default function PreDepartureChecklist(props) {
                     justifyContent: 'flex-start',
                   }}>
                   <Icons name="image-outline" size={25} color={'black'} />
-                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                     Upload from Gallery
                   </Text>
                 </TouchableOpacity>
@@ -2131,7 +2133,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
+  imgName: { color: 'black', fontSize: 12, fontWeight: '600' },
   checkbox: {
     width: 8,
     height: 8,

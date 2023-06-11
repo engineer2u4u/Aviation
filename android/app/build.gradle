@@ -308,11 +308,13 @@ task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.implementation
     into 'libs'
 }
-project.ext.vectoricons = [
-    iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf' ] // Name of the font files you want to copy
-]
+
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+project.ext.vectoricons = [
+    iconFontNames: [ 'AntDesign.ttf','EvilIcons.ttf','Entypo.ttf','Feather.ttf','FontAwesome.ttf','FontAwesome5.ttf','FontAwesome5Brands.ttf','Fontisto.ttf','Foundation.ttf','Ionicons.ttf','MaterialCommunityIcons.ttf','MaterialIcons.ttf','Octicons.ttf' ] // Name of the font files you want to copy
+]
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
 
 def isNewArchitectureEnabled() {
     // To opt-in for the New Architecture, you can either:

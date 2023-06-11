@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -21,9 +21,9 @@ import * as ImagePicker from 'react-native-image-picker';
 import Loader from '../Loader';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
-import {firebase} from '@react-native-firebase/functions';
-import {ActivityIndicator} from 'react-native';
-const {width, height} = Dimensions.get('window');
+import { firebase } from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
+const { width, height } = Dimensions.get('window');
 import auth from '@react-native-firebase/auth';
 import s from '../subcomponents/Forms/FlightPreparation/form.styles';
 export default function ArrivalService(props) {
@@ -45,7 +45,38 @@ export default function ArrivalService(props) {
     towing: false,
     overnight: false,
   });
-
+  const [aService, setaService] = useState({
+    "ARS_BAGGAGE": null, "ARS_BAGGAGE_PHOTO": "",
+    "ARS_CEC_REMARKS": "", "ARS_CEC_REQ": null,
+    "ARS_CREW": null, "ARS_CRM_CAT": "", "ARS_CRM_CCIQ": "",
+    "ARS_CRM_CDA": "", "ARS_CRM_CDT": "", "ARS_CRM_CVA": "",
+    "ARS_CRM_REM": "", "ARS_CRM_TAT": "", "ARS_CTR_CDT": "",
+    "ARS_CTR_CEL": "", "ARS_CTR_CEO": "", "ARS_CTR_NCO": "",
+    "ARS_CTR_REM": "", "ARS_CTR_REQ": 1, "ARS_DS_CONTACT_NO": "",
+    "ARS_DS_NAME": "", "ARS_FOA_END": "",
+    "ARS_FOA_FTAT": "", "ARS_FOA_RECEIPT": "",
+    "ARS_FOA_REM": "", "ARS_FOA_REQ": 0,
+    "ARS_FOA_START": "", "ARS_GPU_REQ": 0, "ARS_GPU_START": "",
+    "ARS_GPU_STOP": "", "ARS_LAS_CT": "",
+    "ARS_LAS_ET": "", "ARS_LAS_REM": "",
+    "ARS_LAS_REQ": 0, "ARS_LAS_ST": "", "ARS_LC_NR": 0,
+    "ARS_LC_PHOTO": null, "ARS_LC_REMARKS": "",
+    "ARS_MOVACLANDED": "", "ARS_MOVCHOCKIN": "",
+    "ARS_MOV_PXAT": "", "ARS_MOV_PXCIQ": "",
+    "ARS_MOV_PXDA": "", "ARS_MOV_PXDT": null, "ARS_MOV_PXTAT": null,
+    "ARS_MOV_PXVA": "", "ARS_MOV_REM": null,
+    "ARS_MOV_VOA": 0, "ARS_OVB_NUMBER": "",
+    "ARS_OVB_REQ": 0, "ARS_PAX": null,
+    "ARS_RUS_CT": "", "ARS_RUS_REM": "",
+    "ARS_RUS_REQ": 0, "ARS_TOS_END": "", "ARS_TOS_PHOTO": "",
+    "ARS_TOS_REM": "", "ARS_TOS_REQ": 0,
+    "ARS_TOS_START": "", "ARS_WAS_CT": "", "ARS_WAS_ET": "",
+    "ARS_WAS_REM": "", "ARS_WAS_REQ": 0, "CREATED_BY": "",
+    "CREATED_DATE": "", "FLIGHT_ARRIVAL_CREW": null,
+    "FLIGHT_ARRIVAL_PAX": null, "FUID": "",
+    "LAST_UPDATE": "", "STATUS": 1,
+    "UID": "", "UPDATE_BY": ""
+  })
   const [arrival, setArrival] = useState([
     null,
     null,
@@ -53,55 +84,55 @@ export default function ArrivalService(props) {
     null,
     null,
     null,
-    {value: '', file: []},
+    { value: '', file: [] },
     null,
     null,
-    {checked: false},
+    { checked: false },
     null, //10
     null,
-    {checked: false},
-    {checked: false},
+    { checked: false },
+    { checked: false },
     null,
     null,
-    {value: null, file: []},
-    {value: null, file: []},
+    { value: null, file: [] },
+    { value: null, file: [] },
     null,
     null,
-    {checked: false},
-    null,
-    null,
-    null,
-    {checked: false},
+    { checked: false },
     null,
     null,
     null,
-    {checked: false},
-    null,
-    null,
-    {checked: false},
+    { checked: false },
     null,
     null,
     null,
-    {value: null, file: []},
+    { checked: false },
+    null,
+    null,
+    { checked: false },
+    null,
+    null,
+    null,
+    { value: null, file: [] },
     'For remarks; if the fuel truck needs to  come around a second time, they can put the details of the second time it comes around into the remarks here',
-    {checked: false},
+    { checked: false },
     null,
     null,
-    {value: null, file: []},
+    { value: null, file: [] },
     null, //41
-    {checked: false},
+    { checked: false },
     null,
-    {checked: false},
-    null,
-    null,
-    {checked: false},
+    { checked: false },
     null,
     null,
+    { checked: false },
     null,
     null,
     null,
     null,
-    {value: null, file: []},
+    null,
+    null,
+    { value: null, file: [] },
     null,
     null,
     null,
@@ -118,7 +149,7 @@ export default function ArrivalService(props) {
     var tarrival = [...arrival];
     tarrival[60] = [
       ...arrival[60],
-      {arrival: null, departed: null, remarks: null, type: 'Pax'},
+      { arrival: null, departed: null, remarks: null, type: 'Pax' },
     ];
     setArrival([...tarrival]);
   };
@@ -140,6 +171,7 @@ export default function ArrivalService(props) {
         var packet = JSON.parse(response.data.body);
         var res = [...packet.Table];
         if (res) {
+          setaService(res[0]);
           console.log(res[0]);
           setuid(res[0].UID);
           let x = [...arrival];
@@ -268,7 +300,7 @@ export default function ArrivalService(props) {
             .then(response => {
               var packet = JSON.parse(response.data.body);
               var res = packet.Table;
-              console.log(res, 'res');
+              // console.log(res, 'res');
               if (res && res.length > 0) {
                 x[60] = [];
                 x[62] = [];
@@ -326,10 +358,8 @@ export default function ArrivalService(props) {
     // console.log('triggered', tcheckList);
   };
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const showDatePicker = (type, index, pos, field) => {
-    pos != undefined
-      ? (currentPicker.current = [index, pos, field])
-      : (currentPicker.current = [index]);
+  const showDatePicker = (type, index, arr, pos) => {
+    currentPicker.current = [index, arr, pos];
     setMode(type);
     setDatePickerVisibility(true);
   };
@@ -337,58 +367,89 @@ export default function ArrivalService(props) {
     setDatePickerVisibility(false);
   };
   const handleConfirm = date => {
-    // console.log('A date has been picked: ', date);
-    var tarrival = [...arrival];
-    if (currentPicker.current.length > 1) {
-      tarrival[currentPicker.current[0]][currentPicker.current[1]][
-        currentPicker.current[2]
-      ] = tConvert(
-        new Date(date).toLocaleString('en-US', {
-          hour12: false,
-        }),
-      );
-    } else {
-      tarrival[currentPicker.current[0]] = tConvert(
-        new Date(date).toLocaleString('en-US', {
-          hour12: false,
-        }),
-      );
+
+    switch (currentPicker.current[1]) {
+      case 'aService':
+        var tcheckList = {
+          ...aService, [currentPicker.current[2]]: tConvert(
+            new Date(date).toLocaleString('en-US', {
+              hour12: false,
+            }),
+          )
+        };
+        console.log(currentPicker.current)
+        setaService({ ...tcheckList }); break;
+      case 'papaxHotel':
+        var tcheckList = [...papaxHotel];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpapaxHotel([...tcheckList]); break;
+      case 'pacrewHotel':
+        var tcheckList = [...pacrewHotel];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpacrewHotel([...tcheckList]); break;
+      case 'pacrewTransport':
+        var tcheckList = [...pacrewTransport];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpacrewTransport([...tcheckList]); break;
     }
-    console.log(
-      'A date has been picked: ',
-      new Date(date).toLocaleString('en-US', {
-        hour12: false,
-      }),
-    );
-    setArrival(tarrival);
     hideDatePicker();
   };
   const tConvert = datetime => {
     var date = datetime.split(',')[0].split('/');
     var time24 = datetime.split(', ')[1];
     var time = time24.split(':');
-    return (
-      date[1] + '/' + date[0] + '/' + date[2] + ', ' + time[0] + ':' + time[1]
-    );
-  };
-  const setNow = (index, pos, field) => {
-    console.log(field);
-    var tarrival = [...arrival];
-    console.log(field);
-    if (pos != undefined) {
-      tarrival[index][pos][field] = tConvert(
-        new Date().toLocaleString('en-US', {
-          hour12: false,
-        }),
-      );
-    } else {
-      tarrival[index] = tConvert(
-        new Date().toLocaleString('en-US', {
-          hour12: false,
-        }),
+    if (mode == 'date') {
+      return (
+        datetime.split(',')[0]
       );
     }
-    setArrival(tarrival);
+    else if (mode == 'time') {
+      return (
+        time[0] + ':' + time[1]
+      );
+    }
+    return (
+      datetime
+    );
+  };
+  const setNow = (index, arr, pos) => {
+    currentPicker.current = [index, arr, pos];
+    handleConfirm(new Date())
+    // console.log(field);
+    // var tarrival = [...arrival];
+    // console.log(field);
+    // if (pos != undefined) {
+    //   tarrival[index][pos][field] = tConvert(
+    //     new Date().toLocaleString('en-US', {
+    //       hour12: false,
+    //     }),
+    //   );
+    // } else {
+    //   tarrival[index] = tConvert(
+    //     new Date().toLocaleString('en-US', {
+    //       hour12: false,
+    //     }),
+    //   );
+    // }
+    // setArrival(tarrival);
   };
   const onPressDocPreA = async index => {
     try {
@@ -496,7 +557,7 @@ export default function ArrivalService(props) {
     var tarrival = [...arrival];
     tarrival[62] = [
       ...arrival[62],
-      {arrival: null, departed: null, remarks: null, type: 'Crew'},
+      { arrival: null, departed: null, remarks: null, type: 'Crew' },
     ];
     setArrival([...tarrival]);
   };
@@ -658,11 +719,11 @@ export default function ArrivalService(props) {
           Arrival Services
         </Text>
         {callLoad ? (
-          <View style={{paddingRight: 20}}>
+          <View style={{ paddingRight: 20 }}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
         ) : (
-          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+          <TouchableOpacity onPress={sendForm} style={{ marginRight: 20 }}>
             <Icons name="content-save" color="green" size={30} />
           </TouchableOpacity>
         )}
@@ -670,28 +731,62 @@ export default function ArrivalService(props) {
       <ScrollView>
         <Loader visible={loading} />
 
-        <View style={{padding: 20, marginBottom: 100}}>
+        <View style={{ padding: 20, marginBottom: 100 }}>
+          <Text style={styleSheet.label}>Duty Supervisor Details:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <LabelledInput
+              disabled={false}
+              label={'Name'} //mark
+              data={aService.ARS_DS_NAME}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_DS_NAME: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+            <LabelledInput
+              disabled={false}
+              label={'Contact No.'} //mark
+              data={aService.ARS_DS_CONTACT_NO}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_DS_CONTACT_NO: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
           <DateTimeInput
             label={'Movement (AC Landed) (Local Time)'}
             showDatePickerPostDepart={() => {
-              showDatePicker('time', 0);
+              showDatePicker('time', 0, 'aService', "ARS_MOVACLANDED");
             }}
-            setNowPostDepart={() => setNow(0)}
+            setNowPostDepart={() => setNow(0, 'aService', "ARS_MOVACLANDED")}
             size={12}
             type={'time'}
-            data={arrival[0]}
+            data={aService.ARS_MOVACLANDED}
             index={12}
           />
 
           <DateTimeInput
             label={'Movement (Checks In) (Local Time)'}
             showDatePickerPostDepart={() => {
-              showDatePicker('time', 1);
+              showDatePicker('time', 0, 'aService', "ARS_MOVCHOCKIN");
             }}
-            setNowPostDepart={() => setNow(1)}
+            setNowPostDepart={() => setNow(0, 'aService', "ARS_MOVCHOCKIN")}
             size={12}
             type={'time'}
-            data={arrival[1]}
+            data={aService.ARS_MOVCHOCKIN}
             index={12}
           />
 
@@ -704,61 +799,73 @@ export default function ArrivalService(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_GPU_REQ: !aService.ARS_GPU_REQ, ARS_GPU_START: "", ARS_GPU_STOP: "" })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_GPU_REQ == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_GPU_REQ == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
             <DateTimeInput
+              disabled={aService.ARS_GPU_REQ}
               label={'Start Time (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 2);
+                showDatePicker('time', 0, 'aService', "ARS_GPU_START");
               }}
-              setNowPostDepart={() => setNow(2)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_GPU_START")}
               size={12}
               type={'time'}
-              data={arrival[2]}
+              data={aService.ARS_GPU_START}
               index={12}
             />
             <DateTimeInput
+              disabled={aService.ARS_GPU_REQ}
               label={'Stop Time (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 3);
+                showDatePicker('time', 0, 'aService', "ARS_GPU_STOP");
               }}
-              setNowPostDepart={() => setNow(3)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_GPU_STOP")}
               size={12}
               type={'time'}
-              data={arrival[3]}
+              data={aService.ARS_GPU_STOP}
             />
           </View>
 
-          {/* <LabelledInput
+          <LabelledInput
             label={'Number of Pax'} //mark
-            data={arrival[4]}
+            data={aService.ARS_PAX}
             datatype={'text'}
-            index={4}
-            setText={(index, text, type, section) => {
-              var tarrival = [...arrival];
-              tarrival[index] = text;
-              setArrival(tarrival);
+            index={12}
+            setText={(i, text, type, section) => {
+              setaService({ ...aService, ARS_PAX: text });
             }}
             multiline={false}
             numberOfLines={1}
-          /> */}
-          <Text style={s.label}>{'Number of Pax'}</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TextInput
-              style={[s.input, {backgroundColor: 'white'}]}
-              editable={true}
-              value={arrival[4] ? arrival[4].toString() : ''}
-              onChangeText={text => {
-                var tarrival = [...arrival];
-                tarrival[4] = text;
-                setArrival(tarrival);
-              }}
-            />
-          </View>
+          />
+
           <LabelledInput
             label={'Number of Crew'} //mark
-            data={arrival[5]}
+            data={aService.ARS_CREW}
             datatype={'text'}
             index={5}
-            setText={setArrivalData}
+            setText={(i, text, type, section) => {
+              setaService({ ...aService, ARS_CREW: text });
+            }}
             multiline={false}
             numberOfLines={1}
           />
@@ -772,21 +879,19 @@ export default function ArrivalService(props) {
               marginVertical: 10,
             }}>
             <Text style={styleSheet.label}>Number of Baggage Offloaded</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 style={styleSheet.input}
-                value={arrival[6].value ? arrival[6].value.toString() : ''}
+                value={aService.ARS_CREW}
                 onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[6].value = text;
-                  setArrival(tarrival);
+                  setaService({ ...aService, ARS_CREW: text });
                 }}
               />
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(6)}
                 onPress={() => {
-                  setuploadSection(6);
-                  refRBSheet.current.open();
+                  // setuploadSection(6);
+                  // refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -803,8 +908,8 @@ export default function ArrivalService(props) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {arrival[6].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+            {/* {arrival[6].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
                 {arrival[6].file.map((value, index) => {
                   return (
                     <View
@@ -821,7 +926,7 @@ export default function ArrivalService(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -834,7 +939,7 @@ export default function ArrivalService(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(6, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -843,7 +948,7 @@ export default function ArrivalService(props) {
                   );
                 })}
               </View>
-            )}
+            )} */}
           </View>
           {/* ---------------------------Pax Movement-----------------------*/}
           <Text style={styleSheet.label}>Pax Movement :</Text>
@@ -856,7 +961,7 @@ export default function ArrivalService(props) {
               marginVertical: 10,
             }}>
             <DateTimeInput
-              label={'Pax Departed from Aircraft (Local Time)'}
+              label={'Left Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePicker('time', 7);
               }}
@@ -928,41 +1033,7 @@ export default function ArrivalService(props) {
               data={arrival[10]}
               index={12}
             />
-            {/* <DateTimeInput
-              label={'Actual Transport Arrival Time at Airport (Local Time)'}
-              notrequiredSection={true}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 58);
-              }}
-              setNowPostDepart={() => setNow(58)}
-              size={12}
-              type={'time'}
-              data={arrival[58]}
-              index={12}
-            />
 
-            <DateTimeInput
-              label={'Pax Departed from Terminal (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 11);
-              }}
-              setNowPostDepart={() => setNow(11)}
-              size={12}
-              type={'time'}
-              data={arrival[11]}
-              index={12}
-            />
-
-            <LabelledInput
-              label={'Remarks'} //mark
-              data={arrival[14]}
-              datatype={'text'}
-              index={14}
-              setText={setArrivalData}
-              multiline={true}
-              numberOfLines={2}
-            />
-            */}
             <View
               style={{
                 flexDirection: 'row',
@@ -972,14 +1043,14 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 onPress={() => addMovement(true)}
                 style={[styleSheet.button]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Movement
                 </Text>
               </TouchableOpacity>
             </View>
             {arrival[60].map((val, index) => {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
@@ -991,7 +1062,7 @@ export default function ArrivalService(props) {
                     //add
                     //
                   }
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveMovement(index)}>
@@ -1015,21 +1086,21 @@ export default function ArrivalService(props) {
                     index={60}
                   />
                   <Text style={styleSheet.label}>
-                    Pax Departed from Terminal (Local Time)
+                    Left Terminal (Local Time)
                   </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TouchableOpacity
                       style={styleSheet.picker}
                       onPress={() =>
                         showDatePicker('time', 60, index, 'departed')
                       }>
-                      <Text style={{fontSize: 20, color: 'black'}}>
+                      <Text style={{ fontSize: 20, color: 'black' }}>
                         {val.departed ? val.departed : 'dd/mm/yy, -- : --'}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => setNow(60, index, 'departed')}
-                      style={{padding: 10}}>
+                      style={{ padding: 10 }}>
                       <Text
                         style={{
                           fontSize: Dimensions.get('window').width / 25,
@@ -1041,7 +1112,7 @@ export default function ArrivalService(props) {
                   </View>
 
                   <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                       style={styleSheet.input}
                       multiline={true}
@@ -1079,47 +1150,46 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(20);
-                  var x = [...arrival];
-                  //come here
-                  x[15] = null;
-                  x[16] = {value: null, file: []};
-                  x[17] = {value: null, file: []};
-                  x[18] = null;
-                  x[19] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_CTR_REQ: !aService.ARS_CTR_REQ, ARS_CTR_CEO: "", ARS_CTR_CDT: "", ARS_CTR_REM: "" })
+                  // setArrivalcheck(20);
+                  // var x = [...arrival];
+                  // //come here
+                  // x[15] = null;
+                  // x[16] = { value: null, file: [] };
+                  // x[17] = { value: null, file: [] };
+                  // x[18] = null;
+                  // x[19] = null;
+                  // setArrival(x);
                 }}>
                 <Icons
                   name={
-                    arrival[20].checked
+                    aService.ARS_CTR_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[20].checked ? 'green' : 'black'}
+                  color={aService.ARS_CTR_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
             <Text style={styleSheet.label}>Catering Equipment Offloaded</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
-                editable={!arrival[20].checked}
+                editable={!aService.ARS_CTR_REQ ? true : false}
                 style={[
                   styleSheet.input,
                   {
-                    backgroundColor: arrival[20].checked
+                    backgroundColor: aService.ARS_CTR_REQ == 1
                       ? 'rgba(0,0,0,0.1)'
                       : 'white',
                   },
                 ]}
                 multiline={true}
                 numberOfLines={2}
-                value={arrival[15]}
+                value={aService.ARS_CTR_CEO}
                 onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[15] = text;
-                  setArrival(tarrival);
+                  setaService({ ...aService, ARS_CTR_CEO: text })
                 }}
               />
             </View>
@@ -1136,25 +1206,25 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(16)}
                 onPress={() => {
-                  setuploadSection(16);
-                  refRBSheet.current.open();
+                  // setuploadSection(16);
+                  // refRBSheet.current.open();
                 }}
-                disabled={arrival[20].checked}
+                disabled={!aService.ARS_CTR_REQ ? false : true}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: arrival[20].checked
+                  backgroundColor: aService.ARS_CTR_REQ == 1
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{color: 'green'}}>Upload</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {arrival[16].file.length > 0 && (
-              <View style={{marginBottom: 20, marginTop: 10}}>
+            {/* {arrival[16].file.length > 0 && (
+              <View style={{ marginBottom: 20, marginTop: 10 }}>
                 {arrival[16].file.map((value, index) => {
                   return (
                     <View
@@ -1171,7 +1241,7 @@ export default function ArrivalService(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -1184,7 +1254,7 @@ export default function ArrivalService(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(16, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -1193,7 +1263,7 @@ export default function ArrivalService(props) {
                   );
                 })}
               </View>
-            )}
+            )} */}
             <View
               style={{
                 flexDirection: 'row',
@@ -1205,25 +1275,25 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(17)}
                 onPress={() => {
-                  setuploadSection(17);
-                  refRBSheet.current.open();
+                  // setuploadSection(17);
+                  // refRBSheet.current.open();
                 }}
-                disabled={arrival[20].checked}
+                disabled={!aService.ARS_CTR_REQ ? false : true}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: arrival[20].checked
+                  backgroundColor: aService.ARS_CTR_REQ == 1
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{color: 'green'}}>Upload</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {arrival[17].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+            {/* {arrival[17].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
                 {arrival[17].file.map((value, index) => {
                   return (
                     <View
@@ -1240,7 +1310,7 @@ export default function ArrivalService(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -1253,7 +1323,7 @@ export default function ArrivalService(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(17, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -1262,61 +1332,32 @@ export default function ArrivalService(props) {
                   );
                 })}
               </View>
-            )}
-            <Text style={styleSheet.label}>
-              Catering Delivey Time (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[20].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[20].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 18)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[18] ? arrival[18] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[20].checked}
-                onPress={() => setNow(18)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                editable={!arrival[20].checked}
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: arrival[20].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                multiline={true}
-                numberOfLines={2}
-                value={arrival[19]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[19] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View>
+            )} */}
+
+            <DateTimeInput
+              disabled={aService.ARS_CTR_REQ}
+              label={'Catering Delivey Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_CTR_CDT");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_CTR_CDT")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_CTR_CDT}
+              index={12}
+            />
+            <LabelledInput
+              disabled={aService.ARS_CTR_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_CTR_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_CTR_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
           </View>
           <Text style={styleSheet.label}>Water Service:</Text>
           <View
@@ -1335,108 +1376,62 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(24);
-                  var x = [...arrival];
-                  x[21] = null;
-                  x[22] = null;
-                  x[23] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_WAS_REQ: !aService.ARS_WAS_REQ, ARS_WAS_CT: "", ARS_WAS_ET: "", ARS_WAS_REM: "" })
+                  // setArrivalcheck(24);
+                  // var x = [...arrival];
+                  // x[21] = null;
+                  // x[22] = null;
+                  // x[23] = null;
+                  // setArrival(x);
                 }}>
                 <Icons
                   name={
-                    arrival[24].checked
+                    aService.ARS_WAS_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[24].checked ? 'green' : 'black'}
+                  color={aService.ARS_WAS_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[24].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[24].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 21)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[21] ? arrival[21] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[24].checked}
-                onPress={() => setNow(21)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>End Time (Local TIme)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[24].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[24].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 22)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[22] ? arrival[22] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[24].checked}
-                onPress={() => setNow(22)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                editable={!arrival[24].checked}
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: arrival[24].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                multiline={true}
-                numberOfLines={2}
-                value={arrival[23]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[23] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View>
+            <DateTimeInput
+              disabled={aService.ARS_WAS_REQ}
+              label={'Start Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_WAS_CT");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_WAS_CT")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_WAS_CT}
+              index={12}
+            />
+            <DateTimeInput
+              disabled={aService.ARS_WAS_REQ}
+              label={'End Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_WAS_ET");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_WAS_ET")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_WAS_ET}
+              index={12}
+            />
+            <LabelledInput
+              disabled={aService.ARS_WAS_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_WAS_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_WAS_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
           </View>
           <Text style={styleSheet.label}>Lavatory Service:</Text>
           <View
@@ -1455,108 +1450,56 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(28);
-                  var x = [...arrival];
-                  x[25] = null;
-                  x[26] = null;
-                  x[27] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_LAS_REQ: !aService.ARS_LAS_REQ, ARS_LAS_CT: "", ARS_LAS_ET: "", ARS_LAS_REM: "" })
                 }}>
                 <Icons
                   name={
-                    arrival[28].checked
+                    aService.ARS_LAS_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[28].checked ? 'green' : 'black'}
+                  color={aService.ARS_LAS_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[28].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[28].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 25)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[25] ? arrival[25] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[28].checked}
-                onPress={() => setNow(25)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>End Time (Local TIme)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[28].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[28].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 26)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[26] ? arrival[26] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[28].checked}
-                onPress={() => setNow(26)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                editable={!arrival[28].checked}
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: arrival[28].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                multiline={true}
-                numberOfLines={2}
-                value={arrival[27]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[27] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View>
+            <DateTimeInput
+              disabled={aService.ARS_LAS_REQ}
+              label={'Start Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_LAS_CT");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_LAS_CT")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_LAS_CT}
+              index={12}
+            />
+            <DateTimeInput
+              disabled={aService.ARS_LAS_REQ}
+              label={'End Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_LAS_ET");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_LAS_ET")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_LAS_ET}
+              index={12}
+            />
+            <LabelledInput
+              disabled={aService.ARS_LAS_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_LAS_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_LAS_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
           </View>
           <Text style={styleSheet.label}>Rubbish Service:</Text>
           <View
@@ -1575,26 +1518,46 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(31);
-                  var x = [...arrival];
-                  x[29] = null;
-                  x[30] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_RUS_REQ: !aService.ARS_RUS_REQ, ARS_RUS_CT: "", ARS_RUS_REM: "" })
                 }}>
                 <Icons
                   name={
-                    arrival[31].checked
+                    aService.ARS_RUS_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[31].checked ? 'green' : 'black'}
+                  color={aService.ARS_RUS_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <DateTimeInput
+              disabled={aService.ARS_RUS_REQ}
+              label={'Completion Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_RUS_CT");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_RUS_CT")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_RUS_CT}
+              index={12}
+            />
+            <LabelledInput
+              disabled={aService.ARS_RUS_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_RUS_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_RUS_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+            {/* <Text style={styleSheet.label}>Completion Time (Local Time)</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 disabled={arrival[31].checked}
                 style={[
@@ -1606,14 +1569,14 @@ export default function ArrivalService(props) {
                   },
                 ]}
                 onPress={() => showDatePicker('time', 29)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
+                <Text style={{ fontSize: 20, color: 'black' }}>
                   {arrival[29] ? arrival[29] : 'dd/mm/yy, -- : --'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={arrival[31].checked}
                 onPress={() => setNow(29)}
-                style={{padding: 10}}>
+                style={{ padding: 10 }}>
                 <Text
                   style={{
                     fontSize: Dimensions.get('window').width / 25,
@@ -1624,7 +1587,7 @@ export default function ArrivalService(props) {
               </TouchableOpacity>
             </View>
             <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 editable={!arrival[31].checked}
                 style={[
@@ -1644,7 +1607,7 @@ export default function ArrivalService(props) {
                   setArrival(tarrival);
                 }}
               />
-            </View>
+            </View> */}
           </View>
           {/* ---------------------------Fuel on Arriva -----------------------*/}
 
@@ -1665,119 +1628,58 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(37);
-                  var x = [...arrival];
-                  x[32] = null;
-                  x[33] = null;
-                  x[34] = null;
-                  x[35] = {value: false, file: []};
-                  x[36] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_FOA_REQ: !aService.ARS_FOA_REQ, ARS_FOA_FTAT: "", ARS_FOA_START: "", ARS_FOA_END: "", ARS_FOA_REM: "" })
                 }}>
                 <Icons
                   name={
-                    arrival[37].checked
+                    aService.ARS_FOA_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[37].checked ? 'green' : 'black'}
+                  color={aService.ARS_FOA_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>
-              Fuel Truck Arrival Time (Local Time)
-            </Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[37].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[37].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 32)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[32] ? arrival[32] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[37].checked}
-                onPress={() => setNow(32)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[37].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[37].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 33)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[33] ? arrival[33] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[37].checked}
-                onPress={() => setNow(33)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>End Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[37].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[37].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 34)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[34] ? arrival[34] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[37].checked}
-                onPress={() => setNow(34)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <DateTimeInput
+              disabled={aService.ARS_FOA_REQ}
+              label={'Fuel Truck Arrival Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_FOA_FTAT");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_FOA_FTAT")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_FOA_FTAT}
+              index={12}
+            />
+            <DateTimeInput
+              disabled={aService.ARS_FOA_REQ}
+              label={'Start Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_FOA_START");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_FOA_START")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_FOA_START}
+              index={12}
+            />
+            <DateTimeInput
+              disabled={aService.ARS_FOA_REQ}
+              label={'End Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_FOA_END");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_FOA_END")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_FOA_END}
+              index={12}
+            />
+
+
             <View
               style={{
                 flexDirection: 'row',
@@ -1790,8 +1692,8 @@ export default function ArrivalService(props) {
                 disabled={arrival[37].checked}
                 onPress={event => {
                   //onPressDocPreA(35)
-                  setuploadSection(35);
-                  refRBSheet.current.open();
+                  // setuploadSection(35);
+                  // refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -1803,11 +1705,11 @@ export default function ArrivalService(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{color: 'green'}}>Upload</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {arrival[35].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+            {/* {arrival[35].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
                 {arrival[35].file.map((value, index) => {
                   return (
                     <View
@@ -1824,7 +1726,7 @@ export default function ArrivalService(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -1837,7 +1739,7 @@ export default function ArrivalService(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(35, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -1846,29 +1748,19 @@ export default function ArrivalService(props) {
                   );
                 })}
               </View>
-            )}
-            <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                editable={!arrival[37].checked}
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: arrival[37].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                multiline={true}
-                numberOfLines={2}
-                value={arrival[36]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[36] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View>
+            )} */}
+            <LabelledInput
+              disabled={aService.ARS_FOA_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_FOA_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_FOA_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
           </View>
           {/* ---------------------------Towing Service -----------------------*/}
           <Text style={styleSheet.label}>Towing Service:</Text>
@@ -1888,87 +1780,45 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(42);
-                  var x = [...arrival];
-                  //x[34]=null;
-                  x[38] = null;
-                  x[39] = null;
-                  x[40] = {value: false, file: []};
-                  x[41] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_TOS_REQ: !aService.ARS_TOS_REQ, ARS_TOS_START: "", ARS_TOS_END: "", ARS_TOS_REM: "" })
                 }}>
                 <Icons
                   name={
-                    arrival[42].checked
+                    aService.ARS_TOS_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[42].checked ? 'green' : 'black'}
+                  color={aService.ARS_TOS_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Start Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[42].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[42].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 38)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[38] ? arrival[38] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[42].checked}
-                onPress={() => setNow(38)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styleSheet.label}>End Time (Local Time)</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity
-                disabled={arrival[42].checked}
-                style={[
-                  styleSheet.picker,
-                  {
-                    backgroundColor: arrival[42].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                onPress={() => showDatePicker('time', 39)}>
-                <Text style={{fontSize: 20, color: 'black'}}>
-                  {arrival[39] ? arrival[39] : 'dd/mm/yy, -- : --'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={arrival[42].checked}
-                onPress={() => setNow(39)}
-                style={{padding: 10}}>
-                <Text
-                  style={{
-                    fontSize: Dimensions.get('window').width / 25,
-                    color: 'green',
-                  }}>
-                  Time Now
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <DateTimeInput
+              disabled={aService.ARS_TOS_REQ}
+              label={'Start Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_TOS_START");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_TOS_START")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_TOS_START}
+              index={12}
+            />
+            <DateTimeInput
+              disabled={aService.ARS_TOS_REQ}
+              label={'End Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_TOS_END");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_TOS_END")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_TOS_END}
+              index={12}
+            />
+
             <View
               style={{
                 flexDirection: 'row',
@@ -1981,8 +1831,8 @@ export default function ArrivalService(props) {
                 disabled={arrival[42].checked}
                 //onPress={event => onPressDocPreA(40)}
                 onPress={() => {
-                  setuploadSection(40);
-                  refRBSheet.current.open();
+                  // setuploadSection(40);
+                  // refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -1994,11 +1844,11 @@ export default function ArrivalService(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{color: 'green'}}>Upload</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {arrival[40].file.length > 0 && (
-              <View style={{marginBottom: 20}}>
+            {/* {arrival[40].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
                 {arrival[40].file.map((value, index) => {
                   return (
                     <View
@@ -2015,7 +1865,7 @@ export default function ArrivalService(props) {
                         ...Platform.select({
                           ios: {
                             shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
+                            shadowOffset: { width: 0, height: 2 },
                             shadowOpacity: 0.8,
                             shadowRadius: 2,
                           },
@@ -2028,7 +1878,7 @@ export default function ArrivalService(props) {
                       <TouchableOpacity
                         onPress={() => removeFilePreA(40, index)}>
                         <Icons
-                          style={{color: 'green', marginLeft: 10}}
+                          style={{ color: 'green', marginLeft: 10 }}
                           name="close"
                           size={30}
                         />
@@ -2037,29 +1887,19 @@ export default function ArrivalService(props) {
                   );
                 })}
               </View>
-            )}
-            <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: arrival[42].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                editable={!arrival[42].checked}
-                multiline={true}
-                numberOfLines={2}
-                value={arrival[41]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[41] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View>
+            )} */}
+            <LabelledInput
+              disabled={aService.ARS_TOS_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_TOS_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_TOS_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
           </View>
 
           {/* ---------------------------Overnight Bay-----------------------*/}
@@ -2080,44 +1920,270 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setArrivalcheck(44);
-                  var x = [...arrival];
-                  x[43] = null;
-                  setArrival(x);
+                  setaService({ ...aService, ARS_OVB_REQ: !aService.ARS_OVB_REQ, ARS_OVB_NUMBER: "" })
                 }}>
                 <Icons
                   name={
-                    arrival[44].checked
+                    aService.ARS_OVB_REQ == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[44].checked ? 'green' : 'black'}
+                  color={aService.ARS_OVB_REQ == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-            <Text style={styleSheet.label}>Number</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                editable={!arrival[44].checked}
-                style={[
-                  styleSheet.input,
-                  {
-                    backgroundColor: arrival[44].checked
-                      ? 'rgba(0,0,0,0.1)'
-                      : 'white',
-                  },
-                ]}
-                value={arrival[43]}
-                onChangeText={text => {
-                  var tarrival = [...arrival];
-                  tarrival[43] = text;
-                  setArrival(tarrival);
-                }}
-              />
-            </View>
+            <LabelledInput
+              disabled={aService.ARS_OVB_REQ}
+              label={'Number'} //mark
+              data={aService.ARS_OVB_NUMBER}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_OVB_NUMBER: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
           </View>
+
+          {/* ---------------------------Catering Equipment Cleaning-----------------------*/}
+
+          <Text style={styleSheet.label}>Catering Equipment Cleaning:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_CEC_REQ: !aService.ARS_CEC_REQ, ARS_CEC_REM: "" })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_CEC_REQ == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_CEC_REQ == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
+              }}>
+              <Text style={styleSheet.label}>Photo (if required)</Text>
+              <TouchableOpacity
+                disabled={aService.ARS_CEC_REQ ? true : true}
+                //onPress={event => onPressDocPreA(40)}
+                onPress={() => {
+                  // setuploadSection(40);
+                  // refRBSheet.current.open();
+                }}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                  backgroundColor: aService.ARS_CEC_REQ == 1
+                    ? 'rgba(0,0,0,0.1)'
+                    : 'white',
+                }}>
+                <Text style={{ color: 'green' }}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+            {/* {arrival[40].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
+                {arrival[40].file.map((value, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 16,
+                        padding: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 20,
+                        marginHorizontal: 5,
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.8,
+                            shadowRadius: 2,
+                          },
+                          android: {
+                            elevation: 3,
+                          },
+                        }),
+                      }}>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
+                      <TouchableOpacity
+                        onPress={() => removeFilePreA(40, index)}>
+                        <Icons
+                          style={{ color: 'green', marginLeft: 10 }}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
+            )} */}
+            <LabelledInput
+              disabled={aService.ARS_CEC_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_CEC_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_CEC_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
+
+          {/* ---------------------------Laundry Cleaning-----------------------*/}
+
+          <Text style={styleSheet.label}>Laundry Cleaning:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_LC_NR: !aService.ARS_LC_NR, ARS_LC_REM: "" })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_LC_REQ == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_LC_REQ == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
+              }}>
+              <Text style={styleSheet.label}>Photo (if required)</Text>
+              <TouchableOpacity
+                disabled={aService.ARS_LC_REQ ? true : true}
+                //onPress={event => onPressDocPreA(40)}
+                onPress={() => {
+                  // setuploadSection(40);
+                  // refRBSheet.current.open();
+                }}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                  backgroundColor: aService.ARS_LC_REQ == 1
+                    ? 'rgba(0,0,0,0.1)'
+                    : 'white',
+                }}>
+                <Text style={{ color: 'green' }}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+            {/* {arrival[40].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
+                {arrival[40].file.map((value, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 16,
+                        padding: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 20,
+                        marginHorizontal: 5,
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.8,
+                            shadowRadius: 2,
+                          },
+                          android: {
+                            elevation: 3,
+                          },
+                        }),
+                      }}>
+                      <Text style={styleSheet.imgName}>{value.name}</Text>
+                      <TouchableOpacity
+                        onPress={() => removeFilePreA(40, index)}>
+                        <Icons
+                          style={{ color: 'green', marginLeft: 10 }}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
+            )} */}
+            <LabelledInput
+              disabled={aService.ARS_LC_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_LC_REM}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_LC_REM: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
+
 
           {/* ---------------------------Crew Movement	-----------------------*/}
 
@@ -2131,7 +2197,7 @@ export default function ArrivalService(props) {
               marginVertical: 10,
             }}>
             <DateTimeInput
-              label={'Crew Departed from Aircraft (Local Time)'}
+              label={'Left Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePicker('time', 45);
               }}
@@ -2214,21 +2280,21 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 onPress={() => addCrewMovement(true)}
                 style={[styleSheet.button]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Movement
                 </Text>
               </TouchableOpacity>
             </View>
             {arrival[62].map((data, index) => {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => removeCrewMovement(index)}>
@@ -2253,7 +2319,7 @@ export default function ArrivalService(props) {
                     index={62}
                   />
                   <DateTimeInput
-                    label={'Crew Departed from Terminal (Local Time)'}
+                    label={'Left Terminal (Local Time)'}
                     showDatePickerPostDepart={() => {
                       showDatePicker('time', 62, index, 'departed');
                     }}
@@ -2266,7 +2332,7 @@ export default function ArrivalService(props) {
                     index={index}
                   />
                   <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                       style={styleSheet.input}
                       multiline={true}
@@ -2307,11 +2373,11 @@ export default function ArrivalService(props) {
               backgroundColor: '#000',
             },
           }}>
-          <View style={{flex: 1, paddingLeft: 20}}>
-            <View style={{flex: 1}}>
-              <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+          <View style={{ flex: 1, paddingLeft: 20 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: 'black', fontSize: 22 }}>Upload Image</Text>
             </View>
-            <View style={{flex: 1.5, flexDirection: 'column'}}>
+            <View style={{ flex: 1.5, flexDirection: 'column' }}>
               <TouchableOpacity
                 onPress={() => getImage(false)}
                 style={{
@@ -2320,7 +2386,7 @@ export default function ArrivalService(props) {
                   justifyContent: 'flex-start',
                 }}>
                 <Icons name="camera-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                   Upload from Camera
                 </Text>
               </TouchableOpacity>
@@ -2333,7 +2399,7 @@ export default function ArrivalService(props) {
                   justifyContent: 'flex-start',
                 }}>
                 <Icons name="image-outline" size={25} color={'black'} />
-                <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                   Upload from Gallery
                 </Text>
               </TouchableOpacity>
@@ -2350,7 +2416,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
+  imgName: { color: 'black', fontSize: 12, fontWeight: '600' },
   checkbox: {
     width: 40,
     height: 40,

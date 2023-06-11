@@ -8,7 +8,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -20,12 +20,12 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import TakeCamera from '../subcomponents/Forms/takecamera';
-import {firebase} from '@react-native-firebase/functions';
-import {ActivityIndicator} from 'react-native';
+import { firebase } from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import s from '../subcomponents/Forms/FlightPreparation/form.styles';
 
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export default function PreArrival(props) {
   const FUID = props.route.params.UID;
@@ -34,26 +34,33 @@ export default function PreArrival(props) {
   const pTransport = useRef();
   const cTransport = useRef();
   const cHotel = useRef();
+  const [pacheck, setpacheck] = useState({ "CREATED_BY": "", "CREATED_DATE": "", "FUID": "", "LAST_UPDATE": "", "PAC_CER": 0, "PAC_CER_REM": "", "PAC_CHA": 0, "PAC_CHA_REM": "", "PAC_CHNR": null, "PAC_CTA": 0, "PAC_CTA_REM": "", "PAC_CTNR": null, "PAC_IAS": 0, "PAC_IAS_REM": "", "PAC_ICAI": 0, "PAC_ICAI_REM": "", "PAC_ICC": 0, "PAC_ICC_REM": "", "PAC_IFBO": 0, "PAC_IFBO_REM": "", "PAC_IHA": 0, "PAC_IHA_REM": "", "PAC_IRP": 0, "PAC_IRP_REM": "", "PAC_PAGD": 0, "PAC_PAGD_REM": "", "PAC_PER": 0, "PAC_PER_REM": "Pax entry", "PAC_PHA": 0, "PAC_PHA_REM": "", "PAC_PHNR": 0, "PAC_PRA": 0, "PAC_PRA_REM": "", "PAC_PTA": 0, "PAC_PTA_REM": "", "PAC_PTNR": 0, "PAC_UAGD": 0, "STATUS": 0, "UID": "", "UPDATE_BY": "" })
+
+  const [papaxHotel, setpapaxHotel] = useState([]);
+  const [pacrewHotel, setpacrewHotel] = useState([]);
+  const [papaxTransport, setpapaxTransport] = useState([]);
+  const [pacrewTransport, setpacrewTransport] = useState([]);
+
   const [checkList, setChecklist] = useState([
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, file: [], remarks: ''},
-    {checked: false, remarks: ''},
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, file: [], remarks: '' },
+    { checked: false, remarks: '' },
 
     [], //12
     [],
     [],
     [],
-    {checked: false, remarks: ''}, //16
-    {checked: false, remarks: ''}, //17
+    { checked: false, remarks: '' }, //16
+    { checked: false, remarks: '' }, //17
   ]);
   const refRBSheet = useRef();
   //upload funcs
@@ -80,6 +87,7 @@ export default function PreArrival(props) {
         var res = packet.Table[0];
         if (res) {
           console.log(res, 'Actual');
+          setpacheck(res)
           var x = checkList;
           x[0].checked = res.PAC_CER == 0 ? false : true;
           x[0].remarks = res.PAC_CER_REM == '""' ? '' : res.PAC_CER_REM;
@@ -115,7 +123,7 @@ export default function PreArrival(props) {
           setcrewactivesections(res.PAC_CTNR == 0 ? false : true);
           setcrewhotelactivesections(res.PAC_CHNR == 0 ? false : true);
           setuid(res.UID);
-          console.log(x);
+          // console.log(x);
         } else {
           console.log(res, 'Actual');
           setuid('');
@@ -138,40 +146,23 @@ export default function PreArrival(props) {
       .then(response => {
         var packet = JSON.parse(response.data.body);
         var res = packet.Table;
-        // console.log(res);
+        console.log(res);
         if (res.length > 0) {
-          var y = checkList;
-          y[13] = [];
-          y[15] = [];
+          var paxHotelArr = [];
+          var crewHotelArr = [];
           res.forEach((val, index) => {
-            if (val.PCH_TYPE == 'Pax       ') {
-              y[13].push({
-                name: val.PCH_HN.trim().replace('""', ''),
-                location: val.PCH_HL.trim().replace('""', ''),
-                hotelMap: {value: null, file: []},
-                transportTime: val.PCH_TT,
-                remarks: val.PCH_REM.trim().replace('""', ''),
-                type: val.PCH_TYPE,
-                UID: val.UID,
-              });
+            val.PCH_DATE_CHECKIN = mConvert(val.PCH_DATE_CHECKIN, 'date');
+            val.PCH_DATE_CHECKOUT = mConvert(val.PCH_DATE_CHECKOUT, 'date');
+            if (val.PCH_TYPE == 'Pax') {
+              paxHotelArr.push(val);
             } else {
-              y[15].push({
-                name: val.PCH_HN.trim().replace('""', ''),
-                location: val.PCH_HL.trim().replace('""', ''),
-                hotelMap: {value: null, file: []},
-                transportTime: val.PCH_TT,
-                remarks: val.PCH_REM.trim().replace('""', ''),
-                type: val.PCH_TYPE,
-                UID: val.UID,
-              });
+              crewHotelArr.push(val);
             }
           });
-          pHotel.current = y[13];
-          cHotel.current = y[15];
-          console.log(y[15]);
-          setChecklist([...y]);
+          setpapaxHotel([...paxHotelArr]);
+          setpacrewHotel([...crewHotelArr]);
         } else {
-          console.log(checkList[13], checkList[15]);
+          // console.log(checkList[13], checkList[15]);
         }
       })
       .catch(error => {
@@ -189,38 +180,23 @@ export default function PreArrival(props) {
         //get pax & crew transport
         var packet = JSON.parse(response.data.body);
         var res = packet.Table;
-        // console.log(res);
+        console.log(res);
         if (res.length > 0) {
-          var y = checkList;
-          y[12] = [];
-          y[14] = [];
+          var paxTransArr = [];
+          var crewTransArr = [];
           res.forEach((val, index) => {
             // console.log(val.PCT_TYPE);
-            if (val.PCT_TYPE == 'Pax       ') {
-              y[12].push({
-                transportTime: val.PCT_STAT.trim().replace('""', ''),
-                name: val.PCT_DN.trim().replace('""', ''),
-                number: val.PCT_DCN.trim().replace('""', ''),
-                remarks: val.PCT_REM.trim().replace('""', ''),
-                type: val.PCT_TYPE,
-                UID: val.UID,
-              });
+            if (val.PCT_TYPE == 'Pax') {
+
+              paxTransArr.push(val);
             } else {
-              y[14].push({
-                transportTime: val.PCT_STAT.trim().replace('""', ''),
-                name: val.PCT_DN.trim().replace('""', ''),
-                number: val.PCT_DCN.trim().replace('""', ''),
-                remarks: val.PCT_REM.trim().replace('""', ''),
-                type: val.PCT_TYPE,
-                UID: val.UID,
-              });
+              crewTransArr.push(val);
             }
           });
-          pTransport.current = y[12];
-          cTransport.current = y[14];
-          setChecklist([...y]);
+          setpapaxTransport([...paxTransArr]);
+          setpacrewTransport([...crewTransArr]);
         } else {
-          console.log(checkList[12], checkList[14]);
+          // console.log(checkList[12], checkList[14]);
         }
       })
       .catch(error => {
@@ -228,8 +204,8 @@ export default function PreArrival(props) {
         console.log(error, 'Function error');
       });
   }, []);
-  const showDatePicker = (type, index, pos) => {
-    currentPicker.current = [index, pos];
+  const showDatePicker = (type, index, arr, pos) => {
+    currentPicker.current = [index, arr, pos];
     setMode(type);
     setDatePickerVisibility(true);
   };
@@ -237,30 +213,75 @@ export default function PreArrival(props) {
     setDatePickerVisibility(false);
   };
   const handleConfirm = date => {
-    // console.log('A date has been picked: ', date);
-    var tcheckList = [...checkList];
-    tcheckList[currentPicker.current[0]][
-      currentPicker.current[1]
-    ].transportTime = tConvert(
-      new Date(date).toLocaleString('en-US', {
-        hour12: false,
-      }),
-    );
-    console.log(
-      'A date has been picked: ',
-      new Date(date).toLocaleString('en-US', {
-        hour12: false,
-      }),
-    );
-    setChecklist(tcheckList);
+    switch (currentPicker.current[1]) {
+      case 'papaxTransport':
+        var tcheckList = [...papaxTransport];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpapaxTransport([...tcheckList]); break;
+      case 'papaxHotel':
+        var tcheckList = [...papaxHotel];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpapaxHotel([...tcheckList]); break;
+      case 'pacrewHotel':
+        var tcheckList = [...pacrewHotel];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpacrewHotel([...tcheckList]); break;
+      case 'pacrewTransport':
+        var tcheckList = [...pacrewTransport];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpacrewTransport([...tcheckList]); break;
+    }
     hideDatePicker();
   };
   const tConvert = datetime => {
+
     var date = datetime.split(',')[0].split('/');
     var time24 = datetime.split(', ')[1];
     var time = time24.split(':');
+    if (mode == 'date') {
+      return (
+        datetime.split(',')[0]
+      );
+    }
     return (
-      date[1] + '/' + date[0] + '/' + date[2] + ', ' + time[0] + ':' + time[1]
+      datetime
+    );
+  };
+  const mConvert = (val, type) => {
+    var datetime = new Date(val).toLocaleString('en-US', {
+      hour12: false,
+    });
+    if (type == 'date') {
+      return (
+        datetime.split(',')[0]
+      );
+    }
+    return (
+      datetime
     );
   };
   const setNow = (index, pos) => {
@@ -288,20 +309,19 @@ export default function PreArrival(props) {
   const getFeedback = index => {
     setvFeedback(true);
     currentFeedback.current = index;
-    console.log(checkList[currentFeedback.current]);
+    // console.log(checkList[currentFeedback.current]);
   };
   const onSubmitFeedback = text => {
     var index = currentFeedback.current;
-    var tcheckList = [...checkList];
-    tcheckList[index].remarks = text;
-    setChecklist(tcheckList);
-    console.log(tcheckList);
+    // var tcheckList = [...checkList];
+    // tcheckList[index].remarks = text;
+    // setChecklist(tcheckList);
+    // console.log(tcheckList);
+    setpacheck({ ...pacheck, [index]: text })
     setvFeedback(false);
   };
   const removeFeedback = index => {
-    var tcheckList = [...checkList];
-    tcheckList[index].remarks = '';
-    setChecklist(tcheckList);
+    setpacheck({ ...pacheck, [index]: '' })
   };
   const onPressDocPreA = async (index, pos) => {
     try {
@@ -317,13 +337,13 @@ export default function PreArrival(props) {
           setloading(false);
           var tcheckList = [...checkList];
           if (pos != undefined) {
-            console.log(tcheckList[index][pos].hotelMap.file);
+            // console.log(tcheckList[index][pos].hotelMap.file);
             tcheckList[index][pos].hotelMap.file.push({
               name: res.name,
               base64: 'data:' + res.type + ';base64,' + encoded,
             });
           } else {
-            console.log('pos', pos);
+            // console.log('pos', pos);
             tcheckList[index].file.push({
               name: res.name,
               base64: 'data:' + res.type + ';base64,' + encoded,
@@ -348,90 +368,101 @@ export default function PreArrival(props) {
     }
   };
   const addTransport = () => {
-    var tcheckList = [...checkList];
-    tcheckList[12] = [
-      ...checkList[12],
-      {
-        transportTime: null,
-        name: null,
-        number: null,
-        remarks: null,
-        type: 'Pax',
-      },
-    ];
-    setChecklist(tcheckList);
+    const email = auth().currentUser.email;
+    setpapaxTransport([...papaxTransport,
+    { "CREATED_BY": email, "CREATED_DATE": new Date().toDateString(), "FUID": FUID, "LAST_UPDATE": "", "PCT_ADDRESS": "", "PCT_DCN": "", "PCT_DN": "", "PCT_DOD_ADDRESS": "", "PCT_DOD_LOCATION": "", "PCT_DOD_NR": 0, "PCT_LEAD_NAME": "", "PCT_NR": 0, "PCT_PASSENGER_NO": 0, "PCT_PICKUP_LOCATION": "", "PCT_REM": "", "PCT_SPT": null, "PCT_STAT": "", "PCT_TYPE": "Pax", "PCT_VEHICLE_NO": "", "PCT_VEHICLE_TYPE": "", "STATUS": 0, "UID": uid, "UPDATE_BY": email }]);
+    // var tcheckList = [...checkList];
+    // tcheckList[12] = [
+    //   ...checkList[12],
+    //   {
+    //     transportTime: null,
+    //     name: null,
+    //     number: null,
+    //     remarks: null,
+    //     type: 'Pax',
+    //   },
+    // ];
+    // setChecklist(tcheckList);
   };
   const addTransportCrew = () => {
-    var tcheckList = [...checkList];
-    tcheckList[14] = [
-      ...checkList[14],
-      {
-        transportTime: null,
-        name: null,
-        number: null,
-        remarks: null,
-        type: 'Crew',
-      },
-    ];
-    setChecklist(tcheckList);
+    const email = auth().currentUser.email;
+    setpacrewTransport([...pacrewTransport,
+    { "CREATED_BY": email, "CREATED_DATE": new Date().toDateString(), "FUID": FUID, "LAST_UPDATE": "", "PCT_ADDRESS": "", "PCT_DCN": "", "PCT_DN": "", "PCT_DOD_ADDRESS": "", "PCT_DOD_LOCATION": "", "PCT_DOD_NR": 0, "PCT_LEAD_NAME": "", "PCT_NR": 0, "PCT_PASSENGER_NO": 0, "PCT_PICKUP_LOCATION": "", "PCT_REM": "", "PCT_SPT": null, "PCT_STAT": "", "PCT_TYPE": "Crew", "PCT_VEHICLE_NO": "", "PCT_VEHICLE_TYPE": "", "STATUS": 0, "UID": uid, "UPDATE_BY": email }]);
+
+    // var tcheckList = [...checkList];
+    // tcheckList[14] = [
+    //   ...checkList[14],
+    //   {
+    //     transportTime: null,
+    //     name: null,
+    //     number: null,
+    //     remarks: null,
+    //     type: 'Crew',
+    //   },
+    // ];
+    // setChecklist(tcheckList);
   };
 
   //here
   const [addedimagepaxhotel, setaddedimagepaxhotel] = useState([]);
 
   const addHotel = () => {
-    var tcheckList = [...checkList];
-    tcheckList[13] = [
-      ...checkList[13],
-      {
-        name: null,
-        location: null,
-        hotelMap: {value: null, file: []},
-        time: null,
-        remarks: null,
-        type: 'Pax',
-      },
-    ];
-    setChecklist(tcheckList);
+    const email = auth().currentUser.email;
+    setpapaxHotel([...papaxHotel,
+    { "CREATED_BY": email, "CREATED_DATE": new Date().toDateString(), "FUID": FUID, "LAST_UPDATE": "", "PCH_CONTACT_NO": "", "PCH_DATE_CHECKIN": "", "PCH_DATE_CHECKOUT": "", "PCH_HL": "", "PCH_HN": "", "PCH_NR": 0, "PCH_REM": "", "PCH_TT": "", "PCH_TYPE": "Pax", "STATUS": 0, "UID": uid, "UPDATE_BY": email }]);
+
+    // var tcheckList = [...checkList];
+    // tcheckList[13] = [
+    //   ...checkList[13],
+    //   {
+    //     name: null,
+    //     location: null,
+    //     hotelMap: { value: null, file: [] },
+    //     time: null,
+    //     remarks: null,
+    //     type: 'Pax',
+    //   },
+    // ];
+    // setChecklist(tcheckList);
   };
   const addHotelCrew = () => {
-    var tcheckList = [...checkList];
-    tcheckList[15] = [
-      ...checkList[15],
-      {
-        name: null,
-        location: null,
-        hotelMap: {value: null, file: []},
-        time: null,
-        remarks: null,
-        type: 'Crew',
-      },
-    ];
-    setChecklist(tcheckList);
+    const email = auth().currentUser.email;
+    setpapaxHotel([...papaxHotel,
+    { "CREATED_BY": email, "CREATED_DATE": new Date().toDateString(), "FUID": FUID, "LAST_UPDATE": "", "PCH_CONTACT_NO": "", "PCH_DATE_CHECKIN": "", "PCH_DATE_CHECKOUT": "", "PCH_HL": "", "PCH_HN": "", "PCH_NR": 0, "PCH_REM": "", "PCH_TT": "", "PCH_TYPE": "Crew", "STATUS": 0, "UID": uid, "UPDATE_BY": email }]);
+
+    // var tcheckList = [...checkList];
+    // tcheckList[15] = [
+    //   ...checkList[15],
+    //   {
+    //     name: null,
+    //     location: null,
+    //     hotelMap: { value: null, file: [] },
+    //     time: null,
+    //     remarks: null,
+    //     type: 'Crew',
+    //   },
+    // ];
+    // setChecklist(tcheckList);
   };
   const onRemoveService = index => {
-    var service = [...checkList];
-    service[12].splice(index, 1);
-    setChecklist(service);
+    var service = [...papaxTransport];
+    service.splice(index, 1);
+    setpapaxTransport(service);
   };
   const onRemoveServiceCrew = index => {
-    var service = [...checkList];
-    service[14].splice(index, 1);
-    setChecklist(service);
+    var service = [...pacrewTransport];
+    service.splice(index, 1);
+    setpacrewTransport(service);
   };
   const onRemoveHotel = index => {
-    console.log(index);
-    var service = [...checkList];
-    console.log(service[13]);
-    service[13].splice(index, 1);
-    console.log(checkList[13]);
-
-    setChecklist([...service]);
+    var service = [...papaxHotel];
+    service.splice(index, 1);
+    setpapaxHotel(service);
   };
   const onRemoveHotelCrew = index => {
-    var service = [...checkList];
-    service[15].splice(index, 1);
-    setChecklist(service);
+    var service = [...pacrewHotel];
+    service.splice(index, 1);
+    setpacrewHotel(service);
   };
   const removeFilePreA = (arrayIndex, index, pos) => {
     var tcheckList = [...checkList];
@@ -452,13 +483,13 @@ export default function PreArrival(props) {
         setloading(false);
         var tcheckList = [...checkList];
         if (pos != undefined) {
-          console.log(tcheckList[index][pos].hotelMap.file);
+          // console.log(tcheckList[index][pos].hotelMap.file);
           tcheckList[index][pos].hotelMap.file.push({
             name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
             base64: 'data:' + res.type + ';base64,' + encoded,
           });
         } else {
-          console.log('pos', pos);
+          // console.log('pos', pos);
           tcheckList[index].file.push({
             name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
             base64: 'data:' + res.type + ';base64,' + encoded,
@@ -474,7 +505,7 @@ export default function PreArrival(props) {
   };
 
   const getImage = async type => {
-    console.log('HERE', uploadSection);
+    // console.log('HERE', uploadSection);
     var options = {
       mediaType: 'image',
       includeBase64: false,
@@ -528,56 +559,31 @@ export default function PreArrival(props) {
 
     const email = auth().currentUser.email;
     var payload = {
-      PAC_CER: x[0].checked == true ? 1 : 0,
-      PAC_CER_REM: x[0].remarks == '' ? '""' : x[0].remarks,
-      PAC_PER: x[1].checked == true ? 1 : 0,
-      PAC_PER_REM: x[1].remarks == '' ? '""' : x[1].remarks,
-      PAC_CTA: x[2].checked == true ? 1 : 0,
-      PAC_CTA_REM: x[2].remarks == '' ? '""' : x[2].remarks,
-      PAC_PTA: x[3].checked == true ? 1 : 0,
-      PAC_PTA_REM: x[3].remarks == '' ? '""' : x[3].remarks,
-      PAC_CHA: x[16].checked == true ? 1 : 0,
-      PAC_CHA_REM: x[16].remarks == '' ? '""' : x[16].remarks,
-      PAC_PHA: x[17].checked == true ? 1 : 0,
-      PAC_PHA_REM: x[17].remarks == '' ? '""' : x[17].remarks,
-      PAC_IRP: x[4].checked == true ? 1 : 0,
-      PAC_IRP_REM: x[4].remarks == '' ? '""' : x[4].remarks,
-      PAC_IFBO: x[5].checked == true ? 1 : 0,
-      PAC_IFBO_REM: x[5].remarks == '' ? '""' : x[5].remarks,
-      PAC_IHA: x[6].checked == true ? 1 : 0,
-      PAC_IHA_REM: x[6].remarks == '' ? '""' : x[6].remarks,
-      PAC_ICAI: x[7].checked == true ? 1 : 0,
-      PAC_ICAI_REM: x[7].remarks == '' ? '""' : x[7].remarks,
-      PAC_IAS: x[8].checked == true ? 1 : 0,
-      PAC_IAS_REM: x[8].remarks == '' ? '""' : x[8].remarks,
-      PAC_ICC: x[9].checked == true ? 1 : 0,
-      PAC_ICC_REM: x[9].remarks == '' ? '""' : x[9].remarks,
-      PAC_PAGD: x[10].checked == true ? 1 : 0,
-      PAC_PAGD_REM: x[10].remarks == '' ? '""' : x[10].remarks,
-      PAC_PRA: x[11].checked == true ? 1 : 0,
-      PAC_PRA_REM: x[11].remarks == '' ? '""' : x[11].remarks,
-      PAC_PTNR: paxactivesections == true ? 1 : 0,
-      PAC_PHNR: paxhotelactivesections == true ? 1 : 0,
-      PAC_CTNR: crewactivesections == true ? 1 : 0,
-      PAC_CHNR: crewhotelactivesections == true ? 1 : 0,
+      ...pacheck,
       FUID: FUID,
       UID: uid,
       UPDATE_BY: email,
       STATUS: '0',
     };
 
-    // console.log(payload);
-
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable('updateFlightModule?module=PostPreArrivalChecklist')(
-        JSON.stringify(payload),
-      )
-      .then(response => {
+    console.log(payload);
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(payload)
+    };
+    fetch(
+      'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreArrivalChecklist',
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
         Alert.alert('Success');
         setcallLoad(false);
-        console.log(response);
+        console.log(result);
       })
       .catch(error => {
         Alert.alert('Error in updation');
@@ -585,124 +591,104 @@ export default function PreArrival(props) {
         console.log(error, 'Function error');
       });
 
-    checkList[13].map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewHotel')(
-          JSON.stringify({
-            PCH_HN: val.name ? val.name : '""',
-            PCH_HL: val.location ? val.location : '""',
-            PCH_TT: val.transportTime ? val.transportTime : '""',
-            PCH_REM: val.remarks ? val.remarks : '""',
-            PCH_TYPE: val.type ? val.type : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
-        )
-        .then(response => {
-          // Alert.alert('Success');
-          // setcallLoad(false);
-          console.log(response);
+
+    papaxHotel.concat(pacrewHotel).map(val => {
+      var requestOptions1 = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify(val)
+      };
+      fetch(
+        'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreArrivalPaxCrewHotel',
+        requestOptions1,
+      )
+        .then(response => response.text())
+        .then(result => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(result);
         })
         .catch(error => {
-          // Alert.alert('Error in updation');
-          // setcallLoad(false);
+          Alert.alert('Error in updation');
+          setcallLoad(false);
           console.log(error, 'Function error');
         });
     });
 
-    checkList[15].map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewHotel')(
-          JSON.stringify({
-            PCH_HN: val.name ? val.name : '""',
-            PCH_HL: val.location ? val.location : '""',
-            PCH_TT: val.transportTime ? val.transportTime : '""',
-            PCH_REM: val.remarks ? val.remarks : '""',
-            PCH_TYPE: val.type ? val.type : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
-        )
-        .then(response => {
-          // Alert.alert('Success');
-          // setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          // Alert.alert('Error in updation');
-          // setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
+    // firebase
+    //   .app()
+    //   .functions('asia-southeast1')
+    //   .httpsCallable('updateFlightModule?module=PostPreArrivalChecklist')(
+    //     JSON.stringify(payload),
+    //   )
+    //   .then(response => {
+    //     Alert.alert('Success');
+    //     setcallLoad(false);
+    //     console.log(response);
+    //   })
+    //   .catch(error => {
+    //     Alert.alert('Error in updation');
+    //     setcallLoad(false);
+    //     console.log(error, 'Function error');
+    //   });
+    // console.log(papaxHotel);
+    // console.log(papaxTransport);
+    // console.log(pacrewHotel);
+    // console.log(pacrewTransport);
+    // papaxHotel.concat(pacrewHotel).map(val => {
+    //   firebase
+    //     .app()
+    //     .functions('asia-southeast1')
+    //     .httpsCallable('updateFlightModule?module=PostPreArrivalPaxCrewHotel')(
+    //       JSON.stringify({
+    //         ...val,
+    //         UID: val.UID ? val.UID : '',
+    //         STATUS: 0,
+    //         FUID: FUID,
+    //         UPDATE_BY: email,
+    //       }),
+    //     )
+    //     .then(response => {
+    //       // Alert.alert('Success');
+    //       // setcallLoad(false);
+    //       console.log(response);
+    //     })
+    //     .catch(error => {
+    //       // Alert.alert('Error in updation');
+    //       // setcallLoad(false);
+    //       console.log(error, 'Function error');
+    //     });
+    // });
 
-    checkList[12].map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable(
-          'updateFlightModule?module=PostPreArrivalPaxCrewTransport',
-        )(
-          JSON.stringify({
-            PCT_STAT: val.transportTime,
-            PCT_DN: val.name,
-            PCT_DCN: val.number,
-            PCT_REM: val.remarks,
-            PCT_TYPE: val.type,
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-            UID: val.UID ? val.UID : '',
-          }),
-        )
-        .then(response => {
-          // Alert.alert('Success');
-          // setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          // Alert.alert('Error in updation');
-          // setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
 
-    checkList[14].map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable(
-          'updateFlightModule?module=PostPreArrivalPaxCrewTransport',
-        )(
-          JSON.stringify({
-            PCT_STAT: val.transportTime,
-            PCT_DN: val.name,
-            PCT_DCN: val.number,
-            PCT_REM: val.remarks,
-            PCT_TYPE: val.type,
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
-        )
-        .then(response => {
-          // Alert.alert('Success');
-          // setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          // Alert.alert('Error in updation');
-          // setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
+
+    // papaxTransport.concat(pacrewTransport).map(val => {
+    //   firebase
+    //     .app()
+    //     .functions('asia-southeast1')
+    //     .httpsCallable(
+    //       'updateFlightModule?module=PostPreArrivalPaxCrewTransport',
+    //     )(
+    //       JSON.stringify({
+    //         ...val,
+    //         STATUS: 0,
+    //         FUID: FUID,
+    //         UPDATE_BY: email,
+    //         UID: val.UID ? val.UID : '',
+    //       }),
+    //     )
+    //     .then(response => {
+    //       // Alert.alert('Success');
+    //       // setcallLoad(false);
+    //       console.log(response);
+    //     })
+    //     .catch(error => {
+    //       // Alert.alert('Error in updation');
+    //       // setcallLoad(false);
+    //       console.log(error, 'Function error');
+    //     });
+    // });
+
   };
 
   return (
@@ -724,11 +710,11 @@ export default function PreArrival(props) {
           Pre-Arrival Checklist
         </Text>
         {callLoad ? (
-          <View style={{paddingRight: 20}}>
+          <View style={{ paddingRight: 20 }}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
         ) : (
-          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+          <TouchableOpacity onPress={sendForm} style={{ marginRight: 20 }}>
             <Icons name="content-save" color="green" size={30} />
           </TouchableOpacity>
         )}
@@ -746,14 +732,14 @@ export default function PreArrival(props) {
           }
         />
 
-        <View style={{padding: 20, marginBottom: 100}}>
+        <View style={{ padding: 20, marginBottom: 100 }}>
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(0)}
+              onPress={event => setpacheck({ ...pacheck, PAC_CER: pacheck.PAC_CER ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[0].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_CER ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -761,29 +747,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[0].checked ? 'white' : 'black',
+                    color: pacheck.PAC_CER ? 'white' : 'black',
                   },
                 ]}>
                 Crew Entry Requirements
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(0)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_CER_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[0].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_CER_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[0].remarks}</Text>
+                <Text>{pacheck.PAC_CER_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(0)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_CER_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -793,11 +779,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(1)}
+              onPress={event => setpacheck({ ...pacheck, PAC_PER: pacheck.PAC_PER ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[1].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_PER ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -805,29 +791,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[1].checked ? 'white' : 'black',
+                    color: pacheck.PAC_PER ? 'white' : 'black',
                   },
                 ]}>
                 Pax Entry Requirements
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(1)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_PER_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[1].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_PER_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[1].remarks}</Text>
+                <Text>{pacheck.PAC_PER_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(1)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_PER_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -837,11 +823,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(2)}
+              onPress={event => setpacheck({ ...pacheck, PAC_CTA: pacheck.PAC_CTA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[2].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_CTA ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -849,29 +835,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[2].checked ? 'white' : 'black',
+                    color: pacheck.PAC_CTA ? 'white' : 'black',
                   },
                 ]}>
                 Crew Transport Arranged
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(2)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_CTA_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[2].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_CTA_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[2].remarks}</Text>
+                <Text>{pacheck.PAC_CTA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(2)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_CTA_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -881,11 +867,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(3)}
+              onPress={event => setpacheck({ ...pacheck, PAC_PTA: pacheck.PAC_PTA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[3].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_PTA ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -893,29 +879,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[3].checked ? 'white' : 'black',
+                    color: pacheck.PAC_PTA ? 'white' : 'black',
                   },
                 ]}>
                 Pax Transport Arranged
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(3)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_PTA_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[3].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_PTA_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[3].remarks}</Text>
+                <Text>{pacheck.PAC_PTA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(3)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_PTA_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -925,11 +911,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(16)}
+              onPress={event => setpacheck({ ...pacheck, PAC_CHA: pacheck.PAC_CHA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[16].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_CHA ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -937,29 +923,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[16].checked ? 'white' : 'black',
+                    color: pacheck.PAC_CHA ? 'white' : 'black',
                   },
                 ]}>
                 Crew Hotel Arranged
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(16)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_CHA_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[16].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_CHA_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[16].remarks}</Text>
+                <Text>{pacheck.PAC_CHA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(16)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_CHA_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -969,11 +955,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(17)}
+              onPress={event => setpacheck({ ...pacheck, PAC_PHA: pacheck.PAC_PHA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[17].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_PHA ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -981,29 +967,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[17].checked ? 'white' : 'black',
+                    color: pacheck.PAC_PHA ? 'white' : 'black',
                   },
                 ]}>
                 Pax Hotel Arranged
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(17)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_PHA_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[17].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_PHA_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[17].remarks}</Text>
+                <Text>{pacheck.PAC_PHA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(17)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_PHA_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1018,11 +1004,11 @@ export default function PreArrival(props) {
           }
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(4)}
+              onPress={event => setpacheck({ ...pacheck, PAC_IRP: pacheck.PAC_IRP ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[4].checked ? 'green' : 'white', //checkList[4].checked
+                  backgroundColor: pacheck.PAC_IRP ? 'green' : 'white', //checkList[4].checked
                 },
               ]}>
               <Text
@@ -1030,29 +1016,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[4].checked ? 'white' : 'black',
+                    color: pacheck.PAC_IRP ? 'white' : 'black',
                   },
                 ]}>
                 Informed Recieving Party
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(4)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_IRP_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[4].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_IRP_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[4].remarks}</Text>
+                <Text>{pacheck.PAC_IRP_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(4)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_IRP_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1062,11 +1048,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(5)}
+              onPress={event => setpacheck({ ...pacheck, PAC_IFBO: pacheck.PAC_IFBO ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[5].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_IFBO ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -1074,29 +1060,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[5].checked ? 'white' : 'black',
+                    color: pacheck.PAC_IFBO ? 'white' : 'black',
                   },
                 ]}>
                 Informed FBO
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(5)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_IFBO_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[5].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_IFBO_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[5].remarks}</Text>
+                <Text>{pacheck.PAC_IFBO_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(5)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_IFBO_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1106,11 +1092,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(6)}
+              onPress={event => setpacheck({ ...pacheck, PAC_IHA: pacheck.PAC_IHA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[6].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_IHA ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -1118,29 +1104,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[6].checked ? 'white' : 'black',
+                    color: pacheck.PAC_IHA ? 'white' : 'black',
                   },
                 ]}>
                 Informed Handling Agent
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(6)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_IHA_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[6].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_IHA_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[6].remarks}</Text>
+                <Text>{pacheck.PAC_IHA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(6)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_IHA_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1150,11 +1136,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(7)}
+              onPress={event => setpacheck({ ...pacheck, PAC_ICAI: pacheck.PAC_ICAI ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[7].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_ICAI ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -1162,29 +1148,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[7].checked ? 'white' : 'black',
+                    color: pacheck.PAC_ICAI ? 'white' : 'black',
                   },
                 ]}>
                 Informed Customs & Immigration
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(7)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_ICAI_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[7].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_ICAI_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[7].remarks}</Text>
+                <Text>{pacheck.PAC_ICAI_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(7)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_ICAI_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1194,11 +1180,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(8)}
+              onPress={event => setpacheck({ ...pacheck, PAC_IAS: pacheck.PAC_IAS ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[8].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_IAS ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -1206,29 +1192,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[8].checked ? 'white' : 'black',
+                    color: pacheck.PAC_IAS ? 'white' : 'black',
                   },
                 ]}>
                 Informed Airport Security
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(8)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_IAS_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[8].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_IAS_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[8].remarks}</Text>
+                <Text>{pacheck.PAC_IAS_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(8)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_IAS_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1238,11 +1224,11 @@ export default function PreArrival(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(9)}
+              onPress={event => setpacheck({ ...pacheck, PAC_ICC: pacheck.PAC_ICC ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[9].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_ICC ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -1250,29 +1236,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[9].checked ? 'white' : 'black',
+                    color: pacheck.PAC_ICC ? 'white' : 'black',
                   },
                 ]}>
                 Informed Catering Company
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(9)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_ICC_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[9].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_ICC_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[9].remarks}</Text>
+                <Text>{pacheck.PAC_ICC_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(9)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_ICC_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1288,11 +1274,11 @@ export default function PreArrival(props) {
             }}>
             <View style={styleSheet.toggleContainer}>
               <TouchableOpacity
-                onPress={event => setChecked(10)}
+                onPress={event => setpacheck({ ...pacheck, PAC_PAGD: pacheck.PAC_PAGD ? 0 : 1 })}
                 style={[
                   styleSheet.toggleButton,
                   {
-                    backgroundColor: checkList[10].checked ? 'green' : 'white',
+                    backgroundColor: pacheck.PAC_PAGD ? 'green' : 'white',
                   },
                 ]}>
                 <Text
@@ -1300,7 +1286,7 @@ export default function PreArrival(props) {
                     styleSheet.label,
                     {
                       textAlign: 'center',
-                      color: checkList[10].checked ? 'white' : 'black',
+                      color: pacheck.PAC_PAGD ? 'white' : 'black',
                     },
                   ]}>
                   Prepared Arrival GenDec
@@ -1308,12 +1294,11 @@ export default function PreArrival(props) {
               </TouchableOpacity>
             </View>
             <TouchableOpacity
-              //onPress={() => onPressDocPreA(10)}
-              onPress={() => {
-                setuploadSection(10);
-                setuploadAddedSection(false);
-                refRBSheet.current.open();
-              }}
+              // onPress={() => {
+              //   setuploadSection(10);
+              //   setuploadAddedSection(false);
+              //   refRBSheet.current.open();
+              // }}
               style={{
                 marginLeft: 10,
                 paddingVertical: 5,
@@ -1321,25 +1306,25 @@ export default function PreArrival(props) {
                 borderWidth: 1,
                 borderRadius: 8,
               }}>
-              <Text style={{color: 'green'}}>Upload</Text>
+              <Text style={{ color: 'green' }}>Upload</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(10)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_PAGD_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[10].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 5}}>
+          {pacheck.PAC_PAGD_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 5 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[10].remarks}</Text>
+                <Text>{pacheck.PAC_PAGD_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(10)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_PAGD_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1347,8 +1332,8 @@ export default function PreArrival(props) {
               </TouchableOpacity>
             </View>
           )}
-          {checkList[10].file.length > 0 && (
-            <View style={{marginBottom: 20}}>
+          {/* {checkList[10].file.length > 0 && (
+            <View style={{ marginBottom: 20 }}>
               {checkList[10].file.map((value, index) => {
                 return (
                   <View
@@ -1364,7 +1349,7 @@ export default function PreArrival(props) {
                       ...Platform.select({
                         ios: {
                           shadowColor: '#000',
-                          shadowOffset: {width: 0, height: 2},
+                          shadowOffset: { width: 0, height: 2 },
                           shadowOpacity: 0.8,
                           shadowRadius: 2,
                         },
@@ -1373,10 +1358,10 @@ export default function PreArrival(props) {
                         },
                       }),
                     }}>
-                    <Text style={{color: 'black'}}>{value.name}</Text>
+                    <Text style={{ color: 'black' }}>{value.name}</Text>
                     <TouchableOpacity onPress={() => removeFilePreA(10, index)}>
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
@@ -1385,14 +1370,14 @@ export default function PreArrival(props) {
                 );
               })}
             </View>
-          )}
+          )} */}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setChecked(11)}
+              onPress={event => setpacheck({ ...pacheck, PAC_PRA: pacheck.PAC_PRA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: checkList[11].checked ? 'green' : 'white',
+                  backgroundColor: pacheck.PAC_PRA ? 'green' : 'white',
                 },
               ]}>
               <Text
@@ -1400,29 +1385,29 @@ export default function PreArrival(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: checkList[11].checked ? 'white' : 'black',
+                    color: pacheck.PAC_PRA ? 'white' : 'black',
                   },
                 ]}>
                 In Position to Receive Aircraft
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(11)}>
+            <TouchableOpacity onPress={() => getFeedback('PAC_PRA_REM')}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
               />
             </TouchableOpacity>
           </View>
-          {checkList[11].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+          {pacheck.PAC_PRA_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{checkList[11].remarks}</Text>
+                <Text>{pacheck.PAC_PRA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(11)}>
+              <TouchableOpacity onPress={() => removeFeedback('PAC_PRA_REM')}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1431,7 +1416,7 @@ export default function PreArrival(props) {
             </View>
           )}
 
-          <Text style={[styleSheet.label, {marginTop: 20}]}>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>
             Pax Transport:
           </Text>
           <View
@@ -1445,87 +1430,262 @@ export default function PreArrival(props) {
             <View
               style={{
                 flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={() => { setpacheck({ ...pacheck, PAC_PTNR: pacheck.PAC_PTNR ? 0 : 1 }), setpapaxTransport([]) }}
+              >
+                <Icons
+                  name={
+                    pacheck.PAC_PTNR
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pacheck.PAC_PTNR ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
               <TouchableOpacity
                 onPress={addTransport}
-                disabled={paxactivesections}
+                disabled={pacheck.PAC_PTNR ? true : false}
                 style={[
                   styleSheet.button,
-                  {backgroundColor: paxactivesections ? '#80808080' : 'green'},
+                  { backgroundColor: pacheck.PAC_PTNR ? '#80808080' : 'green' },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
             </View>
-            {checkList[12].map((val, index) => {
+            {papaxTransport.map((val, index) => {
               //if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveService(index)}>
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-                  <DateTimeInput
-                    label={'Scheduled Transport Arrival Time (Local Time)'}
-                    showDatePickerPostDepart={() => {
-                      showDatePicker('time', 12, index);
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pick-up Details:
+                  </Text>
+                  <LabelledInput
+                    label={'Pickup Location'} //mark
+                    data={val.PCT_PICKUP_LOCATION}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_PICKUP_LOCATION: text };
+                      setpapaxTransport([...markers]);
                     }}
-                    setNowPostDepart={() => setNow(12, index)}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Address'} //mark
+                    data={val.PCT_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_ADDRESS: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+
+
+                  <DateTimeInput
+                    label={'Scheduled Pick-up Time (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'papaxTransport', "PCT_SPT");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...papaxTransport];
+                      tcheckList[index].PCT_SPT = x
+                      setpapaxTransport([...tcheckList]);
+                    }}
                     size={12}
                     type={'datetime'}
-                    data={checkList[12][index].transportTime}
+                    data={val.PCT_SPT}
                     index={12}
                   />
-
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Drop-off Details:
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var tcheckList = [...papaxTransport];
+                        tcheckList[index].PCT_DOD_NR = tcheckList[index].PCT_DOD_NR ? 0 : 1
+                        setpapaxTransport([...tcheckList]);
+                      }}
+                    >
+                      <Icons
+                        name={
+                          val.PCT_DOD_NR
+                            ? 'checkbox-marked-outline'
+                            : 'checkbox-blank-outline'
+                        }
+                        color={val.PCT_DOD_NR ? 'green' : 'black'}
+                        size={40}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Not Required</Text>
+                  </View>
                   <LabelledInput
-                    label={'Local Receiving Party / Driver Name'} //mark
-                    data={checkList[12][index].name}
+                    disabled={val.PCT_DOD_NR}
+                    label={'Drop-off Location'} //mark
+                    data={val.PCT_DOD_LOCATION}
                     datatype={'text'}
                     index={12}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[i][index].name = text;
-                      setChecklist(tcheckList);
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_DOD_LOCATION: text };
+                      setpapaxTransport([...markers]);
                     }}
                     multiline={false}
                     numberOfLines={1}
                   />
-
                   <LabelledInput
-                    label={'Local Receiving Party / Driver Contact Number'} //mark
-                    data={checkList[12][index].number}
+                    disabled={val.PCT_DOD_NR}
+                    label={'Address'} //mark
+                    data={val.PCT_DOD_ADDRESS}
                     datatype={'text'}
                     index={12}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[i][index].number = text;
-                      setChecklist(tcheckList);
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_DOD_ADDRESS: text };
+                      setpapaxTransport([...markers]);
                     }}
                     multiline={false}
                     numberOfLines={1}
                   />
-
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Driver Details:
+                  </Text>
                   <LabelledInput
+
+                    label={'Driver Name'} //mark
+                    data={val.PCT_DN}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_DN: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Driver Contact Number'} //mark
+                    data={val.PCT_DCN}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_DCN: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Vehicle Number'} //mark
+                    data={val.PCT_VEHICLE_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_VEHICLE_NO: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Vehicle Type'} //mark
+                    data={val.PCT_VEHICLE_TYPE}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_VEHICLE_TYPE: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pax Details:
+                  </Text>
+                  <LabelledInput
+
+                    label={'Lead Pax Name'} //mark
+                    data={val.PCT_LEAD_NAME}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_LEAD_NAME: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'No. of Pax'} //mark
+                    data={val.PCT_PASSENGER_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_PASSENGER_NO: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
                     label={'Remarks'} //mark
-                    data={checkList[12][index].remarks}
+                    data={val.PCT_REM}
                     datatype={'text'}
                     index={12}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[i][index].remarks = text;
-                      setChecklist(tcheckList);
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCT_REM: text };
+                      setpapaxTransport([...markers]);
                     }}
                     multiline={false}
                     numberOfLines={1}
@@ -1534,7 +1694,7 @@ export default function PreArrival(props) {
               );
             })}
           </View>
-          <Text style={[styleSheet.label, {marginTop: 20}]}>Pax Hotel:</Text>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>Pax Hotel:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -1546,36 +1706,57 @@ export default function PreArrival(props) {
             <View
               style={{
                 flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={() => { setpapaxHotel([]); setpacheck({ ...pacheck, PAC_PHNR: pacheck.PAC_PHNR ? 0 : 1 }) }}
+              >
+                <Icons
+                  name={
+                    pacheck.PAC_PHNR
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pacheck.PAC_PHNR ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                disabled={paxhotelactivesections}
+                disabled={pacheck.PAC_PHNR ? true : false}
                 onPress={addHotel}
                 style={[
                   styleSheet.button,
                   {
-                    backgroundColor: paxhotelactivesections
+                    backgroundColor: pacheck.PAC_PHNR
                       ? '#80808080'
                       : 'green',
                   },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Hotel
                 </Text>
               </TouchableOpacity>
             </View>
-            {checkList[13].map((val, index) => {
+            {papaxHotel.map((val, index) => {
               // if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveHotel(index)}>
@@ -1583,45 +1764,50 @@ export default function PreArrival(props) {
                     </TouchableOpacity>
                   </View>
 
-                  <>
-                    <Text style={s.label}>{'Hotel Name'}</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <TextInput
-                        style={[
-                          s.input,
-                          {
-                            backgroundColor: paxhotelactivesections
-                              ? 'rgba(0,0,0,0.1)'
-                              : 'white',
-                          },
-                        ]}
-                        value={checkList[13][index].name}
-                        multiline={false}
-                        numberOfLines={1}
-                        onChangeText={text => {
-                          var tcheckList = [...checkList];
-                          tcheckList[13][index].name = text;
-                          setChecklist(tcheckList);
-                        }}
-                      />
-                    </View>
-                  </>
-
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Hotel Details:
+                  </Text>
                   <LabelledInput
-                    label={'Hotel Location'} //mark
-                    data={checkList[13][index].location}
-                    datatype={'location'}
+                    label={'Hotel Name'} //mark
+                    data={val.PCH_HN}
+                    datatype={'text'}
                     index={13}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[13][index].location = text;
-                      setChecklist([...tcheckList]);
+                      let markers = [...papaxHotel];
+                      markers[index] = { ...markers[index], PCH_HN: text };
+                      setpapaxHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Hotel Location'} //mark
+                    data={val.PCH_HL}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxHotel];
+                      markers[index] = { ...markers[index], PCH_HL: text };
+                      setpapaxHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Hotel Contact No.'} //mark
+                    data={val.PCH_CONTACT_NO}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxHotel];
+                      markers[index] = { ...markers[index], PCH_CONTACT_NO: text };
+                      setpapaxHotel([...markers]);
                     }}
                     multiline={false}
                     numberOfLines={1}
                   />
 
-                  <TakeCamera
+                  {/* <TakeCamera
                     label={'Map of Route to Hotel'}
                     type={13}
                     uploadInitiator={() => {
@@ -1631,79 +1817,118 @@ export default function PreArrival(props) {
                       refRBSheet.current.open();
                     }}
                     removeFilePreA={(type, i) => {
-                      //console.log(type,i);
                       var x = [...checkList];
-                      //console.log(x[13][index].hotelMap.file.length);
-                      //x[13][index].hotelMap.splice(i, 1);
                       if (x[13][index].hotelMap.file.length === 1) {
                         x[13][index].hotelMap.file = [];
                       } else {
                         x[13][index].hotelMap.file.splice(i, 1);
                       }
-
-                      //console.log(x[13][index].hotelMap.file.length);
-
-                      /**
-                       * NEW STRUCTURE REQ
-                       *  NEW ARRAY FOR ATTACHED FILES
-                       */
                     }}
                     attachments={checkList[13][index].hotelMap}
                     Icon={
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
                     }
-                  />
-
-                  <DateTimeInput
-                    label={'Travel Time (Approximate)'}
-                    showDatePickerPostDepart={() => {
-                      showDatePicker('time', 13, index);
-                    }}
-                    setNowPostDepart={() => setNow(13, index)}
-                    size={12}
-                    type={'time'}
-                    data={checkList[13][index].transportTime}
-                    index={13}
-                  />
-
-                  {/* <LabelledInput
-                    label={'Remarks'} //mark
-                    data={checkList[13][index].remarks}
+                  /> */}
+                  <LabelledInput
+                    label={'Travel Time (Approximate) Hrs'} //mark
+                    data={val.PCH_TT}
                     datatype={'text'}
                     index={13}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[13][index].remarks = text;
-                      setChecklist([...tcheckList]);
+                      let markers = [...pacrewHotel];
+                      markers[index] = { ...markers[index], PCH_TT: text };
+                      setpapaxHotel([...markers]);
                     }}
-                    multiline={true}
-                    numberOfLines={2}
-                  /> */}
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TextInput
-                      style={styleSheet.input}
-                      multiline={true}
-                      placeholder="Vehicle Number, Vehicle Type, Pax Name"
-                      numberOfLines={2}
-                      value={checkList[13][index].remarks}
-                      onChangeText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[13][index].remarks = text;
-                        setChecklist(tcheckList);
-                      }}
-                    />
-                  </View>
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Booking Details:
+                  </Text>
+                  <DateTimeInput
+                    label={'Check-in Date'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('date', index, 'papaxHotel', "PCH_DATE_CHECKIN");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...papaxHotel];
+                      tcheckList[index].PCH_DATE_CHECKIN = x
+                      setpapaxHotel([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'date'}
+                    data={val.PCH_DATE_CHECKIN}
+                    index={12}
+                  />
+                  <DateTimeInput
+                    label={'Check-out Date'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('date', index, 'papaxHotel', "PCH_DATE_CHECKOUT");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...papaxHotel];
+                      tcheckList[index].PCH_DATE_CHECKOUT = x
+                      setpapaxHotel([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'date'}
+                    data={val.PCH_DATE_CHECKOUT}
+                    index={12}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Confirmation Details:
+                  </Text>
+                  <LabelledInput
+                    label={'Guest Name'} //mark
+                    data=''
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      // let markers = [...papaxHotel];
+                      // markers[index] = { ...markers[index], PCH_HL: text };
+                      // setpapaxHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Guest Name'} //mark
+                    data=''
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      // let markers = [...papaxHotel];
+                      // markers[index] = { ...markers[index], PCH_HL: text };
+                      // setpapaxHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Remarks'} //mark
+                    data={val.PCH_REM}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCH_REM: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
                 </View>
               );
               // }
             })}
           </View>
-          <Text style={[styleSheet.label, {marginTop: 20}]}>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>
             Crew Transport:
           </Text>
           <View
@@ -1714,113 +1939,27 @@ export default function PreArrival(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            {/* <View
+            <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
               <TouchableOpacity
-                onPress={event => {
-                  var x = crewactivesections;
-                  setcrewactivesections(!x);
-                  var y = [...checkList];
-                  y[14] = [
-                    {
-                      transportTime: null,
-                      name: null,
-                      number: null,
-                      remarks: null,
-                    },
-                  ];
-                  setChecklist(y);
-                }}>
+                onPress={() => { setpacrewTransport([]); setpacheck({ ...pacheck, PAC_CTNR: pacheck.PAC_CTNR ? 0 : 1 }) }}
+              >
                 <Icons
                   name={
-                    crewactivesections
+                    pacheck.PAC_CTNR
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={crewactivesections ? 'green' : 'black'}
+                  color={pacheck.PAC_CTNR ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-
-            <DateTimeInput
-              label={'Scheduled Transport Arrival Time (Local Time)'}
-              disabled={crewactivesections}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 14, 0);
-              }}
-              setNowPostDepart={() => setNow(14, 0)}
-              size={12}
-              type={'datetime'}
-              data={checkList[14][0].transportTime}
-              index={15}
-            />
-            <LabelledInput
-              label={'Driver Name'} //mark
-              disabled={crewactivesections}
-              data={checkList[14][0].name}
-              datatype={'text'}
-              index={14}
-              setText={(index, text, type, section) => {
-                var tcheckList = [...checkList];
-                tcheckList[index][0].name = text;
-                setChecklist(tcheckList);
-              }}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <LabelledInput
-              label={'Driver Contact Number'} //mark
-              disabled={crewactivesections}
-              data={checkList[14][0].number}
-              datatype={'text'}
-              index={14}
-              setText={(index, text, type, section) => {
-                var tcheckList = [...checkList];
-                tcheckList[index][0].number = text;
-                setChecklist(tcheckList);
-              }}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            {/* <LabelledInput
-              label={'Remarks'} //mark
-              disabled={crewactivesections}
-              data={checkList[14][0].remarks}
-              datatype={'text'}
-              index={14}
-              setText={(index, text, type, section) => {
-                var tcheckList = [...checkList];
-                tcheckList[index][0].remarks = text;
-                setChecklist(tcheckList);
-              }}
-              multiline={true}
-              numberOfLines={2}
-            /> 
-
-        <Text style={styleSheet.label}>Remarks</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TextInput
-                style={styleSheet.input}
-                multiline={true}
-                placeholder="Vehicle Number, Vehicle Type, Pax Name"
-                numberOfLines={2}
-                value={checkList[14][0].remarks}
-                onChangeText={text => {
-                  var tcheckList = [...checkList];
-                  tcheckList[14][0].remarks = text;
-                  setChecklist(tcheckList);
-                }}
-              />
-            </View> */}
-
             <View
               style={{
                 flexDirection: 'row',
@@ -1829,92 +1968,245 @@ export default function PreArrival(props) {
               }}>
               <TouchableOpacity
                 onPress={addTransportCrew}
-                disabled={crewactivesections}
+                disabled={pacheck.PAC_CTNR ? true : false}
                 style={[
                   styleSheet.button,
-                  {backgroundColor: crewactivesections ? '#80808080' : 'green'},
+                  { backgroundColor: pacheck.PAC_CTNR ? '#80808080' : 'green' },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
             </View>
-            {checkList[14].map((val, index) => {
+            {pacrewTransport.map((val, index) => {
               //if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveServiceCrew(index)}>
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-                  <DateTimeInput
-                    label={'Scheduled Transport Arrival Time (Local Time)'}
-                    showDatePickerPostDepart={() => {
-                      showDatePicker('time', 14, index);
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pick-up Details:
+                  </Text>
+                  <LabelledInput
+                    label={'Pickup Location'} //mark
+                    data={val.PCT_PICKUP_LOCATION}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_PICKUP_LOCATION: text };
+                      setpacrewTransport([...markers]);
                     }}
-                    setNowPostDepart={() => setNow(14, index)}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Address'} //mark
+                    data={val.PCT_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_ADDRESS: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+
+
+
+                  <DateTimeInput
+                    label={'Scheduled Pick-up Time (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'pacrewTransport', "PCT_SPT");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...pacrewTransport];
+                      tcheckList[index].PCT_SPT = x
+                      setpacrewTransport([...tcheckList]);
+                    }}
                     size={12}
                     type={'datetime'}
-                    data={checkList[14][index].transportTime}
-                    index={15}
+                    data={val.PCT_SPT}
+                    index={12}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Drop-off Details:
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var tcheckList = [...pacrewTransport];
+                        tcheckList[index].PCT_DOD_NR = tcheckList[index].PCT_DOD_NR ? 0 : 1
+                        setpacrewTransport([...tcheckList]);
+                      }}
+                    >
+                      <Icons
+                        name={
+                          val.PCT_DOD_NR
+                            ? 'checkbox-marked-outline'
+                            : 'checkbox-blank-outline'
+                        }
+                        color={val.PCT_DOD_NR ? 'green' : 'black'}
+                        size={40}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Not Required</Text>
+                  </View>
+                  <LabelledInput
+                    disabled={val.PCT_DOD_NR}
+                    label={'Drop-off Location'} //mark
+                    data={val.PCT_DOD_LOCATION}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_DOD_LOCATION: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
                   />
                   <LabelledInput
+                    disabled={val.PCT_DOD_NR}
+                    label={'Address'} //mark
+                    data={val.PCT_DOD_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_DOD_ADDRESS: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Driver Details:
+                  </Text>
+                  <LabelledInput
+
                     label={'Driver Name'} //mark
-                    data={checkList[14][index].name}
+                    data={val.PCT_DN}
                     datatype={'text'}
-                    index={14}
-                    setText={(x, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      //console.log(tcheckList[x][index].name);
-                      tcheckList[x][index].name = text;
-                      setChecklist(tcheckList);
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_DN: text };
+                      setpacrewTransport([...markers]);
                     }}
                     multiline={false}
                     numberOfLines={1}
                   />
-
                   <LabelledInput
+
                     label={'Driver Contact Number'} //mark
-                    data={checkList[14][index].number}
+                    data={val.PCT_DCN}
                     datatype={'text'}
-                    index={14}
+                    index={12}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[i][index].number = text;
-                      setChecklist(tcheckList);
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_DCN: text };
+                      setpacrewTransport([...markers]);
                     }}
                     multiline={false}
                     numberOfLines={1}
                   />
-
                   <LabelledInput
-                    label={'Remarks'} //mark
-                    data={checkList[14][index].remarks}
+
+                    label={'Vehicle Number'} //mark
+                    data={val.PCT_VEHICLE_NO}
                     datatype={'text'}
-                    index={14}
+                    index={12}
                     setText={(i, text, type, section) => {
-                      var tcheckList = [...checkList];
-                      tcheckList[i][index].remarks = text;
-                      setChecklist(tcheckList);
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_VEHICLE_NO: text };
+                      setpacrewTransport([...markers]);
                     }}
-                    multiline={true}
-                    numberOfLines={2}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Vehicle Type'} //mark
+                    data={val.PCT_VEHICLE_TYPE}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_VEHICLE_TYPE: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pax Details:
+                  </Text>
+                  <LabelledInput
+
+                    label={'Lead Pax Name'} //mark
+                    data={val.PCT_LEAD_NAME}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_LEAD_NAME: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'No. of Pax'} //mark
+                    data={val.PCT_PASSENGER_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_PASSENGER_NO: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Remarks'} //mark
+                    data={val.PCT_REM}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewTransport];
+                      markers[index] = { ...markers[index], PCT_REM: text };
+                      setpacrewTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
                   />
                 </View>
               );
             })}
           </View>
-          <Text style={[styleSheet.label, {marginTop: 20}]}>Crew Hotel:</Text>
-
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>Crew Hotel:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -1923,173 +2215,27 @@ export default function PreArrival(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            {/* <View
+            <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
               <TouchableOpacity
-                onPress={event => {
-                  var x = crewhotelactivesections;
-                  setcrewhotelactivesections(!x);
-                  var y = [...checkList];
-
-                  y[15] = [
-                    {
-                      name: null,
-                      location: null,
-                      hotelMap: {value: null, file: []},
-                      time: null,
-                      remarks: null,
-                    },
-                  ];
-                  setChecklist(y);
-                }}>
+                onPress={() => { setpacrewHotel([]); setpacheck({ ...pacheck, PAC_CHNR: pacheck.PAC_CHNR ? 0 : 1 }) }}
+              >
                 <Icons
                   name={
-                    crewhotelactivesections
+                    pacheck.PAC_CHNR
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={crewhotelactivesections ? 'green' : 'black'}
+                  color={pacheck.PAC_CHNR ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-
-            <LabelledInput
-              label={'Hotel Name'} //mark
-              disabled={crewhotelactivesections}
-              data={checkList[15][0].name}
-              datatype={'text'}
-              index={15}
-              setText={(index, text, type, section) => {
-                var tcheckList = [...checkList];
-                tcheckList[index][0].name = text;
-                setChecklist(tcheckList);
-              }}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <LabelledInput
-              label={'Hotel Location'} //mark
-              disabled={crewhotelactivesections}
-              data={checkList[15][0].location}
-              datatype={'text'}
-              index={15}
-              setText={(index, text, type, section) => {
-                var tcheckList = [...checkList];
-                tcheckList[index][0].location = text;
-                setChecklist(tcheckList);
-              }}
-              multiline={false}
-              numberOfLines={1}
-            />
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginVertical: 20,
-              }}>
-              <Text style={styleSheet.label}>Map of Route to Hotel</Text>
-              <TouchableOpacity
-                //onPress={event => onPressDocPreA(13, 0)}
-                disabled={crewhotelactivesections}
-                onPress={() => {
-                  setuploadAddedSection(false);
-                  setuploadSection(15);
-                  refRBSheet.current.open();
-                }}
-                style={{
-                  marginLeft: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  borderWidth: 1,
-                  borderRadius: 8,
-                }}>
-                <Text
-                  style={{
-                    color: crewhotelactivesections ? '#000000' : 'green',
-                  }}>
-                  Upload
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {checkList[15][0].hotelMap.file.length > 0 && (
-              <View style={{marginBottom: 20}}>
-                {checkList[15][0].hotelMap.file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: {width: 0, height: 2},
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(15, index, 0)}>
-                        <Icons
-                          style={{color: 'green', marginLeft: 10}}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-
-            <DateTimeInput
-              label={'Travel Time (Approximate)'}
-              disabled={crewhotelactivesections}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 15, 0);
-              }}
-              setNowPostDepart={() => setNow(15, 0)}
-              size={12}
-              type={'datetime'}
-              data={checkList[15][0].transportTime}
-              index={15}
-            />
-
-            <LabelledInput
-              label={'Remarks'} //mark
-              disabled={crewhotelactivesections}
-              data={checkList[15][0].remarks}
-              datatype={'remarks'}
-              index={15}
-              setText={(index, text, type, section) => {
-                var tcheckList = [...checkList];
-                tcheckList[index][0].remarks = text;
-                setChecklist(tcheckList);
-              }}
-              multiline={true}
-              numberOfLines={2}
-            /> */}
-
             <View
               style={{
                 flexDirection: 'row',
@@ -2097,166 +2243,201 @@ export default function PreArrival(props) {
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                disabled={crewhotelactivesections}
+                disabled={pacheck.PAC_CHNR ? true : false}
                 onPress={addHotelCrew}
                 style={[
-                  [
-                    styleSheet.button,
-                    {
-                      backgroundColor: crewhotelactivesections
-                        ? '#80808080'
-                        : 'green',
-                    },
-                  ],
+                  styleSheet.button,
+                  {
+                    backgroundColor: pacheck.PAC_CHNR
+                      ? '#80808080'
+                      : 'green',
+                  },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Hotel
                 </Text>
               </TouchableOpacity>
             </View>
-            {checkList[15].map((val, index) => {
-              //if (index > 0) {
+            {pacrewHotel.map((val, index) => {
+              // if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveHotelCrew(index)}>
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-                  {/* <LabelledInput
-                      label={'Hotel Name'}
-                      data={checkList[15][index].name}
-                      datatype={'text'}
-                      index={15}
-                      setText={text => {
-                        console.log(text);
-                        var tcheckList = [...checkList];
-                        tcheckList[15][index].name = text;
-                        setChecklist(tcheckList);
-                      }}
-                      multiline={false}
-                      numberOfLines={1}
-                    /> */}
-                  <Text style={styleSheet.label}>Hotel Name</Text>
-                  <TextInput
-                    style={styleSheet.input}
-                    value={checkList[15][index].name}
-                    onChangeText={text => {
-                      console.log(text);
-                      var tcheckList = [...checkList];
-                      tcheckList[15][index].name = text;
-                      setChecklist(tcheckList);
+
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Hotel Details:
+                  </Text>
+                  <LabelledInput
+                    label={'Hotel Name'} //mark
+                    data={val.PCH_HN}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewHotel];
+                      markers[index] = { ...markers[index], PCH_HN: text };
+                      setpacrewHotel([...markers]);
                     }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Hotel Location'} //mark
+                    data={val.PCH_HL}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewHotel];
+                      markers[index] = { ...markers[index], PCH_HL: text };
+                      setpacrewHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Hotel Contact No.'} //mark
+                    data={val.PCH_CONTACT_NO}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewHotel];
+                      markers[index] = { ...markers[index], PCH_CONTACT_NO: text };
+                      setpacrewHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
                   />
 
-                  {/* <LabelledInput
-                      label={'Hotel Location'}
-                      data={checkList[15][index].name}
-                      datatype={'text'}
-                      index={15}
-                      setText={text => {
-                        var tcheckList = [...checkList];
-                        tcheckList[15][index].location = text;
-                        setChecklist(tcheckList);
-                      }}
-                      multiline={false}
-                      numberOfLines={1}
-                    /> */}
-
-                  <Text style={styleSheet.label}>Hotel Location</Text>
-                  <TextInput
-                    style={styleSheet.input}
-                    value={checkList[15][index].location}
-                    onChangeText={text => {
-                      console.log(text);
-                      var tcheckList = [...checkList];
-                      tcheckList[15][index].location = text;
-                      setChecklist(tcheckList);
-                    }}
-                  />
-
-                  <TakeCamera
+                  {/* <TakeCamera
                     label={'Map of Route to Hotel'}
-                    type={15}
+                    type={13}
                     uploadInitiator={() => {
                       setuploadAddedSection(true);
                       setuploadAddedSectionindex(index);
-                      setuploadSection(15);
+                      setuploadSection(13);
                       refRBSheet.current.open();
                     }}
                     removeFilePreA={(type, i) => {
-                      //console.log(type,i);
                       var x = [...checkList];
-                      //console.log(x[13][index].hotelMap.file.length);
-                      //x[13][index].hotelMap.splice(i, 1);
-                      if (x[15][index].hotelMap.file.length === 1) {
-                        x[15][index].hotelMap.file = [];
+                      if (x[13][index].hotelMap.file.length === 1) {
+                        x[13][index].hotelMap.file = [];
                       } else {
-                        x[15][index].hotelMap.file.splice(i, 1);
+                        x[13][index].hotelMap.file.splice(i, 1);
                       }
-
-                      //console.log(x[13][index].hotelMap.file.length);
-
-                      /**
-                       * NEW STRUCTURE REQ
-                       *  NEW ARRAY FOR ATTACHED FILES
-                       */
                     }}
-                    attachments={checkList[15][index].hotelMap}
+                    attachments={checkList[13][index].hotelMap}
                     Icon={
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
                     }
+                  /> */}
+                  <LabelledInput
+                    label={'Travel Time (Approximate) Hrs'} //mark
+                    data={val.PCH_TT}
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      let markers = [...pacrewHotel];
+                      markers[index] = { ...markers[index], PCH_TT: text };
+                      setpacrewHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
                   />
 
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Booking Details:
+                  </Text>
                   <DateTimeInput
-                    label={'Travel Time (Approximate)'}
+                    label={'Check-in Date'}
                     showDatePickerPostDepart={() => {
-                      showDatePicker('time', 15, index);
+                      showDatePicker('date', index, 'pacrewHotel', "PCH_DATE_CHECKIN");
                     }}
-                    setNowPostDepart={() => setNow(15, index)}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...pacrewHotel];
+                      tcheckList[index].PCH_DATE_CHECKIN = x
+                      setpacrewHotel([...tcheckList]);
+                    }}
                     size={12}
-                    type={'datetime'}
-                    data={checkList[15][index].transportTime}
-                    index={15}
+                    type={'date'}
+                    data={val.PCH_DATE_CHECKIN}
+                    index={12}
                   />
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <TextInput
-                    style={styleSheet.input}
-                    value={checkList[15][index].remarks}
-                    onChangeText={text => {
-                      console.log(text);
-                      var tcheckList = [...checkList];
-                      tcheckList[15][index].remarks = text;
-                      setChecklist(tcheckList);
+                  <DateTimeInput
+                    label={'Check-out Date'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('date', index, 'pacrewHotel', "PCH_DATE_CHECKOUT");
                     }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...pacrewHotel];
+                      tcheckList[index].PCH_DATE_CHECKOUT = x
+                      setpacrewHotel([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'date'}
+                    data={val.PCH_DATE_CHECKOUT}
+                    index={12}
                   />
-                  {/* <LabelledInput
-                    label={'Remarks'}
-                    data={checkList[15][index].remarks}
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Confirmation Details:
+                  </Text>
+                  <LabelledInput
+                    label={'Guest Name'} //mark
+                    data=''
                     datatype={'text'}
-                    index={15}
-                    setText={text => {
-                      var tcheckList = [...checkList];
-                      tcheckList[15][index].remarks = text;
-                      setChecklist(tcheckList);
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      // let markers = [...papaxHotel];
+                      // markers[index] = { ...markers[index], PCH_HL: text };
+                      // setpapaxHotel([...markers]);
                     }}
-                    multiline={true}
-                    numberOfLines={2}
-                  /> */}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    label={'Guest Name'} //mark
+                    data=''
+                    datatype={'text'}
+                    index={13}
+                    setText={(i, text, type, section) => {
+                      // let markers = [...papaxHotel];
+                      // markers[index] = { ...markers[index], PCH_HL: text };
+                      // setpapaxHotel([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Remarks'} //mark
+                    data={val.PCH_REM}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...papaxTransport];
+                      markers[index] = { ...markers[index], PCH_REM: text };
+                      setpapaxTransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
                 </View>
               );
+              // }
             })}
           </View>
         </View>
@@ -2281,11 +2462,11 @@ export default function PreArrival(props) {
             backgroundColor: '#000',
           },
         }}>
-        <View style={{flex: 1, paddingLeft: 20}}>
-          <View style={{flex: 1}}>
-            <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+        <View style={{ flex: 1, paddingLeft: 20 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: 'black', fontSize: 22 }}>Upload Image</Text>
           </View>
-          <View style={{flex: 1.5, flexDirection: 'column'}}>
+          <View style={{ flex: 1.5, flexDirection: 'column' }}>
             <TouchableOpacity
               onPress={() => getImage(false)}
               style={{
@@ -2294,7 +2475,7 @@ export default function PreArrival(props) {
                 justifyContent: 'flex-start',
               }}>
               <Icons name="camera-outline" size={25} color={'black'} />
-              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                 Upload from Camera
               </Text>
             </TouchableOpacity>
@@ -2307,7 +2488,7 @@ export default function PreArrival(props) {
                 justifyContent: 'flex-start',
               }}>
               <Icons name="image-outline" size={25} color={'black'} />
-              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                 Upload from Gallery
               </Text>
             </TouchableOpacity>
@@ -2323,7 +2504,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
+  imgName: { color: 'black', fontSize: 12, fontWeight: '600' },
   checkbox: {
     width: 40,
     height: 40,

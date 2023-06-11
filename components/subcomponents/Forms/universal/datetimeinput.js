@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, TouchableOpacity} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import s from '../FlightPreparation/form.styles';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -25,15 +25,23 @@ const DateTimeInput = ({
   const [touchableactive, setdisabletouchable] = useState(true);
 
   const setTime = () => {
-    var x = new Date().toLocaleString('en-US', {
-      hour12: false,
-    });
+    if (type == 'date') {
+      var x = new Date().toLocaleString('en-US', {
+        hour12: false,
+      });
+      x = x.split(',')[0];
+    }
+    else {
+      var x = new Date().toLocaleString('en-US', {
+        hour12: false,
+      });
+    }
 
     if (typeof setflightdoc === 'function') {
       console.log('setflight');
       setflightdoc(x);
     } else {
-      console.log('setnow');
+      // console.log('setnow', x);
 
       setNowPostDepart(index, x, 'time', sectionName);
     }
@@ -95,25 +103,25 @@ const DateTimeInput = ({
               notreq
                 ? //val.arrivaActive
 
-                  'checkbox-marked-outline'
+                'checkbox-marked-outline'
                 : 'checkbox-blank-outline'
             }
             color={notreq ? 'green' : 'black'}
             size={35}
           />
-          <Text style={[{fontSize: 15, paddingLeft: 10, color: 'black'}]}>
+          <Text style={[{ fontSize: 15, paddingLeft: 10, color: 'black' }]}>
             Not Required
           </Text>
         </TouchableOpacity>
       )}
 
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity
           disabled={touchableactive}
-          style={[s.picker, {backgroundColor: color}]}
+          style={[s.picker, { backgroundColor: color }]}
           onPress={() => showDatePickerPostDepart(type, index)}>
-          <Text style={{fontSize: 20, color: 'black'}}>
-            {date != null ? date : 'dd/mm/yy, -- : --'}
+          <Text style={{ fontSize: 20, color: 'black' }}>
+            {date != null ? date : (type == 'date' ? 'dd/mm/yy' : type == 'time' ? '-- : --' : 'dd/mm/yy, -- : --')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -121,13 +129,13 @@ const DateTimeInput = ({
           onPress={() => {
             setTime(); //  :  setNowPostDepart(index)
           }}
-          style={{padding: 10}}>
+          style={{ padding: 10 }}>
           <Text
             style={{
               fontSize: size,
               color: 'green',
             }}>
-            Time Now
+            {type == 'date' ? 'Today' : 'Time Now'}
           </Text>
         </TouchableOpacity>
       </View>

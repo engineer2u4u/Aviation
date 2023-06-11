@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Loader from '../Loader';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -18,18 +18,19 @@ import RNFetchBlob from 'rn-fetch-blob';
 import Header from '../subcomponents/Forms/Header';
 import BroadTextInput from '../subcomponents/Forms/FlightPreparation/broadTextInput';
 import BroadImageUpload from '../subcomponents/Forms/FlightPreparation/broadImageUpload';
-import {firebase} from '@react-native-firebase/functions';
+import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
 
+
 // if (true) functions().useEmulator('192.168.29.75', 5001);
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const HeadingTextSize = width / 15;
 const labelTextSize = width / 25;
 const uploadMenu = [
-  {id: 0, name: 'Slots', textId: 3},
-  {id: 1, name: 'Parking', textId: 4},
-  {id: 2, name: 'Landing Permit', textId: 5},
+  { id: 0, name: 'Slots', textId: 3 },
+  { id: 1, name: 'Parking', textId: 4 },
+  { id: 2, name: 'Landing Permit', textId: 5 },
 ];
 
 export default function FlightPreparation(props) {
@@ -38,12 +39,12 @@ export default function FlightPreparation(props) {
   const [loading, setloading] = useState(false);
   const [uid, setuid] = useState(null);
   const [fpreparation, setfpreparation] = useState([
-    {value: null, file: []},
-    {value: null, file: []},
-    {value: null, file: []},
+    { value: null, file: [] },
+    { value: null, file: [] },
+    { value: null, file: [] },
   ]);
   const FUID = props.route.params.UID;
-
+  const [hasUnsavedChanges, sethasUnsavedChanges] = useState(false);
   const removeFileFP = (arrayIndex, index) => {
     var tfpreparation = [...fpreparation];
     tfpreparation[arrayIndex].file.splice(index, 1);
@@ -107,6 +108,35 @@ export default function FlightPreparation(props) {
     }
   };
 
+  useEffect(
+    () =>
+      props.navigation.addListener('beforeRemove', e => {
+        if (!hasUnsavedChanges) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+
+        // Prompt the user before leaving the screen
+        Alert.alert(
+          'Discard changes?',
+          'You have unsaved changes. Are you sure to discard them and leave the screen?',
+          [
+            { text: "Don't leave", style: 'cancel', onPress: () => { } },
+            {
+              text: 'Discard',
+              style: 'destructive',
+              // If the user confirmed, then we dispatch the action we blocked earlier
+              // This will continue the action that had triggered the removal of the screen
+              onPress: () => props.navigation.dispatch(e.data.action),
+            },
+          ],
+        );
+      }),
+    [props.navigation, hasUnsavedChanges],
+  );
   //NEW STRUCTURE
 
   const [airinfo, setAirInfo] = useState('');
@@ -119,11 +149,12 @@ export default function FlightPreparation(props) {
 
   const [formReady, setformReady] = useState(true);
 
-  const validate = () => {};
+  const validate = () => { };
 
   const textSeeker = (type, event) => {
     console.log(type.event);
     validate();
+    sethasUnsavedChanges(true);
     switch (type) {
       case 0:
         setAirInfo(event);
@@ -180,6 +211,7 @@ export default function FlightPreparation(props) {
         setcallLoad(false);
         Alert.alert('Success');
         console.log(response);
+        sethasUnsavedChanges(false)
       })
       .catch(error => {
         setcallLoad(false);
@@ -257,6 +289,8 @@ export default function FlightPreparation(props) {
         headingSize={HeadingTextSize}
         heading={'Flight Preparation'}
         sendForm={sendForm}
+        nav={"IntialScreenView"}
+        navigation={props.navigation}
         Icon={
           callLoad ? (
             <ActivityIndicator size={'small'} color="green" />
@@ -272,7 +306,7 @@ export default function FlightPreparation(props) {
       <ScrollView>
         <Loader visible={loading} />
 
-        <View style={{padding: 20}}>
+        <View style={{ padding: 20 }}>
           <BroadTextInput
             type={0}
             label={'Airport Information'}
@@ -307,7 +341,7 @@ export default function FlightPreparation(props) {
                 uploadInitiator={uploadInitiator}
                 icon={
                   <Icons
-                    style={{marginLeft: 10}}
+                    style={{ marginLeft: 10 }}
                     color={'green'}
                     name="upload"
                     size={40}
@@ -316,15 +350,15 @@ export default function FlightPreparation(props) {
                 attachMents={
                   <>
                     {fpreparation[data.id].file.length > 0 && (
-                      <View style={{marginBottom: 20}}>
+                      <View style={{ marginBottom: 20 }}>
                         {fpreparation[data.id].file.map((value, index) => {
                           return (
                             <View key={index} style={styleSheet.attachment}>
-                              <Text style={{color: 'black'}}>{value.name}</Text>
+                              <Text style={{ color: 'black' }}>{value.name}</Text>
                               <TouchableOpacity
                                 onPress={() => removeFileFP(data.id, index)}>
                                 <Icons
-                                  style={{color: 'green', marginLeft: 10}}
+                                  style={{ color: 'green', marginLeft: 10 }}
                                   name="close"
                                   size={30}
                                 />
@@ -353,11 +387,11 @@ export default function FlightPreparation(props) {
                 backgroundColor: '#000',
               },
             }}>
-            <View style={{flex: 1, paddingLeft: 20}}>
-              <View style={{flex: 1}}>
-                <Text style={{color: 'black', fontSize: 22}}>Upload</Text>
+            <View style={{ flex: 1, paddingLeft: 20 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: 'black', fontSize: 22 }}>Upload</Text>
               </View>
-              <View style={{flex: 1.5, flexDirection: 'column'}}>
+              <View style={{ flex: 1.5, flexDirection: 'column' }}>
                 <TouchableOpacity
                   onPress={() => getImage(false)}
                   style={{
@@ -366,7 +400,7 @@ export default function FlightPreparation(props) {
                     justifyContent: 'flex-start',
                   }}>
                   <Icons name="camera-outline" size={25} color={'black'} />
-                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                     Upload from Camera
                   </Text>
                 </TouchableOpacity>
@@ -379,7 +413,7 @@ export default function FlightPreparation(props) {
                     justifyContent: 'flex-start',
                   }}>
                   <Icons name="image-outline" size={25} color={'black'} />
-                  <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+                  <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                     Upload from Gallery
                   </Text>
                 </TouchableOpacity>
@@ -405,7 +439,7 @@ const styleSheet = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
       },

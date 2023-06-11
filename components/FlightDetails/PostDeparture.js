@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -20,10 +20,10 @@ import Header from '../subcomponents/Forms/Header';
 import TakeCamera from '../subcomponents/Forms/takecamera';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
-import {firebase} from '@react-native-firebase/functions';
+import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const HeadingTextSize = width / 15;
 
 export default function PostDeparture(props) {
@@ -36,7 +36,7 @@ export default function PostDeparture(props) {
   const [uploadSection, setuploadSection] = useState(0);
 
   const [postdeparture, setpostdeparture] = useState([
-    {value: null, file: []},
+    { value: null, file: [] },
     null,
     null,
     null,
@@ -238,6 +238,8 @@ export default function PostDeparture(props) {
         headingSize={HeadingTextSize}
         heading={'Post-Departure'}
         sendForm={sendForm}
+        nav={"IntialScreenView"}
+        navigation={props.navigation}
         Icon={
           callLoad ? (
             <ActivityIndicator color="green" size="small" />
@@ -250,7 +252,7 @@ export default function PostDeparture(props) {
           )
         }
       />
-      <View style={{padding: 20}}>
+      <View style={{ padding: 20 }}>
         <TakeCamera
           label={'Stamped GenDec'}
           type={0}
@@ -264,14 +266,14 @@ export default function PostDeparture(props) {
           attachments={postdeparture[0]}
           Icon={
             <Icons
-              style={{color: 'green', marginLeft: 10}}
+              style={{ color: 'green', marginLeft: 10 }}
               name="close"
               size={30}
             />
           }
         />
 
-        <Text style={[styleSheet.label, {marginTop: 10}]}>
+        <Text style={[styleSheet.label, { marginTop: 10 }]}>
           Services Verified:
         </Text>
         <View
@@ -329,11 +331,11 @@ export default function PostDeparture(props) {
             backgroundColor: '#000',
           },
         }}>
-        <View style={{flex: 1, paddingLeft: 20}}>
-          <View style={{flex: 1}}>
-            <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+        <View style={{ flex: 1, paddingLeft: 20 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: 'black', fontSize: 22 }}>Upload Image</Text>
           </View>
-          <View style={{flex: 1.5, flexDirection: 'column'}}>
+          <View style={{ flex: 1.5, flexDirection: 'column' }}>
             <TouchableOpacity
               onPress={() => getImage(false)}
               style={{
@@ -342,7 +344,7 @@ export default function PostDeparture(props) {
                 justifyContent: 'flex-start',
               }}>
               <Icons name="camera-outline" size={25} color={'black'} />
-              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                 Upload from Camera
               </Text>
             </TouchableOpacity>
@@ -355,7 +357,7 @@ export default function PostDeparture(props) {
                 justifyContent: 'flex-start',
               }}>
               <Icons name="image-outline" size={25} color={'black'} />
-              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                 Upload from Gallery
               </Text>
             </TouchableOpacity>
@@ -371,7 +373,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
+  imgName: { color: 'black', fontSize: 12, fontWeight: '600' },
   checkbox: {
     width: 40,
     height: 40,
