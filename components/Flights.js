@@ -161,7 +161,7 @@ export default function Flights({ navigation }) {
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <TouchableOpacity
           style={{ marginLeft: 20 }}
-          onPress={() => { props.navigation.navigate("Home") }}
+          onPress={() => { navigation.navigate("Home") }}
         >
           <FontAwesome5Icons name="caret-left" color={'black'} size={40} />
         </TouchableOpacity>
