@@ -860,6 +860,40 @@ export default function Departure(props) {
               numberOfLines={1}
             />
           </View> */}
+          <Text style={styleSheet.label}>Duty Supervisor Details:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <LabelledInput
+              disabled={false}
+              label={'Name'} //mark
+              data={""}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                // setaService({ ...aService, ARS_DS_NAME: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+            <LabelledInput
+              disabled={false}
+              label={'Contact No.'} //mark
+              data={""}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                // setaService({ ...aService, ARS_DS_CONTACT_NO: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
           <Text style={styleSheet.label}>Number of Crew</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TextInput

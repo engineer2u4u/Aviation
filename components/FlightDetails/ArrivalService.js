@@ -36,15 +36,6 @@ export default function ArrivalService(props) {
 
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
-  const [disabled, setdisabled] = useState({
-    catering: false,
-    water: false,
-    lavatory: false,
-    rubbish: false,
-    fuel: false,
-    towing: false,
-    overnight: false,
-  });
   const [aService, setaService] = useState({
     "ARS_BAGGAGE": null, "ARS_BAGGAGE_PHOTO": "",
     "ARS_CEC_REMARKS": "", "ARS_CEC_REQ": null,
@@ -60,7 +51,7 @@ export default function ArrivalService(props) {
     "ARS_GPU_STOP": "", "ARS_LAS_CT": "",
     "ARS_LAS_ET": "", "ARS_LAS_REM": "",
     "ARS_LAS_REQ": 0, "ARS_LAS_ST": "", "ARS_LC_NR": 0,
-    "ARS_LC_PHOTO": null, "ARS_LC_REMARKS": "",
+    "ARS_LC_PHOTO": '', "ARS_LC_REMARKS": "",
     "ARS_MOVACLANDED": "", "ARS_MOVCHOCKIN": "",
     "ARS_MOV_PXAT": "", "ARS_MOV_PXCIQ": "",
     "ARS_MOV_PXDA": "", "ARS_MOV_PXDT": null, "ARS_MOV_PXTAT": null,
@@ -77,6 +68,8 @@ export default function ArrivalService(props) {
     "LAST_UPDATE": "", "STATUS": 1,
     "UID": "", "UPDATE_BY": ""
   })
+  const [paxmovement, setpaxmovement] = useState([]);
+  const [crewmovement, setcrewmovement] = useState([]);
   const [arrival, setArrival] = useState([
     null,
     null,
@@ -146,17 +139,19 @@ export default function ArrivalService(props) {
     null, //65
   ]);
   const addMovement = () => {
-    var tarrival = [...arrival];
-    tarrival[60] = [
-      ...arrival[60],
-      { arrival: null, departed: null, remarks: null, type: 'Pax' },
-    ];
-    setArrival([...tarrival]);
+    const email = auth().currentUser.email;
+    setpaxmovement([...paxmovement, { "ARS_PM_ATAT": "", "ARS_PM_PDFT": "", "ARS_PM_REMARK": "", "ARS_PM_TYPE": "Pax", "CREATED_BY": email, "CREATED_DATE": "", "FUID": FUID, "LAST_UPDATE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
+    // var tarrival = [...arrival];
+    // tarrival[60] = [
+    //   ...arrival[60],
+    //   { arrival: null, departed: null, remarks: null, type: 'Pax' },
+    // ];
+    // setArrival([...tarrival]);
   };
   const onRemoveMovement = index => {
-    var service = [...arrival];
-    service[60].splice(index, 1);
-    setArrival(service);
+    var service = [...paxmovement];
+    service.splice(index, 1);
+    setpaxmovement(service);
   };
   useEffect(() => {
     setcallLoad(true);
@@ -170,127 +165,12 @@ export default function ArrivalService(props) {
         // console.log(response);
         var packet = JSON.parse(response.data.body);
         var res = [...packet.Table];
-        if (res) {
+        if (res[0]) {
+          console.log(res)
           setaService(res[0]);
           console.log(res[0]);
           setuid(res[0].UID);
-          let x = [...arrival];
-          x[0] = res[0].ARS_MOVACLANDED
-            ? res[0].ARS_MOVACLANDED.toString().trim().replace('""', '')
-            : '';
-          x[1] = res[0].ARS_MOVCHOCKIN
-            ? res[0].ARS_MOVCHOCKIN.toString().trim().replace('""', '')
-            : '';
-          x[2] = res[0].ARS_GPU_START
-            ? res[0].ARS_GPU_START.toString().trim().replace('""', '')
-            : '';
-          x[3] = res[0].ARS_GPU_STOP
-            ? res[0].ARS_GPU_STOP.toString().trim().replace('""', '')
-            : '';
-          x[4] = res[0].ARS_PAX
-            ? res[0].ARS_PAX.toString().trim().replace('""', '')
-            : '';
-          x[5] = res[0].ARS_CREW
-            ? res[0].ARS_CREW.toString().trim().replace('""', '')
-            : '';
-          x[6].value = res[0].ARS_BAGGAGE
-            ? res[0].ARS_BAGGAGE.toString().toString().trim().replace('""', '')
-            : '';
-          x[7] = res[0].ARS_MOV_PXDA
-            ? res[0].ARS_MOV_PXDA.toString().trim().replace('""', '')
-            : '';
-          x[8] = res[0].ARS_MOV_PXTAT
-            ? res[0].ARS_MOV_PXTAT.toString().trim().replace('""', '')
-            : '';
-          x[9].checked = res[0].ARS_MOV_PXVA;
-          x[10] = res[0].ARS_MOV_PXCIQ
-            ? res[0].ARS_MOV_PXCIQ.toString().trim().replace('""', '')
-            : '';
-          // x[11] = res[0].ARS_MOV_PXDT?res[0].ARS_MOV_PXDT.toString().trim().replace('""', ''): '';
-          x[12].checked = res[0].ARS_MOV_VOA == 1 ? true : false;
-          // x[14] = res[0].ARS_MOV_PXDT?res[0].ARS_MOV_PXDT.toString().trim().replace('""', ''): '';
-          x[15] = res[0].ARS_CTR_CEO
-            ? res[0].ARS_CTR_CEO.toString().trim().replace('""', '')
-            : '';
-          // x[16] = res[0].ARS_CTR_CEL?res[0].ARS_CTR_CEL.toString().trim().replace('""', ''): '';
-          // x[17] = res[0].ARS_CTR_NCO?res[0].ARS_CTR_NCO.toString().trim().replace('""', ''): '';
-          x[18] = res[0].ARS_CTR_CDT
-            ? res[0].ARS_CTR_CDT.toString().trim().replace('""', '')
-            : '';
-          x[19] = res[0].ARS_CTR_REM
-            ? res[0].ARS_CTR_REM.toString().trim().replace('""', '')
-            : '';
-          x[20].checked = res[0].ARS_CTR_REQ == 1 ? true : false;
-          x[21] = res[0].ARS_WAS_CT
-            ? res[0].ARS_WAS_CT.toString().trim().replace('""', '')
-            : '';
-          x[22] = res[0].ARS_WAS_ET
-            ? res[0].ARS_WAS_ET.toString().trim().replace('""', '')
-            : '';
-          x[23] = res[0].ARS_WAS_REM
-            ? res[0].ARS_WAS_REM.toString().trim().replace('""', '')
-            : '';
-          x[24].checked = res[0].ARS_WAS_REQ == 1 ? true : false;
-          x[25] = res[0].ARS_LAS_CT
-            ? res[0].ARS_LAS_CT.toString().trim().replace('""', '')
-            : '';
-          x[26] = res[0].ARS_LAS_ET
-            ? res[0].ARS_LAS_ET.toString().trim().replace('""', '')
-            : '';
-          x[27] = res[0].ARS_LAS_REM
-            ? res[0].ARS_LAS_REM.toString().trim().replace('""', '')
-            : '';
-          x[28].checked = res[0].ARS_LAS_REQ == 1 ? true : false;
-          x[29] = res[0].ARS_RUS_CT
-            ? res[0].ARS_RUS_CT.toString().trim().replace('""', '')
-            : '';
-          x[30] = res[0].ARS_RUS_REM
-            ? res[0].ARS_RUS_REM.toString().trim().replace('""', '')
-            : '';
-          x[31].checked = res[0].ARS_RUS_REQ == 1 ? true : false;
-          x[32] = res[0].ARS_FOA_FTAT
-            ? res[0].ARS_FOA_FTAT.toString().trim().replace('""', '')
-            : '';
-          x[33] = res[0].ARS_FOA_START
-            ? res[0].ARS_FOA_START.toString().trim().replace('""', '')
-            : '';
-          x[34] = res[0].ARS_FOA_END
-            ? res[0].ARS_FOA_END.toString().trim().replace('""', '')
-            : '';
-          // x[35] = res[0].ARS_FOA_RECEIPT?res[0].ARS_FOA_RECEIPT.toString().trim().replace('""', ''): '';
-          x[36] = res[0].ARS_FOA_REM
-            ? res[0].ARS_FOA_REM.toString().trim().replace('""', '')
-            : '';
-          x[37].checked = res[0].ARS_FOA_REQ == 1 ? true : false;
-          x[38] = res[0].ARS_TOS_START
-            ? res[0].ARS_TOS_START.toString().trim().replace('""', '')
-            : '';
-          x[39] = res[0].ARS_TOS_END
-            ? res[0].ARS_TOS_END.toString().trim().replace('""', '')
-            : '';
-          // x[40] = res[0].ARS_TOS_PHOTO?res[0].ARS_TOS_PHOTO.toString().trim().replace('""', ''): '';
-          x[41] = res[0].ARS_TOS_REM
-            ? res[0].ARS_TOS_REM.toString().trim().replace('""', '')
-            : '';
-          x[42].checked = res[0].ARS_TOS_REQ == 1 ? true : false;
-          x[43] = res[0].ARS_OVB_NUMBER
-            ? res[0].ARS_OVB_NUMBER.toString().trim().replace('""', '')
-            : '';
-          x[44].checked = res[0].ARS_OVB_REQ == 1 ? true : false;
-          x[46] = res[0].ARS_CRM_CAT
-            ? res[0].ARS_CRM_CAT.toString().trim().replace('""', '')
-            : '';
-          x[48] = res[0].ARS_CRM_CCIQ
-            ? res[0].ARS_CRM_CCIQ.toString().trim().replace('""', '')
-            : '';
-          x[45] = res[0].ARS_CRM_CDA
-            ? res[0].ARS_CRM_CDA.toString().trim().replace('""', '')
-            : '';
-          x[47] = res[0].ARS_CRM_CVA
-            ? res[0].ARS_CRM_CVA.toString().trim().replace('""', '')
-            : '';
-          // console.log([...x]);
-          setArrival([...x]);
+
           firebase
             .app()
             .functions('asia-southeast1')
@@ -300,43 +180,31 @@ export default function ArrivalService(props) {
             .then(response => {
               var packet = JSON.parse(response.data.body);
               var res = packet.Table;
-              // console.log(res, 'res');
+              console.log(res, 'res');
               if (res && res.length > 0) {
-                x[60] = [];
-                x[62] = [];
+
+                var paxmov = [];
+                var crewmov = [];
                 res.forEach((val, index) => {
                   if (val.ARS_PM_TYPE == 'Pax') {
-                    x[60].push({
-                      arrival: val.ARS_PM_ATAT.trim().replace('""', ''),
-                      departed: val.ARS_PM_PDFT.trim().replace('""', ''),
-                      remarks: val.ARS_PM_REMARK.trim().replace('""', ''),
-                      type: val.ARS_PM_TYPE,
-                      UID: val.UID,
-                    });
+                    paxmov.push(val);
+
                   } else {
-                    x[62].push({
-                      arrival: val.ARS_PM_ATAT.trim().replace('""', ''),
-                      departed: val.ARS_PM_PDFT.trim().replace('""', ''),
-                      remarks: val.ARS_PM_REMARK.trim().replace('""', ''),
-                      type: val.ARS_PM_TYPE,
-                      UID: val.UID,
-                    });
+                    crewmov.push(val);
+                    setcrewmovement([...crewmovement, val]);
+
                   }
                 });
-                console.log(x, 'res');
-
-                setArrival([...x]);
+                setpaxmovement([...paxmov]);
+                setcrewmovement([...crewmov]);
               } else {
                 console.log(x, 'res');
-
-                setArrival([...x]);
               }
               setcallLoad(false);
             })
             .catch(error => {
               setcallLoad(false);
               console.log(error, 'Function error');
-              setArrival([...x]);
             });
         } else {
           setcallLoad(false);
@@ -351,12 +219,6 @@ export default function ArrivalService(props) {
 
     // pax crew movement
   }, []);
-  const setArrivalcheck = index => {
-    var tarrival = [...arrival];
-    tarrival[index].checked = !tarrival[index].checked;
-    setArrival(tarrival);
-    // console.log('triggered', tcheckList);
-  };
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = (type, index, arr, pos) => {
     currentPicker.current = [index, arr, pos];
@@ -377,10 +239,9 @@ export default function ArrivalService(props) {
             }),
           )
         };
-        console.log(currentPicker.current)
         setaService({ ...tcheckList }); break;
-      case 'papaxHotel':
-        var tcheckList = [...papaxHotel];
+      case 'paxmovement':
+        var tcheckList = [...paxmovement];
         tcheckList[currentPicker.current[0]][
           currentPicker.current[2]
         ] = tConvert(
@@ -388,27 +249,7 @@ export default function ArrivalService(props) {
             hour12: false,
           }),
         );
-        setpapaxHotel([...tcheckList]); break;
-      case 'pacrewHotel':
-        var tcheckList = [...pacrewHotel];
-        tcheckList[currentPicker.current[0]][
-          currentPicker.current[2]
-        ] = tConvert(
-          new Date(date).toLocaleString('en-US', {
-            hour12: false,
-          }),
-        );
-        setpacrewHotel([...tcheckList]); break;
-      case 'pacrewTransport':
-        var tcheckList = [...pacrewTransport];
-        tcheckList[currentPicker.current[0]][
-          currentPicker.current[2]
-        ] = tConvert(
-          new Date(date).toLocaleString('en-US', {
-            hour12: false,
-          }),
-        );
-        setpacrewTransport([...tcheckList]); break;
+        setpaxmovement([...tcheckList]); break;
     }
     hideDatePicker();
   };
@@ -551,153 +392,112 @@ export default function ArrivalService(props) {
     setArrival(tarrival);
   };
 
-  const [crewmove, setcrewmove] = useState(false);
-  const [crewmovenum, setcrewmovenum] = useState(0);
   const addCrewMovement = () => {
-    var tarrival = [...arrival];
-    tarrival[62] = [
-      ...arrival[62],
-      { arrival: null, departed: null, remarks: null, type: 'Crew' },
-    ];
-    setArrival([...tarrival]);
+    const email = auth().currentUser.email;
+    setcrewmovement([...crewmovement, { "ARS_PM_ATAT": "", "ARS_PM_PDFT": "", "ARS_PM_REMARK": "", "ARS_PM_TYPE": "Crew", "CREATED_BY": email, "CREATED_DATE": "", "FUID": FUID, "LAST_UPDATE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
+
   };
   const removeCrewMovement = index => {
-    var service = [...arrival];
-    service[62].splice(index, 1);
-    setArrival(service);
+    var service = [...crewmovement];
+    service.splice(index, 1);
+    setcrewmovement(service);
   };
 
-  const setArrivalData = (index, text, type, section) => {
-    var tarrival = [...arrival];
-    tarrival[index] = text;
-    setArrival(tarrival);
-  };
   const [callLoad, setcallLoad] = useState(false);
   const sendForm = () => {
     const email = auth().currentUser.email;
     const payload = {
-      ARS_MOVACLANDED: arrival[0] ? arrival[0] : '""',
-      ARS_MOVCHOCKIN: arrival[1] ? arrival[1] : '""',
-      ARS_GPU_REQ: 0,
-      ARS_GPU_START: arrival[2] ? arrival[2] : '""',
-      ARS_GPU_STOP: arrival[3] ? arrival[3] : '""',
-      ARS_PAX: arrival[4] ? arrival[4] : '""',
-      ARS_CREW: arrival[5] ? arrival[5] : '""',
-      ARS_BAGGAGE: arrival[6].value ? arrival[6].value : '""',
-      ARS_CTR_CEO: arrival[15] ? arrival[15] : '""',
-      ARS_CTR_CDT: arrival[18] ? arrival[18] : '""',
-      ARS_CTR_REM: arrival[19] ? arrival[19] : '""',
-      ARS_CTR_REQ: arrival[20].checked == true ? 1 : 0,
-      ARS_WAS_CT: arrival[21] ? arrival[21] : '""',
-      ARS_WAS_ET: arrival[22] ? arrival[22] : '""',
-      ARS_WAS_REM: arrival[23] ? arrival[23] : '""',
-      ARS_WAS_REQ: arrival[24].checked == true ? 1 : 0,
-      ARS_LAS_ST: arrival[25] ? arrival[25] : '""',
-      ARS_LAS_CT: '""',
-      ARS_LAS_ET: arrival[26] ? arrival[26] : '""',
-      ARS_LAS_REM: arrival[27] ? arrival[27] : '""',
-      ARS_LAS_REQ: arrival[28].checked == true ? 1 : 0,
-      ARS_RUS_CT: arrival[29] ? arrival[29] : '""',
-      ARS_RUS_REM: arrival[30] ? arrival[30] : '""',
-      ARS_RUS_REQ: arrival[31].checked == true ? 1 : 0,
-      ARS_FOA_FTAT: arrival[32] ? arrival[32] : '""',
-      ARS_FOA_START: arrival[33] ? arrival[33] : '""',
-      ARS_FOA_END: arrival[34] ? arrival[34] : '""',
-      ARS_FOA_REM: arrival[36] ? arrival[36] : '""',
-      ARS_FOA_REQ: arrival[37].checked == true ? 1 : 0,
-      ARS_TOS_START: arrival[38] ? arrival[38] : '""',
-      ARS_TOS_END: arrival[39] ? arrival[39] : '""',
-      ARS_TOS_REM: arrival[41] ? arrival[41] : '""',
-      ARS_TOS_REQ: arrival[42].checked == true ? 1 : 0,
-      ARS_OVB_NUMBER: arrival[43] ? arrival[43] : '""',
-      ARS_OVB_REQ: arrival[44].checked == true ? 1 : 0,
+      ...aService,
       STATUS: 0,
       UID: uid ? uid : '',
       FUID: FUID,
-      UPDATE_BY: email,
-      ARS_CRM_CAT: arrival[46] ? arrival[46] : '""',
-      ARS_CRM_CCIQ: arrival[48] ? arrival[48] : '""',
-      ARS_CRM_CDA: arrival[45] ? arrival[45] : '""',
-      ARS_CRM_CVA: arrival[47].checked == true ? 1 : 0,
-      ARS_CRM_REM: '""',
-      ARS_MOV_PXAT: arrival[8] ? arrival[8] : '""',
-      ARS_MOV_PXCIQ: arrival[10] ? arrival[10] : '""',
-      ARS_MOV_PXDA: arrival[7] ? arrival[7] : '""',
-      ARS_MOV_PXVA: arrival[9].checked == true ? 1 : 0,
-      ARS_MOV_VOA: arrival[12].checked == true ? 1 : 0,
+      UPDATE_BY: email
     };
     console.log(payload, 'payload');
     setcallLoad(true);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable('updateFlightModule?module=PostArrivalServices')(
-        JSON.stringify(payload),
-      )
-      .then(response => {
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(payload)
+    };
+    fetch(
+      'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostArrivalServices',
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
         Alert.alert('Success');
         setcallLoad(false);
-        console.log(response);
+        console.log(result);
       })
       .catch(error => {
         Alert.alert('Error in updation');
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-    arrival[60].map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable('updateFlightModule?module=PostArrivalServicesPM')(
-          JSON.stringify({
-            ARS_PM_PDFT: val.departed ? val.departed : '""',
-            ARS_PM_ATAT: val.arrival ? val.arrival : '""',
-            ARS_PM_REMARK: val.remarks ? val.remarks : '""',
-            ARS_PM_TYPE: val.type ? val.type : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
+    // firebase
+    //   .app()
+    //   .functions('asia-southeast1')
+    //   .httpsCallable('updateFlightModule?module=PostArrivalServices')(
+    //     JSON.stringify(payload),
+    //   )
+    //   .then(response => {
+    //     Alert.alert('Success');
+    //     setcallLoad(false);
+    //     console.log(response);
+    //   })
+    //   .catch(error => {
+    //     Alert.alert('Error in updation');
+    //     setcallLoad(false);
+    //     console.log(error, 'Function error');
+    //   });
+    if (paxmovement.concat(crewmovement).length > 0) {
+      paxmovement.concat(crewmovement).map(val => {
+        var requestOptions1 = {
+          method: 'POST',
+          headers: myHeaders,
+          body: JSON.stringify(val)
+        };
+        fetch(
+          'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostArrivalServicesPM',
+          requestOptions1,
         )
-        .then(response => {
-          Alert.alert('Success');
-          setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          Alert.alert('Error in updation');
-          setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
-    arrival[62].map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable('updateFlightModule?module=PostArrivalServicesPM')(
-          JSON.stringify({
-            ARS_PM_PDFT: val.departed ? val.departed : '""',
-            ARS_PM_ATAT: val.arrival ? val.arrival : '""',
-            ARS_PM_REMARK: val.remarks ? val.remarks : '""',
-            ARS_PM_TYPE: val.type ? val.type : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
-        )
-        .then(response => {
-          Alert.alert('Success');
-          setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          Alert.alert('Error in updation');
-          setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
+          .then(response => response.text())
+          .then(result => {
+            Alert.alert('Success');
+            setcallLoad(false);
+            console.log(result);
+          })
+          .catch(error => {
+            Alert.alert('Error in updation');
+            setcallLoad(false);
+            console.log(error, 'Function error');
+          });
+
+      });
+    }
+    else {
+      // firebase
+      //   .app()
+      //   .functions('asia-southeast1')
+      //   .httpsCallable('updateFlightModule?module=PostArrivalServicesPM')(
+      //     JSON.stringify({}),
+      //   )
+      //   .then(response => {
+      //     Alert.alert('Success');
+      //     setcallLoad(false);
+      //     console.log(response);
+      //   })
+      //   .catch(error => {
+      //     Alert.alert('Error in updation');
+      //     setcallLoad(false);
+      //     console.log(error, 'Function error');
+      //   });
+    }
+
   };
 
   return (
@@ -963,26 +763,24 @@ export default function ArrivalService(props) {
             <DateTimeInput
               label={'Left Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 7);
+                showDatePicker('time', 0, 'aService', "ARS_MOV_PXDT");
               }}
-              setNowPostDepart={() => setNow(7)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_MOV_PXDT")}
               size={12}
               type={'time'}
-              data={arrival[7]}
-              index={12}
+              data={aService.ARS_MOV_PXDT}
             />
-
             <DateTimeInput
               label={'Pax Arrived at Terminal (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 8);
+                showDatePicker('time', 0, 'aService', "ARS_MOV_PXAT");
               }}
-              setNowPostDepart={() => setNow(8)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_MOV_PXAT")}
               size={12}
               type={'time'}
-              data={arrival[8]}
-              index={12}
+              data={aService.ARS_MOV_PXAT}
             />
+
 
             <View
               style={{
@@ -990,14 +788,14 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(9)}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_MOV_PXVA: !aService.ARS_MOV_PXVA })}>
                 <Icons
                   name={
-                    arrival[9].checked
+                    aService.ARS_MOV_PXVA == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[9].checked ? 'green' : 'black'}
+                  color={aService.ARS_MOV_PXVA == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -1009,14 +807,14 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(12)}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_MOV_VOA: !aService.ARS_MOV_VOA })}>
                 <Icons
                   name={
-                    arrival[12].checked
+                    aService.ARS_MOV_VOA == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[12].checked ? 'green' : 'black'}
+                  color={aService.ARS_MOV_VOA == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -1025,14 +823,14 @@ export default function ArrivalService(props) {
             <DateTimeInput
               label={'Pax Completed CIQ (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 10);
+                showDatePicker('time', 0, 'aService', "ARS_MOV_PXCIQ");
               }}
-              setNowPostDepart={() => setNow(10)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_MOV_PXCIQ")}
               size={12}
               type={'time'}
-              data={arrival[10]}
-              index={12}
+              data={aService.ARS_MOV_PXCIQ}
             />
+
 
             <View
               style={{
@@ -1048,7 +846,7 @@ export default function ArrivalService(props) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {arrival[60].map((val, index) => {
+            {paxmovement.map((val, index) => {
               return (
                 <View key={index} style={{ marginTop: 20 }}>
                   <View
@@ -1069,63 +867,50 @@ export default function ArrivalService(props) {
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-
                   <DateTimeInput
-                    label={
-                      'Actual Transport Arrival Time at Airport (Local Time)'
-                    }
-                    //come here
-                    notrequiredSection={false}
+                    label={'Actual Transport Arrival Time at Airport (Local Time)'}
                     showDatePickerPostDepart={() => {
-                      showDatePicker('time', 60, index);
+                      showDatePicker('time', index, 'paxmovement', "ARS_PM_ATAT");
                     }}
-                    setNowPostDepart={() => setNow(60, index, 'arrival')}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...paxmovement];
+                      tcheckList[index].ARS_PM_ATAT = x
+                      setpaxmovement([...tcheckList]);
+                    }}
                     size={12}
                     type={'time'}
-                    data={val.arrival}
-                    index={60}
+                    data={val.ARS_PM_ATAT}
+                    index={12}
                   />
-                  <Text style={styleSheet.label}>
-                    Left Terminal (Local Time)
-                  </Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity
-                      style={styleSheet.picker}
-                      onPress={() =>
-                        showDatePicker('time', 60, index, 'departed')
-                      }>
-                      <Text style={{ fontSize: 20, color: 'black' }}>
-                        {val.departed ? val.departed : 'dd/mm/yy, -- : --'}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setNow(60, index, 'departed')}
-                      style={{ padding: 10 }}>
-                      <Text
-                        style={{
-                          fontSize: Dimensions.get('window').width / 25,
-                          color: 'green',
-                        }}>
-                        Time Now
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  <DateTimeInput
+                    label={' Left Terminal (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'paxmovement', "ARS_PM_PDFT");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...paxmovement];
+                      tcheckList[index].ARS_PM_PDFT = x
+                      setpaxmovement([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'time'}
+                    data={val.ARS_PM_PDFT}
+                    index={12}
+                  />
 
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput
-                      style={styleSheet.input}
-                      multiline={true}
-                      placeholder=""
-                      numberOfLines={2}
-                      value={val.remarks}
-                      onChangeText={text => {
-                        var tarrival = [...arrival];
-                        tarrival[60][index].remarks = text;
-                        setArrival(tarrival);
-                      }}
-                    />
-                  </View>
+                  <LabelledInput
+                    label={'Remarks'} //mark
+                    data={val.ARS_PM_REMARK}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      var tcheckList = [...paxmovement];
+                      tcheckList[index].ARS_PM_REMARK = text
+                      setpaxmovement([...tcheckList]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
                 </View>
               );
             })}
@@ -2199,26 +1984,24 @@ export default function ArrivalService(props) {
             <DateTimeInput
               label={'Left Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 45);
+                showDatePicker('time', 0, 'aService', "ARS_CRM_CDA");
               }}
-              setNowPostDepart={() => setNow(45)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_CRM_CDA")}
               size={12}
               type={'time'}
-              data={arrival[45]}
-              index={12}
+              data={aService.ARS_CRM_CDA}
             />
-
             <DateTimeInput
               label={'Crew Arrived at Terminal (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 46);
+                showDatePicker('time', 0, 'aService', "ARS_CRM_CAT");
               }}
-              setNowPostDepart={() => setNow(46)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_CRM_CAT")}
               size={12}
               type={'time'}
-              data={arrival[46]}
-              index={12}
+              data={aService.ARS_CRM_CAT}
             />
+
 
             <View
               style={{
@@ -2226,14 +2009,14 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(9)}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_CRM_CVA: !aService.ARS_CRM_CVA })}>
                 <Icons
                   name={
-                    arrival[9].checked
+                    aService.ARS_CRM_CVA == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[9].checked ? 'green' : 'black'}
+                  color={aService.ARS_CRM_CVA == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -2245,30 +2028,28 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <TouchableOpacity onPress={event => setArrivalcheck(12)}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_CRM_TAT: !aService.ARS_CRM_TAT })}>
                 <Icons
                   name={
-                    arrival[12].checked
+                    aService.ARS_CRM_TAT == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={arrival[12].checked ? 'green' : 'black'}
+                  color={aService.ARS_CRM_TAT == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>VOA Not Required</Text>
             </View>
-
             <DateTimeInput
               label={'Crew Completed CIQ (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 48);
+                showDatePicker('time', 0, 'aService', "ARS_CRM_CCIQ");
               }}
-              setNowPostDepart={() => setNow(48)}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_CRM_CCIQ")}
               size={12}
               type={'time'}
-              data={arrival[48]}
-              index={12}
+              data={aService.ARS_CRM_CCIQ}
             />
 
             <View
@@ -2285,7 +2066,7 @@ export default function ArrivalService(props) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {arrival[62].map((data, index) => {
+            {crewmovement.map((val, index) => {
               return (
                 <View key={index} style={{ marginTop: 20 }}>
                   <View
@@ -2303,49 +2084,49 @@ export default function ArrivalService(props) {
                   </View>
 
                   <DateTimeInput
-                    label={
-                      'Actual Transport Arrival Time at Airport (Local Time)'
-                    }
-                    notrequiredSection={false}
+                    label={'Actual Transport Arrival Time at Airport (Local Time)'}
                     showDatePickerPostDepart={() => {
-                      showDatePicker('time', 62, index, 'arrival');
+                      showDatePicker('time', index, 'crewmovement', "ARS_PM_ATAT");
                     }}
-                    setNowPostDepart={() => {
-                      setNow(62, index, 'arrival');
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...crewmovement];
+                      tcheckList[index].ARS_PM_ATAT = x
+                      setcrewmovement([...tcheckList]);
                     }}
                     size={12}
                     type={'time'}
-                    data={data.arrival}
-                    index={62}
+                    data={val.ARS_PM_ATAT}
+                    index={12}
                   />
                   <DateTimeInput
-                    label={'Left Terminal (Local Time)'}
+                    label={' Left Terminal (Local Time)'}
                     showDatePickerPostDepart={() => {
-                      showDatePicker('time', 62, index, 'departed');
+                      showDatePicker('time', index, 'crewmovement', "ARS_PM_PDFT");
                     }}
-                    setNowPostDepart={() => {
-                      setNow(62, index, 'departed');
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...crewmovement];
+                      tcheckList[index].ARS_PM_PDFT = x
+                      setcrewmovement([...tcheckList]);
                     }}
                     size={12}
                     type={'time'}
-                    data={data.departed}
-                    index={index}
+                    data={val.ARS_PM_PDFT}
+                    index={12}
                   />
-                  <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput
-                      style={styleSheet.input}
-                      multiline={true}
-                      placeholder="Remarks"
-                      numberOfLines={2}
-                      value={data.remarks}
-                      onChangeText={text => {
-                        var tarrival = [...arrival];
-                        tarrival[62][index].remarks = text;
-                        setArrival(tarrival);
-                      }}
-                    />
-                  </View>
+
+                  <LabelledInput
+                    label={'Remarks'} //mark
+                    data={val.ARS_PM_REMARK}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      var tcheckList = [...crewmovement];
+                      tcheckList[index].ARS_PM_REMARK = text
+                      setcrewmovement([...tcheckList]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
                 </View>
               );
             })}

@@ -33,7 +33,7 @@ export default function PreDepartureChecklist(props) {
   const FUID = props.route.params.UID;
   const refRBSheet = useRef();
   const [uid, setuid] = useState(null);
-
+  const currentPicker = useRef(0);
   const [uploadSection, setuploadSection] = useState(0);
   const [uploadaddedSection, setuploadAddedSection] = useState(false);
   const [uploadaddedSectionindex, setuploadAddedSectionindex] = useState(false);
@@ -53,6 +53,10 @@ export default function PreDepartureChecklist(props) {
 
   const [paxhotelactivesections, setpaxhotelactivesections] = useState(false);
   const [crewactivesections, setcrewactivesections] = useState(false);
+  const [pdchecklist, setpdchecklist] = useState({ "CREATED_BY": "", "CREATED_DATE": "", "FUID": "", "LAST_UPDATE": "", "PDC_AFR": 0, "PDC_AFR_REM": "", "PDC_ASR": 0, "PDC_ASR_REM": "", "PDC_CAR": 0, "PDC_CAR_REM": "", "PDC_CCDD": null, "PDC_CCDT": "", "PDC_CIQ": 0, "PDC_CIQ_REM": "", "PDC_CML": "", "PDC_CML_PHOTO": "", "PDC_CNML": 0, "PDC_CNML_REM": "", "PDC_CTA": 0, "PDC_CTA_REM": "", "PDC_CTNR": 0, "PDC_CTPD": "", "PDC_CTPT": "", "PDC_FBO": 0, "PDC_FBO_REM": "", "PDC_FD": null, "PDC_FD_ATC": "", "PDC_FD_FDP": "", "PDC_FD_FDR": "", "PDC_FD_NOTAMS": "", "PDC_FD_SLOTS": "", "PDC_FD_WIU": "", "PDC_FT": "", "PDC_HAR": 0, "PDC_HAR_REM": "", "PDC_PAGD": 0, "PDC_PAGD_REM": "", "PDC_PNML": 0, "PDC_PNML_REM": "", "PDC_PTA": 0, "PDC_PTA_REM": "", "PDC_PTNR": 0, "PDC_REM": "", "PDC_TOR_CONTACT": "", "PDC_TOR_DRIVER": "", "PDC_TOR_REM": "", "PDC_TOR_TIME": "", "PDC_UDGD": "", "STATUS": 0, "UID": "", "UPDATE_BY": "" })
+  const [crewtransport, setcrewtransport] = useState([]);
+  const [paxtransport, setpaxtransport] = useState([]);
+
 
   const [pdeparturecheck, setpdeparturecheck] = useState([
     {
@@ -108,91 +112,17 @@ export default function PreDepartureChecklist(props) {
         'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureChecklist',
       )()
       .then(response => {
-        console.log(response);
+
         var packet = JSON.parse(response.data.body);
         var res = [...packet.Table];
         if (res && res.length > 0) {
+          console.log(res[0]);
+          setpdchecklist(res[0])
           setuid(res[0].UID);
-          let x = [...pdeparturecheck];
-          x[2].catering.delivery = res[0]['PDC_CCDT']
-            ? res[0]['PDC_CCDT'].trim().replace('""', '')
-            : '';
-          x[2].fueling_time = res[0]['PDC_FT']
-            ? res[0]['PDC_FT'].trim().replace('""', '')
-            : '';
-          x[3].checked = res[0]['PDC_PAGD'] == 1 ? true : false;
-          x[3].remarks = res[0]['PDC_PAGD_REM']
-            ? res[0]['PDC_PAGD_REM'].trim().replace('""', '')
-            : '';
-          x[2].flight_and_admin_documents.recieved = res[0]['PDC_FD_FDR']
-            ? res[0]['PDC_FD_FDR'].trim().replace('""', '')
-            : '';
-          x[2].flight_and_admin_documents.printed = res[0]['PDC_FD_FDP']
-            ? res[0]['PDC_FD_FDP'].trim().replace('""', '')
-            : '';
-          x[2].flight_and_admin_documents.notams = res[0]['PDC_FD_NOTAMS']
-            ? res[0]['PDC_FD_NOTAMS'].trim().replace('""', '')
-            : '';
-          x[2].flight_and_admin_documents.weather_info_updated = res[0][
-            'PDC_FD_WIU'
-          ]
-            ? res[0]['PDC_FD_WIU'].trim().replace('""', '')
-            : '';
-          x[2].flight_and_admin_documents.atc_flight_plan = res[0]['PDC_FD_ATC']
-            ? res[0]['PDC_FD_ATC'].trim().replace('""', '')
-            : '';
-          x[2].flight_and_admin_documents.slot_confirmed = res[0][
-            'PDC_FD_SLOTS'
-          ]
-            ? res[0]['PDC_FD_SLOTS'].trim().replace('""', '')
-            : '';
-          x[5].checked = res[0]['PDC_FBO'] == 1 ? true : false;
-          x[5].remarks = res[0]['PDC_FBO_REM']
-            ? res[0]['PDC_FBO_REM'].trim().replace('""', '')
-            : '';
-          x[6].checked = res[0]['PDC_HAR'] == 1 ? true : false;
-          x[6].remarks = res[0]['PDC_HAR_REM']
-            ? res[0]['PDC_HAR_REM'].trim().replace('""', '')
-            : '';
-          x[7].checked = res[0]['PDC_CIQ'] == 1 ? true : false;
-          x[7].remarks = res[0]['PDC_CIQ_REM']
-            ? res[0]['PDC_CIQ_REM'].trim().replace('""', '')
-            : '';
-          x[8].checked = res[0]['PDC_ASR'] == 1 ? true : false;
-          x[8].remarks = res[0]['PDC_ASR_REM']
-            ? res[0]['PDC_ASR_REM'].trim().replace('""', '')
-            : '';
-          x[9].checked = res[0]['PDC_CAR'] == 1 ? true : false;
-          x[9].remarks = res[0]['PDC_CAR_REM']
-            ? res[0]['PDC_CAR_REM'].trim().replace('""', '')
-            : '';
-          x[10].checked = res[0]['PDC_AFR'] == 1 ? true : false;
-          x[10].remarks = res[0]['PDC_AFR_REM']
-            ? res[0]['PDC_AFR_REM'].trim().replace('""', '')
-            : '';
-          setpaxhotelactivesections(res['PDC_PTNR'] == 1 ? true : false);
-          x[13].checked = res[0]['PDC_PTA'] == 1 ? true : false;
-          x[13].remarks = res[0]['PDC_PTA_REM']
-            ? res[0]['PDC_PTA_REM'].trim().replace('""', '')
-            : '';
-          x[11].checked = res[0]['PDC_CTA'] == 1 ? true : false;
-          x[11].remarks = res[0]['PDC_CTA_REM']
-            ? res[0]['PDC_CTA_REM'].trim().replace('""', '')
-            : '';
-          setcrewactivesections(res['PDC_CTNR'] == 1 ? true : false);
-          x[14].checked = res[0]['PDC_PNML'] == 1 ? true : false;
-          x[14].remarks = res[0]['PDC_PNML_REM']
-            ? res[0]['PDC_PNML_REM'].trim().replace('""', '')
-            : '';
-          x[12].checked = res[0]['PDC_CNML'] == 1 ? true : false;
-          x[12].remarks = res[0]['PDC_CNML_REM']
-            ? res[0]['PDC_CNML_REM'].trim().replace('""', '')
-            : '';
-          console.log('recieved', x);
-          setpdeparturecheck(x);
-          // setcallLoad(false);
+          setcallLoad(false);
+
         } else {
-          // setcallLoad(false);
+          setcallLoad(false);
           setuid('');
         }
       })
@@ -216,33 +146,14 @@ export default function PreDepartureChecklist(props) {
           var apaxTransport = [];
           var acrewTransport = [];
           res.forEach((val, index) => {
-            console.log(val.DES_TYPE);
             if (val.PDCT_TYPE.trim() == 'Pax') {
-              apaxTransport.push({
-                name: val.PDCT_DN.trim().replace('""', ''),
-                location: val.PDCT_PL.trim().replace('""', ''),
-                hotelMap: { value: null, file: [] },
-                time: val.PDCT_SPT.trim().replace('""', ''),
-                contact: val.PDCT_DCN.trim().replace('""', ''),
-                remarks: val.PDCT_REMARK.trim().replace('""', ''),
-                type: val.PDCT_TYPE,
-                UID: val.UID,
-              });
+              apaxTransport.push(val);
             } else {
-              acrewTransport.push({
-                name: val.PDCT_DN.trim().replace('""', ''),
-                location: val.PDCT_PL.trim().replace('""', ''),
-                hotelMap: { value: null, file: [] },
-                time: val.PDCT_SPT.trim().replace('""', ''),
-                contact: val.PDCT_DCN.trim().replace('""', ''),
-                remarks: val.PDCT_REMARK.trim().replace('""', ''),
-                type: val.PDCT_TYPE,
-                UID: val.UID,
-              });
+              acrewTransport.push(val);
             }
           });
-          setaddedpaxSectionval([...apaxTransport]);
-          setaddedcrewSectionval([...acrewTransport]);
+          setpaxtransport([...apaxTransport]);
+          setcrewtransport([...acrewTransport]);
           setcallLoad(false);
         } else {
           setcallLoad(false);
@@ -260,16 +171,11 @@ export default function PreDepartureChecklist(props) {
   };
   const onSubmitFeedback = text => {
     var index = currentFeedback.current;
-    var tpdeparturecheck = [...pdeparturecheck];
-    tpdeparturecheck[index].remarks = text;
-    setpdeparturecheck(tpdeparturecheck);
-    console.log(tpdeparturecheck);
+    setpdchecklist({ ...pdchecklist, [index]: text })
     setvFeedback(false);
   };
   const removeFeedback = index => {
-    var tpdeparturecheck = [...pdeparturecheck];
-    tpdeparturecheck[index].remarks = '';
-    setpdeparturecheck(tpdeparturecheck);
+    setpdchecklist({ ...pdchecklist, [index]: '' })
   };
   const onPressDocPreA = async index => {
     try {
@@ -308,6 +214,11 @@ export default function PreDepartureChecklist(props) {
   };
   const [isDatePickerVisibleDeparture, setDatePickerVisibilityDeparture] =
     useState(false);
+  const showDatePicker = (type, index, arr, pos) => {
+    currentPicker.current = [index, arr, pos];
+    setMode(type);
+    setDatePickerVisibilityDeparture(true);
+  };
   const showDatePickerDeparture = (type, index) => {
     currentDeparture.current = index;
     setMode(type);
@@ -321,20 +232,36 @@ export default function PreDepartureChecklist(props) {
     var date = datetime.split(',')[0].split('/');
     var time24 = datetime.split(', ')[1];
     var time = time24.split(':');
+    if (mode == 'date') {
+      return (
+        datetime.split(',')[0]
+      );
+    }
+    else if (mode == 'time') {
+      return (
+        time[0] + ':' + time[1]
+      );
+    }
     return (
-      date[1] + '/' + date[0] + '/' + date[2] + ', ' + time[0] + ':' + time[1]
+      datetime
     );
   };
-
+  const setNow = (index, arr, pos) => {
+    currentPicker.current = [index, arr, pos];
+    handleConfirmDeparture(new Date());
+  };
   const handleConfirmDeparture = date => {
-    // console.log("A date has been picked: ",date);
-    var tpdeparturecheck = [...pdeparturecheck];
-    tpdeparturecheck[currentDeparture.current] = tConvert(
-      new Date(date).toLocaleString('en-US', {
-        hour12: false,
-      }),
-    );
-    setpdeparturecheck(tpdeparturecheck);
+    switch (currentPicker.current[1]) {
+      case 'pdchecklist':
+        var tcheckList = {
+          ...pdchecklist, [currentPicker.current[2]]: tConvert(
+            new Date(date).toLocaleString('en-US', {
+              hour12: false,
+            }),
+          )
+        };
+        setpdchecklist({ ...tcheckList }); break;
+    }
     hideDatePickerDeparture();
   };
   const setNowDeparture = (index, time, type, section = 'crew') => {
@@ -489,42 +416,14 @@ export default function PreDepartureChecklist(props) {
   };
 
   const addnewpaxSection = () => {
-    //add menu value collection
-    var val = [...addedpaxSectionval];
-    var data = {
-      name: null,
-      location: null,
-      hotelMap: { value: null, file: [] },
-      time: null,
-      contact: null,
-      remarks: null,
-      type: 'Pax',
-    };
-    val.push(data);
-    console.log(val);
-    setaddedpaxSectionval(val);
+    const email = auth().currentUser.email;
+    setpaxtransport([...paxtransport, { "CREATED_BY": email, "CREATED_DATE": new Date(), "FUID": FUID, "LAST_UPDATE": "", "PDCT_ADDRESS": "", "PDCT_DCN": "", "PDCT_DD_NR": 0, "PDCT_DN": "", "PDCT_DOD_ADDRESS": "", "PDCT_DOD_LOCATION": "", "PDCT_DOD_TIME": "", "PDCT_LEAD_NAME": "", "PDCT_PASSENGER_NO": 0, "PDCT_PD_NR": 0, "PDCT_PL": "", "PDCT_REMARK": "", "PDCT_SPT": "", "PDCT_TYPE": "Pax", "PDCT_VEHICLE_NO": "", "PDCT_VEHICLE_TYPE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
+
   };
 
   const addnewcrewSection = () => {
-    //add menu section
-    // var section = [...addedcrewSection];
-    // var menu = {name: 'Added Test Section Field'};
-    // section.push(menu);
-    // setaddedcrewSection(section);
-    //add menu value collection
-    var val = [...addedcrewSectionval];
-    var data = {
-      name: null,
-      location: null,
-      hotelMap: { value: null, file: [] },
-      time: null,
-      contact: null,
-      remarks: null,
-      type: 'Crew',
-    };
-    val.push(data);
-    setaddedcrewSectionval(val);
-    // setcrewmovement(true);
+    const email = auth().currentUser.email;
+    setcrewtransport([...crewtransport, { "CREATED_BY": email, "CREATED_DATE": new Date(), "FUID": FUID, "LAST_UPDATE": "", "PDCT_ADDRESS": "", "PDCT_DCN": "", "PDCT_DD_NR": 0, "PDCT_DN": "", "PDCT_DOD_ADDRESS": "", "PDCT_DOD_LOCATION": "", "PDCT_DOD_TIME": "", "PDCT_LEAD_NAME": "", "PDCT_PASSENGER_NO": 0, "PDCT_PD_NR": 0, "PDCT_PL": "", "PDCT_REMARK": "", "PDCT_SPT": "", "PDCT_TYPE": "Crew", "PDCT_VEHICLE_NO": "", "PDCT_VEHICLE_TYPE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
   };
   const [ini, setini] = useState(false);
 
@@ -538,19 +437,9 @@ export default function PreDepartureChecklist(props) {
   };
 
   const removecrewSection = index => {
-    // console.log(index);
-    // //remove section
-    // var s = [...addedcrewSection];
-    // s.splice(index, 1);
-    // if (s.length === 0) s = [];
-    // setaddedcrewSection(s);
-    //remove val
-    var val = [...addedcrewSectionval];
-    val.splice(index, 1);
-    if (val.length === 0) val = [];
-    console.log(val);
-    setaddedcrewSectionval(val);
-    // setini(!ini);
+    var service = [...crewtransport];
+    service.splice(index, 1);
+    setcrewtransport(service);
   };
 
   const setAddedcrewData = (index, data, type, section = 'crew') => {
@@ -719,85 +608,9 @@ export default function PreDepartureChecklist(props) {
     setcallLoad(true);
     let x = [...pdeparturecheck];
     const email = auth().currentUser.email;
-    console.log(
-      'pdeparturecheck[2].catering.delivery',
-      pdeparturecheck[2].catering.delivery,
-    );
+
     var payload = {
-      PDC_CCDT: pdeparturecheck[2].catering.delivery
-        ? pdeparturecheck[2].catering.delivery
-        : '""',
-      // PDC_CCDD: '""',
-      // PDC_FD: '""',
-      PDC_UDGD: '""',
-      PDC_FT: pdeparturecheck[2].fueling_time
-        ? pdeparturecheck[2].fueling_time
-        : '""',
-      PDC_PAGD: pdeparturecheck[3].checked ? 1 : 0,
-      PDC_PAGD_REM: pdeparturecheck[3].remarks
-        ? pdeparturecheck[3].remarks
-        : '""',
-      PDC_FD_FDR: pdeparturecheck[2].flight_and_admin_documents.recieved
-        ? pdeparturecheck[2].flight_and_admin_documents.recieved
-        : '""',
-      PDC_FD_FDP: pdeparturecheck[2].flight_and_admin_documents.printed
-        ? pdeparturecheck[2].flight_and_admin_documents.printed
-        : '""',
-      PDC_FD_NOTAMS: pdeparturecheck[2].flight_and_admin_documents.notams
-        ? pdeparturecheck[2].flight_and_admin_documents.notams
-        : '""',
-      PDC_FD_WIU: pdeparturecheck[2].flight_and_admin_documents
-        .weather_info_updated
-        ? pdeparturecheck[2].flight_and_admin_documents.weather_info_updated
-        : '""',
-      PDC_FD_ATC: pdeparturecheck[2].flight_and_admin_documents.atc_flight_plan
-        ? pdeparturecheck[2].flight_and_admin_documents.atc_flight_plan
-        : '""',
-      PDC_FD_SLOTS: pdeparturecheck[2].flight_and_admin_documents.slot_confirmed
-        ? pdeparturecheck[2].flight_and_admin_documents.slot_confirmed
-        : '""',
-      PDC_FBO: pdeparturecheck[5].checked ? 1 : 0,
-      PDC_FBO_REM: pdeparturecheck[5].remarks
-        ? pdeparturecheck[5].remarks
-        : '""',
-      PDC_HAR_REM: pdeparturecheck[6].remarks
-        ? pdeparturecheck[6].remarks
-        : '""',
-      PDC_HAR: pdeparturecheck[6].checked ? 1 : 0,
-      PDC_CIQ_REM: pdeparturecheck[7].remarks
-        ? pdeparturecheck[7].remarks
-        : '""',
-      PDC_CIQ: pdeparturecheck[7].checked ? 1 : 0,
-      PDC_ASR_REM: pdeparturecheck[8].remarks
-        ? pdeparturecheck[8].remarks
-        : '""',
-      PDC_ASR: pdeparturecheck[8].checked ? 1 : 0,
-      PDC_CAR: pdeparturecheck[9].checked ? 1 : 0,
-      PDC_CAR_REM: pdeparturecheck[9].remarks
-        ? pdeparturecheck[9].remarks
-        : '""',
-      PDC_AFR_REM: pdeparturecheck[10].remarks
-        ? pdeparturecheck[10].remarks
-        : '""',
-      PDC_AFR: pdeparturecheck[10].checked ? 1 : 0,
-      PDC_PTA_REM: pdeparturecheck[13].remarks
-        ? pdeparturecheck[13].remarks
-        : '""',
-      PDC_PTA: pdeparturecheck[13].checked ? 1 : 0,
-      PDC_CTA_REM: pdeparturecheck[11].remarks
-        ? pdeparturecheck[11].remarks
-        : '""',
-      PDC_CTA: pdeparturecheck[11].checked ? 1 : 0,
-      PDC_PNML_REM: pdeparturecheck[14].remarks
-        ? pdeparturecheck[14].remarks
-        : '""',
-      PDC_PNML: pdeparturecheck[14].checked ? 1 : 0,
-      PDC_CNML_REM: pdeparturecheck[12].remarks
-        ? pdeparturecheck[12].remarks
-        : '""',
-      PDC_CNML: pdeparturecheck[12].checked ? 1 : 0,
-      PDC_CTNR: crewactivesections ? 1 : 0,
-      PDC_PTNR: paxhotelactivesections ? 1 : 0,
+      ...pdchecklist,
       STATUS: 0,
       FUID: FUID,
       UPDATE_BY: email,
@@ -806,16 +619,26 @@ export default function PreDepartureChecklist(props) {
       payload.UID = uid;
     }
     console.log('OK', payload);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable('updateFlightModule?module=PostPreDepartureChecklist')(
-        JSON.stringify(payload),
-      )
-      .then(response => {
-        Alert.alert('Success');
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(payload)
+    };
+    fetch(
+      'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreDepartureChecklist',
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
+        Alert.alert('Success', 'Record updated', [
+
+          { text: 'OK', onPress: () => props.navigation.pop() },
+        ]);
         setcallLoad(false);
-        console.log(response);
+        console.log(result);
       })
       .catch(error => {
         Alert.alert('Error in updation');
@@ -823,71 +646,100 @@ export default function PreDepartureChecklist(props) {
         console.log(error, 'Function error');
       });
 
-    console.log('addedcrewSectionval', addedcrewSectionval);
+    // console.log('addedcrewSectionval', addedcrewSectionval);
+    console.log(crewtransport.concat(paxtransport));
 
-    addedcrewSectionval.map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable(
-          'updateFlightModule?module=PostPreDepartureChecklistTransport',
-        )(
-          JSON.stringify({
-            PDCT_SPT: val.time ? val.time : '""',
-            PDCT_PL: val.location ? val.location : '""',
-            PDCT_DN: val.name ? val.name : '""',
-            PDCT_DCN: val.contact ? val.contact : '""',
-            PDCT_REMARK: val.remarks ? val.remarks : '""',
-            PDCT_TYPE: val.type ? val.type : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
+    if (crewtransport.concat(paxtransport).length > 0) {
+      crewtransport.concat(paxtransport).map(val => {
+        var requestOptions1 = {
+          method: 'POST',
+          headers: myHeaders,
+          body: JSON.stringify(val)
+        };
+        fetch(
+          'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreDepartureChecklistTransport',
+          requestOptions1,
         )
-        .then(response => {
-          Alert.alert('Success');
-          setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          Alert.alert('Error in updation');
-          setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
+          .then(response => response.text())
+          .then(result => {
+            Alert.alert('Success', 'Record updated', [
 
-    addedpaxSectionval.map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable(
-          'updateFlightModule?module=PostPreDepartureChecklistTransport',
-        )(
-          JSON.stringify({
-            PDCT_SPT: val.time ? val.time : '""',
-            PDCT_PL: val.location ? val.location : '""',
-            PDCT_DN: val.name ? val.name : '""',
-            PDCT_DCN: val.contact ? val.contact : '""',
-            PDCT_REMARK: val.remarks ? val.remarks : '""',
-            PDCT_TYPE: val.type ? val.type : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
-        )
-        .then(response => {
-          Alert.alert('Success');
-          setcallLoad(false);
-          console.log(response);
-        })
-        .catch(error => {
-          Alert.alert('Error in updation');
-          setcallLoad(false);
-          console.log(error, 'Function error');
-        });
-    });
+              { text: 'OK', onPress: () => props.navigation.pop() },
+            ]);
+            setcallLoad(false);
+            console.log(result);
+          })
+          .catch(error => {
+            Alert.alert('Error in updation');
+            setcallLoad(false);
+            console.log(error, 'Function error');
+          });
+
+      });
+    }
+    // addedcrewSectionval.map(val => {
+    //   firebase
+    //     .app()
+    //     .functions('asia-southeast1')
+    //     .httpsCallable(
+    //       'updateFlightModule?module=PostPreDepartureChecklistTransport',
+    //     )(
+    //       JSON.stringify({
+    //         PDCT_SPT: val.time ? val.time : '""',
+    //         PDCT_PL: val.location ? val.location : '""',
+    //         PDCT_DN: val.name ? val.name : '""',
+    //         PDCT_DCN: val.contact ? val.contact : '""',
+    //         PDCT_REMARK: val.remarks ? val.remarks : '""',
+    //         PDCT_TYPE: val.type ? val.type : '""',
+    //         UID: val.UID ? val.UID : '',
+    //         STATUS: 0,
+    //         FUID: FUID,
+    //         UPDATE_BY: email,
+    //       }),
+    //     )
+    //     .then(response => {
+    //       Alert.alert('Success');
+    //       setcallLoad(false);
+    //       console.log(response);
+    //     })
+    //     .catch(error => {
+    //       Alert.alert('Error in updation');
+    //       setcallLoad(false);
+    //       console.log(error, 'Function error');
+    //     });
+    // });
+
+    // addedpaxSectionval.map(val => {
+    //   firebase
+    //     .app()
+    //     .functions('asia-southeast1')
+    //     .httpsCallable(
+    //       'updateFlightModule?module=PostPreDepartureChecklistTransport',
+    //     )(
+    //       JSON.stringify({
+    //         PDCT_SPT: val.time ? val.time : '""',
+    //         PDCT_PL: val.location ? val.location : '""',
+    //         PDCT_DN: val.name ? val.name : '""',
+    //         PDCT_DCN: val.contact ? val.contact : '""',
+    //         PDCT_REMARK: val.remarks ? val.remarks : '""',
+    //         PDCT_TYPE: val.type ? val.type : '""',
+    //         UID: val.UID ? val.UID : '',
+    //         STATUS: 0,
+    //         FUID: FUID,
+    //         UPDATE_BY: email,
+    //       }),
+    //     )
+    //     .then(response => {
+    //       Alert.alert('Success');
+    //       setcallLoad(false);
+    //       console.log(response);
+    //     })
+    //     .catch(error => {
+    //       Alert.alert('Error in updation');
+    //       setcallLoad(false);
+    //       console.log(error, 'Function error');
+    //     });
+    // });
   };
 
   const uploadInitiator = (type, addedsection, section = 'crew') => {
@@ -933,11 +785,11 @@ export default function PreDepartureChecklist(props) {
 
         <View style={[styleSheet.toggleContainer, { paddingHorizontal: 20 }]}>
           <TouchableOpacity
-            onPress={event => setCheckedDeparture(11)}
+            onPress={event => setpdchecklist({ ...pdchecklist, PDC_CTA: pdchecklist.PDC_CTA ? 0 : 1 })}
             style={[
               styleSheet.toggleButton,
               {
-                backgroundColor: pdeparturecheck[11].checked
+                backgroundColor: pdchecklist.PDC_CTA == 1
                   ? 'green'
                   : 'white',
               },
@@ -947,13 +799,13 @@ export default function PreDepartureChecklist(props) {
                 styleSheet.label,
                 {
                   textAlign: 'center',
-                  color: pdeparturecheck[11].checked ? 'white' : 'black',
+                  color: pdchecklist.PDC_CTA == 1 ? 'white' : 'black',
                 },
               ]}>
               Crew Transport Arranged
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => getFeedback(11)}>
+          <TouchableOpacity onPress={() => getFeedback('PDC_CTA_REM')}>
             <Icons
               style={{ marginLeft: 10 }}
               name="comment-processing-outline"
@@ -962,7 +814,7 @@ export default function PreDepartureChecklist(props) {
             />
           </TouchableOpacity>
         </View>
-        {pdeparturecheck[11].remarks && (
+        {pdchecklist.PDC_CTA_REM && (
           <View
             style={{
               flexDirection: 'row',
@@ -970,9 +822,9 @@ export default function PreDepartureChecklist(props) {
               paddingHorizontal: 20,
             }}>
             <View style={styleSheet.remarks}>
-              <Text>{pdeparturecheck[11].remarks}</Text>
+              <Text>{pdchecklist.PDC_CTA_REM}</Text>
             </View>
-            <TouchableOpacity onPress={() => removeFeedback(11)}>
+            <TouchableOpacity onPress={() => removeFeedback('PDC_CTA_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="delete-circle-outline"
@@ -985,11 +837,11 @@ export default function PreDepartureChecklist(props) {
 
         <View style={[styleSheet.toggleContainer, { paddingHorizontal: 20 }]}>
           <TouchableOpacity
-            onPress={event => setCheckedDeparture(12)}
+            onPress={event => setpdchecklist({ ...pdchecklist, PDC_CNML: pdchecklist.PDC_CNML ? 0 : 1 })}
             style={[
               styleSheet.toggleButton,
               {
-                backgroundColor: pdeparturecheck[12].checked
+                backgroundColor: pdchecklist.PDC_CNML == 1
                   ? 'green'
                   : 'white',
               },
@@ -999,13 +851,13 @@ export default function PreDepartureChecklist(props) {
                 styleSheet.label,
                 {
                   textAlign: 'center',
-                  color: pdeparturecheck[12].checked ? 'white' : 'black',
+                  color: pdchecklist.PDC_CNML == 1 ? 'white' : 'black',
                 },
               ]}>
               Crew Notified on Meeting Location
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => getFeedback(12)}>
+          <TouchableOpacity onPress={() => getFeedback('PDC_CNML_REM')}>
             <Icons
               style={{ marginLeft: 10 }}
               name="comment-processing-outline"
@@ -1014,7 +866,7 @@ export default function PreDepartureChecklist(props) {
             />
           </TouchableOpacity>
         </View>
-        {pdeparturecheck[12].remarks && (
+        {pdchecklist.PDC_CNML_REM && (
           <View
             style={{
               flexDirection: 'row',
@@ -1022,9 +874,9 @@ export default function PreDepartureChecklist(props) {
               paddingHorizontal: 20,
             }}>
             <View style={styleSheet.remarks}>
-              <Text>{pdeparturecheck[12].remarks}</Text>
+              <Text>{pdchecklist.PDC_CNML_REM}</Text>
             </View>
-            <TouchableOpacity onPress={() => removeFeedback(12)}>
+            <TouchableOpacity onPress={() => removeFeedback('PDC_CNML_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="delete-circle-outline"
@@ -1063,20 +915,15 @@ export default function PreDepartureChecklist(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  var x = crewactivesections;
-                  setcrewactivesections(!x);
-                  setaddedcrewSectionval([]);
-                  var x = [...pdeparturecheck];
-                  x[1].hotelMap = { value: null, file: [] };
-                  setpdeparturecheck(x);
+                  { setpdchecklist({ ...pdchecklist, PDC_CTNR: pdchecklist.PDC_CTNR ? 0 : 1 }), setcrewtransport([]) }
                 }}>
                 <Icons
                   name={
-                    crewactivesections
+                    pdchecklist.PDC_CTNR == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={crewactivesections ? 'green' : 'black'}
+                  color={pdchecklist.PDC_CTNR == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -1090,68 +937,111 @@ export default function PreDepartureChecklist(props) {
               }}>
               <TouchableOpacity
                 //onPress={() => addMovement(true, 27)}
-                disabled={crewactivesections}
+                disabled={pdchecklist.PDC_CTNR ? true : false}
                 onPress={addnewcrewSection}
                 style={[
                   styleSheet.button,
-                  { backgroundColor: crewactivesections ? '#80808080' : 'green' },
+                  { backgroundColor: pdchecklist.PDC_CTNR == 1 ? '#80808080' : 'green' },
                 ]}>
                 <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
             </View>
-            {addedcrewSectionval.map((data, i) => {
+            {crewtransport.map((val, index) => {
+              //if (index > 0) {
               return (
-                <View key={i}>
+                <View key={index} style={{ marginTop: 20 }}>
+                  <View
+                    style={{
+                      borderBottomWidth: 1,
+                      borderBottomColor: 'rgba(0,0,0,0.4)',
+                      marginBottom: 20,
+                    }}></View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
-                      onPress={() => {
-                        removecrewSection(i);
-                      }}>
+                      onPress={() => removecrewSection(index)}>
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-                  <View></View>
-
-                  <DateTimeInput
-                    label={'Scheduled Transport Pickup Time (Local Time)'}
-                    //crewmark
-                    showDatePickerPostDepart={showDatePickerDeparture}
-                    setNowPostDepart={setAddedcrewData}
-                    size={12}
-                    ini={ini}
-                    added={true}
-                    type={'datetime'}
-                    data={addedcrewSectionval[i].time}
-                    index={i}
-                  />
-
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pick-up Details:
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var tcheckList = [...crewtransport];
+                        tcheckList[index].PDCT_PD_NR = tcheckList[index].PDCT_PD_NR ? 0 : 1
+                        setcrewtransport([...tcheckList]);
+                      }}
+                    >
+                      <Icons
+                        name={
+                          val.PDCT_PD_NR
+                            ? 'checkbox-marked-outline'
+                            : 'checkbox-blank-outline'
+                        }
+                        color={val.PDCT_PD_NR ? 'green' : 'black'}
+                        size={40}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Not Required</Text>
+                  </View>
                   <LabelledInput
-                    label={'Pickup Location'}
-                    data={addedcrewSectionval[i].location}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    datatype={'location'}
-                    setText={setAddedcrewData}
+                    disabled={val.PDCT_PD_NR}
+                    label={'Pickup Location'} //mark
+                    data={val.PDCT_PL}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_PL: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_PD_NR}
+                    label={'Address'} //mark
+                    data={val.PDCT_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_ADDRESS: text };
+                      setcrewtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
 
                   <TakeCamera
                     label={'Photo of Pickup Location'}
-                    type={i}
+                    disabled={true}
+                    type={index}
                     addedsection={true}
                     init={ini}
+                    sectionName={'pax'}
                     uploadInitiator={uploadInitiator}
                     removeFilePreA={(a, b, c) => {
-                      if (addedcrewSectionval[i].hotelMap.file.length === 1)
-                        addedcrewSectionval[i].hotelMap.file = [];
-                      else addedcrewSectionval[i].hotelMap.file.splice(b, 1);
+                      //removeFilePreA
+
+                      //removeFilePreA(arrayIndex, index, added)
+                      if (addedpaxSectionval[index].hotelMap.file.length === 1)
+                        addedpaxSectionval[index].hotelMap.file = [];
+                      else addedpaxSectionval[index].hotelMap.file.splice(b, 1);
+
+                      //setpdeparturecheck(x);
+                      //console.log(arrayIndex,index)
                     }}
-                    attachments={addedcrewSectionval[i].hotelMap}
+                    attachments={{ file: [] }}
                     Icon={
                       <Icons
                         style={{ color: 'green', marginLeft: 10 }}
@@ -1161,38 +1051,196 @@ export default function PreDepartureChecklist(props) {
                     }
                   />
 
+                  <DateTimeInput
+                    disabled={val.PDCT_PD_NR}
+                    label={'Scheduled Pick-up Time (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'crewtransport', "PDCT_SPT");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...crewtransport];
+                      tcheckList[index].PDCT_SPT = x
+                      setcrewtransport([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'datetime'}
+                    data={val.PDCT_SPT}
+                    index={12}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Drop-off Details:
+                  </Text>
+
                   <LabelledInput
-                    label={'Driver Name'}
-                    data={addedcrewSectionval[i].name}
-                    index={i}
-                    ini={ini}
-                    added={true}
+
+                    label={'Drop-off Location'} //mark
+                    data={val.PDCT_DOD_LOCATION}
                     datatype={'text'}
-                    setText={setAddedcrewData}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_DOD_LOCATION: text };
+                      setcrewtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
-
                   <LabelledInput
-                    label={'Driver Contact Number'}
-                    data={addedcrewSectionval[i].contact}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    datatype={'contact'}
-                    setText={setAddedcrewData}
+
+                    label={'Address'} //mark
+                    data={val.PDCT_DOD_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_DOD_ADDRESS: text };
+                      setcrewtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
+                  <DateTimeInput
+                    label={'Scheduled Drop-off Time (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'crewtransport', "PDCT_DOD_TIME");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...crewtransport];
+                      tcheckList[index].PDCT_DOD_TIME = x
+                      setcrewtransport([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'datetime'}
+                    data={val.PDCT_DOD_TIME}
+                    index={12}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Driver Details:
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var tcheckList = [...crewtransport];
+                        tcheckList[index].PDCT_DD_NR = tcheckList[index].PDCT_DD_NR ? 0 : 1
+                        setcrewtransport([...tcheckList]);
+                      }}
+                    >
+                      <Icons
+                        name={
+                          val.PDCT_DD_NR
+                            ? 'checkbox-marked-outline'
+                            : 'checkbox-blank-outline'
+                        }
+                        color={val.PDCT_DD_NR ? 'green' : 'black'}
+                        size={40}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Not Required</Text>
+                  </View>
 
                   <LabelledInput
-                    label={'Remarks'}
-                    data={addedcrewSectionval[i].remarks}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    datatype={'remarks'}
-                    setText={setAddedcrewData}
+                    disabled={val.PDCT_DD_NR}
+                    label={'Driver Name'} //mark
+                    data={val.PDCT_DN}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_DN: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_DD_NR}
+                    label={'Driver Contact Number'} //mark
+                    data={val.PDCT_DCN}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_DCN: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_DD_NR}
+                    label={'Vehicle Number'} //mark
+                    data={val.PDCT_VEHICLE_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_VEHICLE_NO: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_DD_NR}
+                    label={'Vehicle Type'} //mark
+                    data={val.PDCT_VEHICLE_TYPE}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_VEHICLE_TYPE: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pax Details:
+                  </Text>
+                  <LabelledInput
+
+                    label={'Lead Crew Name'} //mark
+                    data={val.PDCT_LEAD_NAME}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_LEAD_NAME: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'No. of Crew'} //mark
+                    data={val.PDCT_PASSENGER_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_PASSENGER_NO: text };
+                      setcrewtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Remarks'} //mark
+                    data={val.PDCT_REMARK}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...crewtransport];
+                      markers[index] = { ...markers[index], PDCT_REMARK: text };
+                      setcrewtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
@@ -1205,11 +1253,11 @@ export default function PreDepartureChecklist(props) {
 
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(13)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_PTA: pdchecklist.PDC_PTA ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[13].checked
+                  backgroundColor: pdchecklist.PDC_PTA
                     ? 'green'
                     : 'white',
                 },
@@ -1219,13 +1267,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[13].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_PTA ? 'white' : 'black',
                   },
                 ]}>
                 Pax Transport Arranged
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(13)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_PTA_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1234,12 +1282,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[13].remarks && (
+          {pdchecklist.PDC_PTA_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[13].remarks}</Text>
+                <Text>{pdchecklist.PDC_PTA_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(13)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_PTA_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1252,11 +1300,11 @@ export default function PreDepartureChecklist(props) {
 
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(14)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_PNML: pdchecklist.PDC_PNML ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[14].checked
+                  backgroundColor: pdchecklist.PDC_PNML
                     ? 'green'
                     : 'white',
                 },
@@ -1266,13 +1314,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[14].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_PNML ? 'white' : 'black',
                   },
                 ]}>
                 Pax Notifed on Meeting Location
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(14)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_PNML_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1281,12 +1329,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[14].remarks && (
+          {pdchecklist.PDC_PNML_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[14].remarks}</Text>
+                <Text>{pdchecklist.PDC_PNML_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(14)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_PNML_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1319,27 +1367,20 @@ export default function PreDepartureChecklist(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  var x = paxhotelactivesections;
-                  setpaxhotelactivesections(!x);
-                  setaddedpaxSectionval([]);
-
-                  var x = [...pdeparturecheck];
-                  x[1].hotelMap = { value: null, file: [] };
-                  setpdeparturecheck(x);
+                  { setpdchecklist({ ...pdchecklist, PDC_PTNR: pdchecklist.PDC_PTNR ? 0 : 1 }), setcrewtransport([]) }
                 }}>
                 <Icons
                   name={
-                    paxhotelactivesections
+                    pdchecklist.PDC_PTNR == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={paxhotelactivesections ? 'green' : 'black'}
+                  color={pdchecklist.PDC_PTNR == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
-
             <View
               style={{
                 flexDirection: 'row',
@@ -1347,65 +1388,96 @@ export default function PreDepartureChecklist(props) {
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                //onPress={() => addMovement(false, 29)}
-                //mark
-                disabled={paxhotelactivesections}
+                //onPress={() => addMovement(true, 27)}
+                disabled={pdchecklist.PDC_PTNR ? true : false}
                 onPress={addnewpaxSection}
                 style={[
                   styleSheet.button,
-                  {
-                    backgroundColor: paxhotelactivesections
-                      ? '#80808080'
-                      : 'green',
-                  },
+                  { backgroundColor: pdchecklist.PDC_PTNR == 1 ? '#80808080' : 'green' },
                 ]}>
                 <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
             </View>
-
-            {addedpaxSectionval.map((data, i) => {
+            {paxtransport.map((val, index) => {
+              //if (index > 0) {
               return (
-                <View key={i}>
+                <View key={index} style={{ marginTop: 20 }}>
+                  <View
+                    style={{
+                      borderBottomWidth: 1,
+                      borderBottomColor: 'rgba(0,0,0,0.4)',
+                      marginBottom: 20,
+                    }}></View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
-                      onPress={() => {
-                        removepaxSection(i);
-                      }}>
+                      onPress={() => removecrewSection(index)}>
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
-                  <DateTimeInput
-                    label={'Scheduled Transport Pickup Time (Local Time)'}
-                    showDatePickerPostDepart={showDatePickerDeparture}
-                    setNowPostDepart={setAddedcrewData}
-                    size={12}
-                    ini={ini}
-                    added={true}
-                    type={'datetime'}
-                    sectionName={'pax'}
-                    data={addedpaxSectionval[i].time}
-                    index={i}
-                  />
-
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pick-up Details:
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var tcheckList = [...paxtransport];
+                        tcheckList[index].PDCT_PD_NR = tcheckList[index].PDCT_PD_NR ? 0 : 1
+                        setpaxtransport([...tcheckList]);
+                      }}
+                    >
+                      <Icons
+                        name={
+                          val.PDCT_PD_NR
+                            ? 'checkbox-marked-outline'
+                            : 'checkbox-blank-outline'
+                        }
+                        color={val.PDCT_PD_NR ? 'green' : 'black'}
+                        size={40}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Not Required</Text>
+                  </View>
                   <LabelledInput
-                    label={'Pickup Location'}
-                    data={addedpaxSectionval[i].location}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    sectionName={'pax'}
-                    datatype={'location'}
-                    setText={setAddedcrewData}
+                    disabled={val.PDCT_PD_NR}
+                    label={'Pickup Location'} //mark
+                    data={val.PDCT_PL}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_PL: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_PD_NR}
+                    label={'Address'} //mark
+                    data={val.PDCT_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_ADDRESS: text };
+                      setpaxtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
 
                   <TakeCamera
                     label={'Photo of Pickup Location'}
-                    type={i}
+                    disabled={true}
+                    type={index}
                     addedsection={true}
                     init={ini}
                     sectionName={'pax'}
@@ -1414,14 +1486,14 @@ export default function PreDepartureChecklist(props) {
                       //removeFilePreA
 
                       //removeFilePreA(arrayIndex, index, added)
-                      if (addedpaxSectionval[i].hotelMap.file.length === 1)
-                        addedpaxSectionval[i].hotelMap.file = [];
-                      else addedpaxSectionval[i].hotelMap.file.splice(b, 1);
+                      if (addedpaxSectionval[index].hotelMap.file.length === 1)
+                        addedpaxSectionval[index].hotelMap.file = [];
+                      else addedpaxSectionval[index].hotelMap.file.splice(b, 1);
 
                       //setpdeparturecheck(x);
                       //console.log(arrayIndex,index)
                     }}
-                    attachments={addedpaxSectionval[i].hotelMap}
+                    attachments={{ file: [] }}
                     Icon={
                       <Icons
                         style={{ color: 'green', marginLeft: 10 }}
@@ -1431,41 +1503,196 @@ export default function PreDepartureChecklist(props) {
                     }
                   />
 
+                  <DateTimeInput
+                    disabled={val.PDCT_PD_NR}
+                    label={'Scheduled Pick-up Time (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'paxtransport', "PDCT_SPT");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...paxtransport];
+                      tcheckList[index].PDCT_SPT = x
+                      setpaxtransport([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'datetime'}
+                    data={val.PDCT_SPT}
+                    index={12}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Drop-off Details:
+                  </Text>
+
                   <LabelledInput
-                    label={'Driver Name'}
-                    data={addedpaxSectionval[i].name}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    sectionName={'pax'}
+
+                    label={'Drop-off Location'} //mark
+                    data={val.PDCT_DOD_LOCATION}
                     datatype={'text'}
-                    setText={setAddedcrewData}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_DOD_LOCATION: text };
+                      setpaxtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
-
                   <LabelledInput
-                    label={'Driver Contact Number'}
-                    data={addedpaxSectionval[i].contact}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    sectionName={'pax'}
-                    datatype={'contact'}
-                    setText={setAddedcrewData}
+
+                    label={'Address'} //mark
+                    data={val.PDCT_DOD_ADDRESS}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_DOD_ADDRESS: text };
+                      setpaxtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
+                  <DateTimeInput
+                    label={'Scheduled Drop-off Time (Local Time)'}
+                    showDatePickerPostDepart={() => {
+                      showDatePicker('time', index, 'paxtransport', "PDCT_DOD_TIME");
+                    }}
+                    setNowPostDepart={(indexx, x) => {
+                      var tcheckList = [...paxtransport];
+                      tcheckList[index].PDCT_DOD_TIME = x
+                      setpaxtransport([...tcheckList]);
+                    }}
+                    size={12}
+                    type={'datetime'}
+                    data={val.PDCT_DOD_TIME}
+                    index={12}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Driver Details:
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var tcheckList = [...paxtransport];
+                        tcheckList[index].PDCT_DD_NR = tcheckList[index].PDCT_DD_NR ? 0 : 1
+                        setpaxtransport([...tcheckList]);
+                      }}
+                    >
+                      <Icons
+                        name={
+                          val.PDCT_DD_NR
+                            ? 'checkbox-marked-outline'
+                            : 'checkbox-blank-outline'
+                        }
+                        color={val.PDCT_DD_NR ? 'green' : 'black'}
+                        size={40}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Not Required</Text>
+                  </View>
 
                   <LabelledInput
-                    label={'Remarks'}
-                    data={addedpaxSectionval[i].remarks}
-                    index={i}
-                    ini={ini}
-                    added={true}
-                    sectionName={'pax'}
-                    datatype={'remarks'}
-                    setText={setAddedcrewData}
+                    disabled={val.PDCT_DD_NR}
+                    label={'Driver Name'} //mark
+                    data={val.PDCT_DN}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_DN: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_DD_NR}
+                    label={'Driver Contact Number'} //mark
+                    data={val.PDCT_DCN}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_DCN: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_DD_NR}
+                    label={'Vehicle Number'} //mark
+                    data={val.PDCT_VEHICLE_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_VEHICLE_NO: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+                    disabled={val.PDCT_DD_NR}
+                    label={'Vehicle Type'} //mark
+                    data={val.PDCT_VEHICLE_TYPE}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_VEHICLE_TYPE: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
+                    Pax Details:
+                  </Text>
+                  <LabelledInput
+
+                    label={'Lead Crew Name'} //mark
+                    data={val.PDCT_LEAD_NAME}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_LEAD_NAME: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'No. of Crew'} //mark
+                    data={val.PDCT_PASSENGER_NO}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_PASSENGER_NO: text };
+                      setpaxtransport([...markers]);
+                    }}
+                    multiline={false}
+                    numberOfLines={1}
+                  />
+                  <LabelledInput
+
+                    label={'Remarks'} //mark
+                    data={val.PDCT_REMARK}
+                    datatype={'text'}
+                    index={12}
+                    setText={(i, text, type, section) => {
+                      let markers = [...paxtransport];
+                      markers[index] = { ...markers[index], PDCT_REMARK: text };
+                      setpaxtransport([...markers]);
+                    }}
                     multiline={false}
                     numberOfLines={1}
                   />
@@ -1474,84 +1701,37 @@ export default function PreDepartureChecklist(props) {
             })}
           </View>
           {/**PAX TRANS END //catering.delivery=data */}
-
           <DateTimeInput
             label={'Confirm Catering Delivery Time (Local Time)'}
-            showDatePickerPostDepart={showDatePickerDeparture}
-            setNowPostDepart={() => setNowcatering()}
+            showDatePickerPostDepart={() => {
+              showDatePicker('time', 0, 'pdchecklist', "PDC_CCDT");
+            }}
+            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_CCDT")}
             size={12}
-            ini={ini}
-            added={true}
-            type={'catering'}
-            sectionName={'departure'}
-            data={pdeparturecheck[2].catering.delivery}
-            index={2}
+            type={'time'}
+            data={pdchecklist.PDC_CCDT}
+            index={12}
           />
-
           <DateTimeInput
             label={'Fueling Time (Local Time)'}
-            showDatePickerPostDepart={showDatePickerDeparture}
-            setNowPostDepart={() => setNowfuel()}
+            showDatePickerPostDepart={() => {
+              showDatePicker('time', 0, 'pdchecklist', "PDC_FT");
+            }}
+            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FT")}
             size={12}
-            ini={ini}
-            added={true}
-            type={'fueling_time'}
-            sectionName={'departure'}
-            data={pdeparturecheck[2].fueling_time}
-            index={2}
+            type={'time'}
+            data={pdchecklist.PDC_FT}
+            index={12}
           />
 
-          {/* <Text style={styleSheet.label}>
-            Confirm Catering Delivery Time (Local Time)
-          </Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePickerDeparture('datetime', 5)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {pdeparturecheck[5] ? pdeparturecheck[5] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setNowDeparture(5)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
-          {/* <Text style={styleSheet.label}>Fuelling Time (Local Time)</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <TouchableOpacity
-              style={styleSheet.picker}
-              onPress={() => showDatePickerDeparture('datetime', 6)}>
-              <Text style={{fontSize: 20, color: 'black'}}>
-                {pdeparturecheck[6] ? pdeparturecheck[6] : 'dd/mm/yy, -- : --'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setNowDeparture(6)}
-              style={{padding: 10}}>
-              <Text
-                style={{
-                  fontSize: Dimensions.get('window').width / 25,
-                  color: 'green',
-                }}>
-                Time Now
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(3)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_PAGD: pdchecklist.PDC_PAGD ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[3].checked
+                  backgroundColor: pdchecklist.PDC_PAGD
                     ? 'green'
                     : 'white',
                 },
@@ -1561,13 +1741,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[3].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_PAGD ? 'white' : 'black',
                   },
                 ]}>
                 Prepared Departure GenDec
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(3)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_PAGD_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1576,12 +1756,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[3].remarks && (
+          {pdchecklist.PDC_PAGD_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[3].remarks}</Text>
+                <Text>{pdchecklist.PDC_PAGD_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(3)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_PAGD_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1593,6 +1773,7 @@ export default function PreDepartureChecklist(props) {
           )}
 
           <TakeCamera
+            disabled={true}
             label={'Upload Departure GenDec'}
             type={4}
             addedsection={false}
@@ -1600,12 +1781,11 @@ export default function PreDepartureChecklist(props) {
             sectionName={'departure'}
             uploadInitiator={uploadInitiator}
             removeFilePreA={(a, b, c) => {
-              console.log(a, b, c);
-              var x = [...pdeparturecheck];
-              if (x[4].hotelMap.file.length === 1) x[4].hotelMap.file = [];
-              else x[4].hotelMap.file.splice(b, 1);
-              //come here
-              //removeFilePreA()
+              // console.log(a, b, c);
+              // var x = [...pdeparturecheck];
+              // if (x[4].hotelMap.file.length === 1) x[4].hotelMap.file = [];
+              // else x[4].hotelMap.file.splice(b, 1);
+
             }}
             attachments={pdeparturecheck[4].hotelMap}
             Icon={
@@ -1617,70 +1797,7 @@ export default function PreDepartureChecklist(props) {
             }
           />
 
-          {/* <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginVertical: 20,
-            }}>
-            <Text style={styleSheet.label}>Upload Departure GenDec</Text>
-            <TouchableOpacity
-              //onPress={event => onPressDocPreA(8)}
-              onPress={event => {
-                setuploadSection(8);
-                refRBSheet.current.open();
-              }}
-              style={{
-                marginLeft: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderRadius: 8,
-              }}>
-              <Text style={{color: 'green'}}>Add Files</Text>
-            </TouchableOpacity>
-          </View>
-          {pdeparturecheck[8].file.length > 0 && (
-            <View style={{marginBottom: 20}}>
-              {pdeparturecheck[8].file.map((value, index) => {
-                return (
-                  <View
-                    key={index}
-                    style={{
-                      backgroundColor: 'white',
-                      borderRadius: 16,
-                      padding: 10,
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 20,
-                      marginHorizontal: 5,
-                      ...Platform.select({
-                        ios: {
-                          shadowColor: '#000',
-                          shadowOffset: {width: 0, height: 2},
-                          shadowOpacity: 0.8,
-                          shadowRadius: 2,
-                        },
-                        android: {
-                          elevation: 3,
-                        },
-                      }),
-                    }}>
-                    <Text style={styleSheet.imgName}>{value.name}</Text>
-                    <TouchableOpacity onPress={() => removeFilePreA(8, index)}>
-                      <Icons
-                        style={{color: 'green', marginLeft: 10}}
-                        name="close"
-                        size={30}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                );
-              })}
-            </View>
-          )} */}
+
           {/*   ------------------------------Flight Documents/Admin ----------- */}
           <Text style={styleSheet.label}>Flight Documents / Admin:</Text>
           <View
@@ -1693,111 +1810,80 @@ export default function PreDepartureChecklist(props) {
             }}>
             <DateTimeInput
               label={'Flight Documents Received (Local Time)'}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={() => {
-                console.log('aya');
-                setNowflight_and_admin_documents('recieved');
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_FDR");
               }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_FDR")}
               size={12}
-              ini={ini}
-              added={true}
-              type={'recieved'}
-              sectionName={'departure'}
-              data={pdeparturecheck[2].flight_and_admin_documents.recieved}
-              index={2}
+              type={'time'}
+              data={pdchecklist.PDC_FD_FDR}
+              index={12}
             />
-
             <DateTimeInput
               label={'Flight Documents Printed (Local Time)'}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={() =>
-                setNowflight_and_admin_documents('printed')
-              }
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_FDP");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_FDP")}
               size={12}
-              ini={ini}
-              added={true}
-              type={'printed'}
-              sectionName={'departure'}
-              data={pdeparturecheck[2].flight_and_admin_documents.printed}
-              index={2}
+              type={'time'}
+              data={pdchecklist.PDC_FD_FDP}
+              index={12}
             />
-
             <DateTimeInput
               label={'Notams Updated (Local Time)'}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={() =>
-                setNowflight_and_admin_documents('notams')
-              }
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_NOTAMS");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_NOTAMS")}
               size={12}
-              ini={ini}
-              added={true}
-              type={'notams'}
-              sectionName={'departure'}
-              data={pdeparturecheck[2].flight_and_admin_documents.notams}
-              index={2}
+              type={'time'}
+              data={pdchecklist.PDC_FD_NOTAMS}
+              index={12}
             />
-
             <DateTimeInput
               label={'Weather Information Updated (Local Time)'}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={() =>
-                setNowflight_and_admin_documents('weather_info_updated')
-              }
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_WIU");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_WIU")}
               size={12}
-              ini={ini}
-              added={true}
-              type={'weather'}
-              sectionName={'departure'}
-              data={
-                pdeparturecheck[2].flight_and_admin_documents
-                  .weather_info_updated
-              }
-              index={2}
+              type={'time'}
+              data={pdchecklist.PDC_FD_WIU}
+              index={12}
             />
-
             <DateTimeInput
               label={'ATC Flight Plan Filed (Local Time)'}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={() =>
-                setNowflight_and_admin_documents('atc_flight_plan')
-              }
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_ATC");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_ATC")}
               size={12}
-              ini={ini}
-              added={true}
-              type={'atc'}
-              sectionName={'departure'}
-              data={
-                pdeparturecheck[2].flight_and_admin_documents.atc_flight_plan
-              }
-              index={2}
+              type={'time'}
+              data={pdchecklist.PDC_FD_ATC}
+              index={12}
             />
-
             <DateTimeInput
               label={'Slots Confirmed (Local Time)'}
-              showDatePickerPostDepart={showDatePickerDeparture}
-              setNowPostDepart={() =>
-                setNowflight_and_admin_documents('slot_confirmed')
-              }
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_SLOTS");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_SLOTS")}
               size={12}
-              ini={ini}
-              added={true}
-              type={'slot'}
-              sectionName={'departure'}
-              data={
-                pdeparturecheck[2].flight_and_admin_documents.slot_confirmed
-              }
-              index={2}
+              type={'time'}
+              data={pdchecklist.PDC_FD_SLOTS}
+              index={12}
             />
           </View>
           {/*   ------------------------------Flight Documents/Admin End ----------- */}
 
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(5)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_FBO: pdchecklist.PDC_FBO ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[5].checked
+                  backgroundColor: pdchecklist.PDC_FBO
                     ? 'green'
                     : 'white',
                 },
@@ -1807,13 +1893,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[5].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_FBO ? 'white' : 'black',
                   },
                 ]}>
                 FBO Reminder
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(5)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_FBO_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1822,12 +1908,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[5].remarks && (
+          {pdchecklist.PDC_FBO_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[5].remarks}</Text>
+                <Text>{pdchecklist.PDC_FBO_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(5)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_FBO_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1839,11 +1925,11 @@ export default function PreDepartureChecklist(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(6)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_HAR: pdchecklist.PDC_HAR ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[6].checked
+                  backgroundColor: pdchecklist.PDC_HAR
                     ? 'green'
                     : 'white',
                 },
@@ -1853,13 +1939,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[6].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_HAR ? 'white' : 'black',
                   },
                 ]}>
                 Handling Agent Reminder
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(6)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_HAR_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1868,12 +1954,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[6].remarks && (
+          {pdchecklist.PDC_HAR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[6].remarks}</Text>
+                <Text>{pdchecklist.PDC_HAR_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(6)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_HAR_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1885,11 +1971,11 @@ export default function PreDepartureChecklist(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(7)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_CIQ: pdchecklist.PDC_CIQ ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[7].checked
+                  backgroundColor: pdchecklist.PDC_CIQ
                     ? 'green'
                     : 'white',
                 },
@@ -1899,13 +1985,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[7].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_CIQ ? 'white' : 'black',
                   },
                 ]}>
                 CIQ Reminder
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(7)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_CIQ_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1914,12 +2000,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[7].remarks && (
+          {pdchecklist.PDC_CIQ_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[7].remarks}</Text>
+                <Text>{pdchecklist.PDC_CIQ_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(7)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_CIQ_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1931,11 +2017,11 @@ export default function PreDepartureChecklist(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(8)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_ASR: pdchecklist.PDC_ASR ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[8].checked
+                  backgroundColor: pdchecklist.PDC_ASR
                     ? 'green'
                     : 'white',
                 },
@@ -1945,13 +2031,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[8].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_ASR ? 'white' : 'black',
                   },
                 ]}>
                 Airport Security Reminder
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(8)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_ASR_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -1960,12 +2046,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[8].remarks && (
+          {pdchecklist.PDC_ASR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[8].remarks}</Text>
+                <Text>{pdchecklist.PDC_ASR_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(8)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_ASR_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -1977,11 +2063,11 @@ export default function PreDepartureChecklist(props) {
           )}
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(9)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_CAR: pdchecklist.PDC_CAR ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[9].checked
+                  backgroundColor: pdchecklist.PDC_CAR
                     ? 'green'
                     : 'white',
                 },
@@ -1991,13 +2077,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[9].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_CAR ? 'white' : 'black',
                   },
                 ]}>
                 Catering Agent Reminder
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(9)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_CAR_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -2006,12 +2092,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[9].remarks && (
+          {pdchecklist.PDC_CAR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[9].remarks}</Text>
+                <Text>{pdchecklist.PDC_CAR_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(9)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_CAR_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
@@ -2024,11 +2110,11 @@ export default function PreDepartureChecklist(props) {
 
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
-              onPress={event => setCheckedDeparture(10)}
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_AFR: pdchecklist.PDC_AFR ? 0 : 1 })}
               style={[
                 styleSheet.toggleButton,
                 {
-                  backgroundColor: pdeparturecheck[10].checked
+                  backgroundColor: pdchecklist.PDC_AFR
                     ? 'green'
                     : 'white',
                 },
@@ -2038,13 +2124,13 @@ export default function PreDepartureChecklist(props) {
                   styleSheet.label,
                   {
                     textAlign: 'center',
-                    color: pdeparturecheck[10].checked ? 'white' : 'black',
+                    color: pdchecklist.PDC_AFR ? 'white' : 'black',
                   },
                 ]}>
                 Aircraft Fueller Reminder
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback(10)}>
+            <TouchableOpacity onPress={() => getFeedback('PDC_AFR_REM')}>
               <Icons
                 style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
@@ -2053,12 +2139,12 @@ export default function PreDepartureChecklist(props) {
               />
             </TouchableOpacity>
           </View>
-          {pdeparturecheck[10].remarks && (
+          {pdchecklist.PDC_AFR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdeparturecheck[10].remarks}</Text>
+                <Text>{pdchecklist.PDC_AFR_REM}</Text>
               </View>
-              <TouchableOpacity onPress={() => removeFeedback(10)}>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_AFR_REM')}>
                 <Icons
                   style={{ marginLeft: 10 }}
                   name="delete-circle-outline"

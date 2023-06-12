@@ -82,7 +82,7 @@ const AircraftDetails = props => {
                     console.log(result);
                     setaircraftData(JSON.parse(result)[0]);
                     setcallLoad(false);
-                    props.navigation.navigate("Home");
+
                 })
                 .catch(error => { setcallLoad(false); console.log('error', error) });
         } else {
@@ -112,10 +112,13 @@ const AircraftDetails = props => {
                 .then(response => response.text())
                 .then(result => {
                     setcallLoad(false);
-                    Alert.alert('Success');
+                    Alert.alert('Success', 'Record updated', [
+
+                        { text: 'OK', onPress: () => props.navigation.navigate("Home") },
+                    ]);
                     sethasUnsavedChanges(false);
                     console.log(result);
-                    props.navigation.navigate("Aircrafts")
+                    // props.navigation.navigate("Home");
                 })
                 .catch(error => {
                     setcallLoad(false);
@@ -139,8 +142,12 @@ const AircraftDetails = props => {
                 .then(response => response.text())
                 .then(result => {
                     setcallLoad(false);
-                    Alert.alert('Success');
+                    Alert.alert('Success', 'Record updated', [
+
+                        { text: 'OK', onPress: () => props.navigation.navigate("Home") },
+                    ]);
                     sethasUnsavedChanges(false);
+                    // props.navigation.navigate("Home");
                     console.log(result);
                 })
                 .catch(error => {

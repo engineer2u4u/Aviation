@@ -31,6 +31,14 @@ const DateTimeInput = ({
       });
       x = x.split(',')[0];
     }
+    else if (type == 'time') {
+      var x = new Date().toLocaleString('en-US', {
+        hour12: false,
+      });
+      var time24 = x.split(', ')[1];
+      var time = time24.split(':');
+      x = time[0] + ':' + time[1];
+    }
     else {
       var x = new Date().toLocaleString('en-US', {
         hour12: false,

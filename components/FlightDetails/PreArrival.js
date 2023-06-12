@@ -267,6 +267,11 @@ export default function PreArrival(props) {
         datetime.split(',')[0]
       );
     }
+    else if (mode == 'time') {
+      return (
+        time[0] + ':' + time[1]
+      );
+    }
     return (
       datetime
     );
@@ -600,6 +605,28 @@ export default function PreArrival(props) {
       };
       fetch(
         'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreArrivalPaxCrewHotel',
+        requestOptions1,
+      )
+        .then(response => response.text())
+        .then(result => {
+          Alert.alert('Success');
+          setcallLoad(false);
+          console.log(result);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
+    });
+    papaxTransport.concat(pacrewTransport).map(val => {
+      var requestOptions1 = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify(val)
+      };
+      fetch(
+        'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreArrivalPaxCrewTransport',
         requestOptions1,
       )
         .then(response => response.text())
@@ -2158,11 +2185,11 @@ export default function PreArrival(props) {
                     numberOfLines={1}
                   />
                   <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
-                    Pax Details:
+                    Crew Details:
                   </Text>
                   <LabelledInput
 
-                    label={'Lead Pax Name'} //mark
+                    label={'Lead Crew Name'} //mark
                     data={val.PCT_LEAD_NAME}
                     datatype={'text'}
                     index={12}
@@ -2176,7 +2203,7 @@ export default function PreArrival(props) {
                   />
                   <LabelledInput
 
-                    label={'No. of Pax'} //mark
+                    label={'No. of Crew'} //mark
                     data={val.PCT_PASSENGER_NO}
                     datatype={'text'}
                     index={12}
