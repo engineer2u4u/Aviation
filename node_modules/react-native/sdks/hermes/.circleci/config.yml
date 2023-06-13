@@ -1,0 +1,547 @@
+version: 2.1
+
+# The Linux jobs include hacks and flags that restricts parallelism, and re-try
+# with less parallelism on failure.
+#
+# This is because CircleCI Linux jobs have 2 CPUs and 4GB RAM allocated via
+# cgroups, but run on machines that advertise 36 CPUs and 68GB RAM. This means
+# that most build tools will spawn 36 jobs and quickly choke to death. Even
+# with just 4 jobs, 4GB may be too little, so we retry serially on failure.
+#
+# Comments saying "see top comment" refer to this.
+
+orbs:
+  win: circleci/windows@2.4.0
+  android: circleci/android@1.0.3
+  node: circleci/node@4.7.0
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - android
+      - linux
+      - build-apple-runtime
+      - test-macos
+      - test-apple-runtime:
+          requires:
+            - build-apple-runtime
+      - package-apple-runtime:
+          requires:
+            - test-macos
+            - test-apple-runtime
+      - windows
+      - npm:
+          requires:
+            - android
+            - linux
+            - package-apple-runtime
+            - windows
+      - test-emscripten
+      - test-linux
+      - test-e2e
+      - test-e2e-intl
+
+# Default settings for Apple jobs (apple-runtime, test-apple-runtime)
+apple_defaults: &apple_defaults
+  macos:
+    xcode: 12.4.0
+  resource_class: macos.x86.medium.gen2
+  working_directory: ~/hermes
+  environment:
+    - TERM: dumb
+    - HERMES_WS_DIR: /tmp/hermes
+    # Homebrew currently breaks while updating:
+    # https://discuss.circleci.com/t/brew-install-fails-while-updating/32992
+    - HOMEBREW_NO_AUTO_UPDATE: 1
+
+jobs:
+  android:
+    executor:
+      name: android/android
+      sdk-version: '28'
+      variant: ndk
+    environment:
+      - HERMES_WS_DIR: /tmp/hermes
+      - TERM: dumb
+      - DEBIAN_FRONTEND: noninteractive
+    steps:
+      - checkout
+      - run:
+          name: Set up workspace and install dependencies
+          command: |
+            yes | sdkmanager "cmake;3.18.1" &
+            mkdir -p "$HERMES_WS_DIR" "$HERMES_WS_DIR/output"
+            ln -sf "$PWD" "$HERMES_WS_DIR/hermes"
+            sudo apt-get update
+            sudo apt-get install -y cmake ninja-build libicu-dev
+            wait
+            sudo cp /usr/bin/ninja /usr/bin/ninja.real
+            # See top comment
+            printf '%s\n' '#!/bin/sh' 'ninja.real -j4 "$@" || ninja.real -j1 "$@"' | sudo tee /usr/bin/ninja
+            ln -sf /usr/bin/ninja /opt/android/sdk/cmake/3.18.1/bin/ninja
+      - run:
+          name: Build Hermes Compiler
+          command: |
+            cd "$HERMES_WS_DIR"
+            cmake -S hermes -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+            # Build the Hermes compiler so that the cross compiler build can
+            # access it to build the VM
+            cmake --build ./build --target hermesc
+      - run:
+          name: Build Hermes for Android
+          command: |
+            export ANDROID_SDK="$ANDROID_HOME"
+            export ANDROID_NDK="$ANDROID_HOME/ndk-bundle"
+            cd "$HERMES_WS_DIR/hermes/android" && ./gradlew githubRelease
+      - run:
+          name: Copy artifacts
+          command: |
+            cd "$HERMES_WS_DIR"
+            cp "build_android/distributions"/hermes-runtime-android-*.tar.gz "output"
+      - run:
+          name: Checksum artifacts
+          command: |
+            cd "$HERMES_WS_DIR/output"
+            for file in *
+            do
+              sha256sum "$file" > "$file.sha256"
+            done
+      - store_artifacts:
+          path: /tmp/hermes/output/
+      - persist_to_workspace:
+          root: /tmp/hermes/output/
+          paths:
+            - .
+
+  linux:
+    docker:
+      - image: debian:bullseye
+    working_directory: /root
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt update
+            apt install -y git openssh-client cmake build-essential \
+                libreadline-dev libicu-dev zip python3
+      - checkout:
+          path: hermes
+      - run:
+          name: Build Hermes for Linux
+          command: |
+            cmake -S hermes -B build -DHERMES_STATIC_LINK=ON -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=True -DCMAKE_CXX_FLAGS=-s -DCMAKE_C_FLAGS=-s \
+              -DCMAKE_EXE_LINKER_FLAGS="-Wl,--whole-archive -lpthread -Wl,--no-whole-archive"
+            cmake --build build --target check-hermes github-cli-release -j 4
+            mkdir output && cp build/github/hermes-cli-*.tar.gz output
+      - run:
+          name: Checksum artifacts
+          command: |
+            cd output
+            for file in *
+            do
+              sha256sum "$file" > "$file.sha256"
+            done
+      - store_artifacts:
+          path: output
+      - persist_to_workspace:
+          root: output
+          paths:
+            - .
+
+  test-linux:
+    docker:
+      - image: debian:bullseye
+    working_directory: /root
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt update
+            apt install -y git openssh-client cmake build-essential \
+                libicu-dev zip python3
+      - checkout:
+          path: hermes
+      - run:
+          name: Run Hermes regression tests
+          command: |
+            cmake -S hermes -B build
+            cmake --build build --target check-hermes all -j 4
+
+  test-apple-runtime:
+    <<: *apple_defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: v4-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Install dependencies
+          command: |
+            brew install cmake ninja
+      - run:
+          name: Build the test application
+          command: |
+            pod install
+          working_directory: test/ApplePlatformsIntegrationTestApp
+      - run:
+          name: Test MacOS application
+          command: |
+            xcodebuild test \
+              -workspace ApplePlatformsIntegrationTests.xcworkspace \
+              -configuration Debug \
+              -destination 'platform=macOS' \
+              -scheme ApplePlatformsIntegrationMacTests
+          working_directory: test/ApplePlatformsIntegrationTestApp
+      - run:
+          name: Test iPhone application
+          command: |
+            xcodebuild test \
+              -workspace ApplePlatformsIntegrationTests.xcworkspace \
+              -configuration Debug \
+              -destination 'platform=iOS Simulator,name=iPhone 11' \
+              -scheme ApplePlatformsIntegrationMobileTests
+          working_directory: test/ApplePlatformsIntegrationTestApp
+
+  build-apple-runtime:
+    <<: *apple_defaults
+    steps:
+      - checkout
+      # TODO: Use a better cache key to avoid rebuilding whole framework
+      # when it is not necessary
+      - restore_cache:
+          key: v4-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Set up workspace
+          command: mkdir -p /tmp/hermes/output
+      - run:
+          name: Install dependencies
+          command: |
+            brew install cmake ninja
+            sudo gem install cocoapods
+      - run:
+          name: Build the iOS frameworks
+          command: ./utils/build-ios-framework.sh
+      - run:
+          name: Build the Mac frameworks
+          command: ./utils/build-mac-framework.sh
+      - save_cache:
+          key: v4-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/hermes/build_iphoneos
+            - ~/hermes/build_catalyst
+            - ~/hermes/build_iphonesimulator
+            - ~/hermes/build_macosx
+            - ~/hermes/destroot
+
+  package-apple-runtime:
+    <<: *apple_defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: v4-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Set up workspace
+          command: mkdir -p /tmp/hermes/output
+      - run:
+          name: Install dependencies
+          command: |
+            brew install cmake ninja
+            sudo gem install cocoapods
+      - run:
+          name: Package the framework
+          command: |
+            . ./utils/build-apple-framework.sh
+
+            mkdir -p /tmp/cocoapods-package-root/destroot
+            cp -R ./destroot /tmp/cocoapods-package-root
+            cp hermes-engine.podspec LICENSE /tmp/cocoapods-package-root
+
+            tar -C /tmp/cocoapods-package-root/ -czvf /tmp/hermes/output/hermes-runtime-darwin-v$(get_release_version).tar.gz .
+      - run:
+          name: Package the CLI
+          command: |
+            . ./utils/build-apple-framework.sh
+
+            mkdir -p /tmp/hermes-cli-root
+            cp -R ./destroot/bin/* /tmp/hermes-cli-root
+
+            tar -C /tmp/hermes-cli-root/ -czvf /tmp/hermes/output/hermes-cli-darwin-v$(get_release_version).tar.gz .
+      - run:
+          name: Checksum artifacts
+          command: |
+            cd /tmp/hermes/output
+            for file in *
+            do
+              shasum -a 256 "$file" > "$file.sha256"
+            done
+      - store_artifacts:
+          path: /tmp/hermes/output/
+      - persist_to_workspace:
+          root: /tmp/hermes/output/
+          paths:
+            - .
+
+  test-macos:
+    macos:
+      xcode: 13.4.1
+    steps:
+      - checkout:
+          path: hermes
+      - run:
+          name: Install dependencies
+          command: |
+            brew install cmake
+      - run:
+          name: Run MacOS regression tests in debug mode
+          command: |
+            cmake -S hermes -B build -GXcode
+            cmake --build ./build
+            cmake --build ./build --target check-hermes
+      - run:
+          name: Test Apple Intl
+          command: |
+            cmake -S hermes -B build_intl -GXcode -DHERMES_ENABLE_INTL=ON
+            cmake --build ./build_intl
+            cmake --build ./build_intl --target check-hermes
+
+  windows:
+    executor:
+      name: win/default
+      shell: powershell.exe
+    environment:
+      - HERMES_WS_DIR: 'C:\tmp\hermes'
+      - ICU_URL: "https://github.com/unicode-org/icu/releases/download/release-64-2/icu4c-64_2-Win64-MSVC2017.zip"
+      - MSBUILD_DIR: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin'
+      - CMAKE_DIR: 'C:\Program Files\CMake\bin'
+    steps:
+      - checkout
+
+      - run:
+          name: Set up workspace
+          command: |
+            New-Item -ItemType Directory $Env:HERMES_WS_DIR
+            New-Item -ItemType Directory $Env:HERMES_WS_DIR\icu
+            New-Item -ItemType Directory $Env:HERMES_WS_DIR\output
+            New-Item -ItemType Directory $Env:HERMES_WS_DIR\deps
+            New-Item -ItemType SymbolicLink -Target . -Path $Env:HERMES_WS_DIR -Name hermes
+
+      - run:
+          name: Download ICU
+          command: |
+            cd $Env:HERMES_WS_DIR\icu
+            # If Invoke-WebRequest shows a progress bar, it will fail with
+            #   Win32 internal error "Access is denied" 0x5 occurred [...]
+            $progressPreference = 'silentlyContinue'
+            Invoke-WebRequest -Uri "$Env:ICU_URL" -OutFile "icu.zip"
+            Expand-Archive -Path "icu.zip" -DestinationPath "."
+
+      - run:
+          name: Install dependencies
+          command: |
+            choco install --no-progress cmake --version 3.14.7
+            if (-not $?) { throw "Failed to install CMake" }
+            choco install --no-progress python3
+            if (-not $?) { throw "Failed to install Python" }
+
+      - run:
+          name: Assemble Windows runtime dependencies
+          command: |
+            cd $Env:HERMES_WS_DIR
+            Copy-Item -Path "icu\bin64\icu*.dll" -Destination "deps"
+            # Include MSVC++ 2015 redistributables
+            Copy-Item -Path "c:\windows\system32\msvcp140.dll" -Destination "deps"
+            Copy-Item -Path "c:\windows\system32\vcruntime140.dll" -Destination "deps"
+            Copy-Item -Path "c:\windows\system32\vcruntime140_1.dll" -Destination "deps"
+
+      - run:
+          name: Build Hermes for Windows
+          command: |
+            $Env:PATH += ";$Env:CMAKE_DIR;$Env:MSBUILD_DIR"
+            $Env:ICU_ROOT = "$Env:HERMES_WS_DIR\icu"
+            cd $Env:HERMES_WS_DIR
+            cmake -S hermes -B build_release -G 'Visual Studio 16 2019' -Ax64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=True -DHERMES_ENABLE_WIN10_ICU_FALLBACK=OFF -DHERMES_GITHUB_RESOURCE_DIR="$Env:HERMES_WS_DIR\deps"
+            if (-not $?) { throw "Failed to configure Hermes" }
+            cd build_release
+            cmake --build . --target github-cli-release --config Release
+            if (-not $?) { throw "Failed to build Hermes" }
+
+      - run:
+          name: Copy artifacts
+          command: |
+            cd $Env:HERMES_WS_DIR
+            Copy-Item -Path "build_release\github\hermes-cli-*.tar.gz" -Destination "output"
+
+      - run:
+          name: Checksum artifacts
+          command: |
+            cd $Env:HERMES_WS_DIR\output
+            foreach($file in Get-ChildItem) {
+              $hash = Get-FileHash -Path $file -Algorithm SHA256
+              Write-Output ($hash.Hash + "  " + $file.Name) |
+                  Out-File -Encoding ASCII -FilePath ($file.Name +".sha256")
+            }
+
+      - store_artifacts:
+          path: c:\tmp\hermes\output
+
+      - persist_to_workspace:
+          root: c:\tmp\hermes\output
+          paths:
+            - .
+
+  npm:
+    docker:
+      - image: cimg/node:lts
+    environment:
+      - YARN: yarnpkg
+      - TERM: dumb
+      - DEBIAN_FRONTEND: noninteractive
+    steps:
+      - run:
+          name: Print versions
+          command: |
+            node --version
+            yarn --version
+      - run:
+          name: Install certificates required to attach workspace
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y ca-certificates
+
+      - attach_workspace:
+          at: /tmp/hermes/input
+
+      - run:
+          name: Install dependencies and set up
+          command: |
+            mkdir -p /tmp/hermes/output
+
+      - checkout
+
+      - run:
+          name: Build NPM
+          command: |
+            cd npm
+            cp /tmp/hermes/input/* .
+            $YARN install
+            $YARN unpack-builds
+            $YARN create-npms
+
+      - run:
+          name: Copy artifacts
+          command: |
+            cd npm
+            cp *.tgz /tmp/hermes/output
+            # Also copy the other packages for the sole purpose of not having
+            # to visit multiple jobs pages to download all release artifacts
+            cp /tmp/hermes/input/*.tar.gz /tmp/hermes/output
+
+      - run:
+          name: Checksum artifacts
+          command: |
+            cd /tmp/hermes/output
+            for file in *
+            do
+              sha256sum "$file" > "$file.sha256"
+            done
+
+      - store_artifacts:
+          path: /tmp/hermes/output
+
+      - persist_to_workspace:
+          root: /tmp/hermes/output
+          paths:
+            - .
+
+  # test to build with emscripten, not run
+  test-emscripten:
+    docker:
+      - image: emscripten/emsdk:2.0.9
+    working_directory: /root
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt update
+            apt install -y libicu-dev
+      - checkout:
+          path: hermes
+      - run:
+          name: Build Hermes Compiler
+          command: |
+            cmake -S hermes -B build_host_hermesc
+            cmake --build ./build_host_hermesc --target hermesc -j 4
+      - run:
+          name: Build Hermes with Emscripten
+          command: |
+            cmake -S hermes -B embuild \
+                -DCMAKE_BUILD_TYPE=Release  \
+                -DCMAKE_EXE_LINKER_FLAGS="-s NODERAWFS=1 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s LLD_REPORT_UNDEFINED=1" \
+                -DCMAKE_TOOLCHAIN_FILE="$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake" \
+                -DIMPORT_HERMESC="$PWD/build_host_hermesc/ImportHermesc.cmake"
+            cmake --build ./embuild --target hermes -j 4
+            cmake --build ./embuild --target hermesc -j 4
+            cmake --build ./embuild --target emhermesc -j 4
+            EMHERMESC="$PWD/embuild/bin/emhermesc.js" node ./hermes/tools/emhermesc/test.js
+
+  test-e2e:
+    executor:
+      name: android/android-machine
+    working_directory: /home/circleci
+    environment:
+      REACT_NATIVE_OVERRIDE_HERMES_DIR: /home/circleci/hermes
+    steps:
+      - node/install:
+          install-yarn: true
+          lts: true
+      - run:
+          name: Setup dependencies
+          command: |
+            (yes | sdkmanager "cmake;3.18.1" --verbose) || true
+      - checkout:
+          path: hermes
+      - run:
+          name: Prepare RNTester
+          command: |
+            git clone --depth=1 https://github.com/facebook/react-native
+            cd react-native
+            yarn install
+            echo "console.log('Using Hermes: ' + (global.HermesInternal != null));" >> packages/rn-tester/js/RNTesterApp.android.js
+      - android/start-emulator-and-run-tests:
+          post-emulator-launch-assemble-command: ''
+          run-tests-working-directory: react-native
+          run-logcat: true
+          test-command: >-
+            ./gradlew -PreactNativeArchitectures=x86 :packages:rn-tester:android:app:installHermesRelease
+            && adb shell am start com.facebook.react.uiapp/.RNTesterActivity
+            && timeout 30s adb logcat -e "Using Hermes: true" -m 1
+
+  test-e2e-intl:
+    executor:
+      name: android/android-machine
+    working_directory: /home/circleci
+    environment:
+      HERMES_WS_DIR: /home/circleci
+    steps:
+      - checkout:
+          path: hermes
+      - run:
+          name: Setup dependencies
+          command: |
+            (yes | sdkmanager "cmake;3.18.1" --verbose) || true
+            # Check out test262 at a pinned revision to reduce flakiness
+            git clone https://github.com/tc39/test262
+            cd test262
+            git checkout 19da3ca0757248f7595ee09d532bb83dd438f2b5
+      - run:
+          name: Build Hermes Compiler
+          command: |
+            cmake -S hermes -B ./build -DCMAKE_BUILD_TYPE=Release
+            cmake --build ./build -j 4 --target hermesc
+      - android/start-emulator-and-run-tests:
+          post-emulator-launch-assemble-command: ''
+          run-tests-working-directory: hermes/android
+          run-logcat: true
+          additional-emulator-args: -timezone Europe/Paris
+          test-command: ./gradlew :intltest:prepareTests && ./gradlew -Pabis=x86 :intltest:connectedAndroidTest
