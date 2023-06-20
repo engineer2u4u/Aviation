@@ -8,7 +8,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -20,12 +20,12 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import TakeCamera from '../subcomponents/Forms/takecamera';
-import {firebase} from '@react-native-firebase/functions';
-import {ActivityIndicator} from 'react-native';
+import { firebase } from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import s from '../subcomponents/Forms/FlightPreparation/form.styles';
 
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export default function PreArrival(props) {
   const FUID = props.route.params.UID;
@@ -35,25 +35,25 @@ export default function PreArrival(props) {
   const cTransport = useRef();
   const cHotel = useRef();
   const [checkList, setChecklist] = useState([
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, remarks: ''},
-    {checked: false, file: [], remarks: ''},
-    {checked: false, remarks: ''},
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, remarks: '' },
+    { checked: false, file: [], remarks: '' },
+    { checked: false, remarks: '' },
 
     [], //12
     [],
     [],
     [],
-    {checked: false, remarks: ''}, //16
-    {checked: false, remarks: ''}, //17
+    { checked: false, remarks: '' }, //16
+    { checked: false, remarks: '' }, //17
   ]);
   const refRBSheet = useRef();
   //upload funcs
@@ -148,7 +148,7 @@ export default function PreArrival(props) {
               y[13].push({
                 name: val.PCH_HN.trim().replace('""', ''),
                 location: val.PCH_HL.trim().replace('""', ''),
-                hotelMap: {value: null, file: []},
+                hotelMap: { value: null, file: [] },
                 transportTime: val.PCH_TT,
                 remarks: val.PCH_REM.trim().replace('""', ''),
                 type: val.PCH_TYPE,
@@ -158,7 +158,7 @@ export default function PreArrival(props) {
               y[15].push({
                 name: val.PCH_HN.trim().replace('""', ''),
                 location: val.PCH_HL.trim().replace('""', ''),
-                hotelMap: {value: null, file: []},
+                hotelMap: { value: null, file: [] },
                 transportTime: val.PCH_TT,
                 remarks: val.PCH_REM.trim().replace('""', ''),
                 type: val.PCH_TYPE,
@@ -386,7 +386,7 @@ export default function PreArrival(props) {
       {
         name: null,
         location: null,
-        hotelMap: {value: null, file: []},
+        hotelMap: { value: null, file: [] },
         time: null,
         remarks: null,
         type: 'Pax',
@@ -401,7 +401,7 @@ export default function PreArrival(props) {
       {
         name: null,
         location: null,
-        hotelMap: {value: null, file: []},
+        hotelMap: { value: null, file: [] },
         time: null,
         remarks: null,
         type: 'Crew',
@@ -724,11 +724,11 @@ export default function PreArrival(props) {
           Pre-Arrival Checklist
         </Text>
         {callLoad ? (
-          <View style={{paddingRight: 20}}>
+          <View style={{ paddingRight: 20 }}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
         ) : (
-          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+          <TouchableOpacity onPress={sendForm} style={{ marginRight: 20 }}>
             <Icons name="content-save" color="green" size={30} />
           </TouchableOpacity>
         )}
@@ -746,7 +746,7 @@ export default function PreArrival(props) {
           }
         />
 
-        <View style={{padding: 20, marginBottom: 100}}>
+        <View style={{ padding: 20, marginBottom: 100 }}>
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity
               onPress={event => setChecked(0)}
@@ -769,7 +769,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(0)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -777,13 +777,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[0].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[0].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(0)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -813,7 +813,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(1)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -821,13 +821,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[1].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[1].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(1)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -857,7 +857,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(2)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -865,13 +865,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[2].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[2].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(2)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -901,7 +901,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(3)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -909,13 +909,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[3].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[3].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(3)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -945,7 +945,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(16)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -953,13 +953,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[16].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[16].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(16)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -989,7 +989,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(17)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -997,13 +997,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[17].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[17].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(17)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1038,7 +1038,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(4)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1046,13 +1046,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[4].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[4].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(4)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1082,7 +1082,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(5)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1090,13 +1090,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[5].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[5].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(5)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1126,7 +1126,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(6)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1134,13 +1134,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[6].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[6].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(6)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1170,7 +1170,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(7)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1178,13 +1178,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[7].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[7].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(7)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1214,7 +1214,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(8)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1222,13 +1222,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[8].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[8].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(8)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1258,7 +1258,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(9)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1266,13 +1266,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[9].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[9].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(9)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1321,11 +1321,11 @@ export default function PreArrival(props) {
                 borderWidth: 1,
                 borderRadius: 8,
               }}>
-              <Text style={{color: 'green'}}>Upload</Text>
+              <Text style={{ color: 'green' }}>Upload</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(10)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1333,13 +1333,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[10].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 5}}>
+            <View style={{ flexDirection: 'row', marginBottom: 5 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[10].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(10)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1348,7 +1348,7 @@ export default function PreArrival(props) {
             </View>
           )}
           {checkList[10].file.length > 0 && (
-            <View style={{marginBottom: 20}}>
+            <View style={{ marginBottom: 20 }}>
               {checkList[10].file.map((value, index) => {
                 return (
                   <View
@@ -1364,7 +1364,7 @@ export default function PreArrival(props) {
                       ...Platform.select({
                         ios: {
                           shadowColor: '#000',
-                          shadowOffset: {width: 0, height: 2},
+                          shadowOffset: { width: 0, height: 2 },
                           shadowOpacity: 0.8,
                           shadowRadius: 2,
                         },
@@ -1373,10 +1373,10 @@ export default function PreArrival(props) {
                         },
                       }),
                     }}>
-                    <Text style={{color: 'black'}}>{value.name}</Text>
+                    <Text style={{ color: 'black' }}>{value.name}</Text>
                     <TouchableOpacity onPress={() => removeFilePreA(10, index)}>
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
@@ -1408,7 +1408,7 @@ export default function PreArrival(props) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => getFeedback(11)}>
               <Icons
-                style={{marginLeft: 10}}
+                style={{ marginLeft: 10 }}
                 name="comment-processing-outline"
                 color="green"
                 size={30}
@@ -1416,13 +1416,13 @@ export default function PreArrival(props) {
             </TouchableOpacity>
           </View>
           {checkList[11].remarks && (
-            <View style={{flexDirection: 'row', marginBottom: 20}}>
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
                 <Text>{checkList[11].remarks}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback(11)}>
                 <Icons
-                  style={{marginLeft: 10}}
+                  style={{ marginLeft: 10 }}
                   name="delete-circle-outline"
                   color="red"
                   size={30}
@@ -1431,7 +1431,7 @@ export default function PreArrival(props) {
             </View>
           )}
 
-          <Text style={[styleSheet.label, {marginTop: 20}]}>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>
             Pax Transport:
           </Text>
           <View
@@ -1453,9 +1453,9 @@ export default function PreArrival(props) {
                 disabled={paxactivesections}
                 style={[
                   styleSheet.button,
-                  {backgroundColor: paxactivesections ? '#80808080' : 'green'},
+                  { backgroundColor: paxactivesections ? '#80808080' : 'green' },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
@@ -1463,14 +1463,14 @@ export default function PreArrival(props) {
             {checkList[12].map((val, index) => {
               //if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveService(index)}>
@@ -1534,7 +1534,7 @@ export default function PreArrival(props) {
               );
             })}
           </View>
-          <Text style={[styleSheet.label, {marginTop: 20}]}>Pax Hotel:</Text>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>Pax Hotel:</Text>
           <View
             style={{
               borderWidth: 1,
@@ -1560,7 +1560,7 @@ export default function PreArrival(props) {
                       : 'green',
                   },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Hotel
                 </Text>
               </TouchableOpacity>
@@ -1568,14 +1568,14 @@ export default function PreArrival(props) {
             {checkList[13].map((val, index) => {
               // if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveHotel(index)}>
@@ -1585,7 +1585,7 @@ export default function PreArrival(props) {
 
                   <>
                     <Text style={s.label}>{'Hotel Name'}</Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <TextInput
                         style={[
                           s.input,
@@ -1651,7 +1651,7 @@ export default function PreArrival(props) {
                     attachments={checkList[13][index].hotelMap}
                     Icon={
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
@@ -1684,7 +1684,7 @@ export default function PreArrival(props) {
                     numberOfLines={2}
                   /> */}
                   <Text style={styleSheet.label}>Remarks</Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                       style={styleSheet.input}
                       multiline={true}
@@ -1698,12 +1698,22 @@ export default function PreArrival(props) {
                       }}
                     />
                   </View>
+                  <Text style={styleSheet.label}>Hotel Contact No.</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                      style={styleSheet.input}
+                      multiline={true}
+                      placeholder=""
+                      numberOfLines={1}
+                      keyboardType='numeric'
+                    />
+                  </View>
                 </View>
               );
               // }
             })}
           </View>
-          <Text style={[styleSheet.label, {marginTop: 20}]}>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>
             Crew Transport:
           </Text>
           <View
@@ -1832,9 +1842,9 @@ export default function PreArrival(props) {
                 disabled={crewactivesections}
                 style={[
                   styleSheet.button,
-                  {backgroundColor: crewactivesections ? '#80808080' : 'green'},
+                  { backgroundColor: crewactivesections ? '#80808080' : 'green' },
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Transport
                 </Text>
               </TouchableOpacity>
@@ -1842,14 +1852,14 @@ export default function PreArrival(props) {
             {checkList[14].map((val, index) => {
               //if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveServiceCrew(index)}>
@@ -1913,7 +1923,7 @@ export default function PreArrival(props) {
               );
             })}
           </View>
-          <Text style={[styleSheet.label, {marginTop: 20}]}>Crew Hotel:</Text>
+          <Text style={[styleSheet.label, { marginTop: 20 }]}>Crew Hotel:</Text>
 
           <View
             style={{
@@ -2109,7 +2119,7 @@ export default function PreArrival(props) {
                     },
                   ],
                 ]}>
-                <Text style={{color: 'white', textAlign: 'center'}}>
+                <Text style={{ color: 'white', textAlign: 'center' }}>
                   Add Hotel
                 </Text>
               </TouchableOpacity>
@@ -2117,14 +2127,14 @@ export default function PreArrival(props) {
             {checkList[15].map((val, index) => {
               //if (index > 0) {
               return (
-                <View key={index} style={{marginTop: 20}}>
+                <View key={index} style={{ marginTop: 20 }}>
                   <View
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: 'rgba(0,0,0,0.4)',
                       marginBottom: 20,
                     }}></View>
-                  <View style={{alignItems: 'flex-end'}}>
+                  <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
                       onPress={() => onRemoveHotelCrew(index)}>
@@ -2213,7 +2223,7 @@ export default function PreArrival(props) {
                     attachments={checkList[15][index].hotelMap}
                     Icon={
                       <Icons
-                        style={{color: 'green', marginLeft: 10}}
+                        style={{ color: 'green', marginLeft: 10 }}
                         name="close"
                         size={30}
                       />
@@ -2242,6 +2252,59 @@ export default function PreArrival(props) {
                       setChecklist(tcheckList);
                     }}
                   />
+                  <Text style={styleSheet.label}>Hotel Contact No.</Text>
+                  <TextInput
+                    style={styleSheet.input}
+                    // value={checkList[15][index].remarks}
+                    // onChangeText={text => {
+                    //   console.log(text);
+                    //   var tcheckList = [...checkList];
+                    //   tcheckList[15][index].remarks = text;
+                    //   setChecklist(tcheckList);
+                    // }}
+                    keyboardType='numeric'
+                  />
+                  <View
+                    style={{
+                      borderWidth: 0,
+                      borderColor: 'rgba(0,0,0,0.5)',
+                      padding: 10,
+                      borderRadius: 10,
+                      marginVertical: 10,
+                    }}>
+                    <TouchableOpacity
+                      // disabled={crewhotelactivesections}
+                      // onPress={addHotelCrew}
+                      style={[
+                        [
+                          styleSheet.button,
+                          {
+                            backgroundColor: crewhotelactivesections
+                              ? '#80808080'
+                              : 'green',
+                          },
+                        ],
+                      ]}>
+                      <Text style={{ color: 'white', textAlign: 'center' }}>
+                        Add Confirmation Details
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={styleSheet.label}>Guest Name</Text>
+                    <TextInput
+                      style={styleSheet.input}
+                    />
+                    <Text style={styleSheet.label}>Confimration number</Text>
+                    <TextInput
+                      style={styleSheet.input}
+                      keyboardType='numeric'
+                    />
+                    <View
+                      style={{
+                        borderBottomColor: 'black',
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                      }}
+                    />
+                  </View>
                   {/* <LabelledInput
                     label={'Remarks'}
                     data={checkList[15][index].remarks}
@@ -2281,11 +2344,11 @@ export default function PreArrival(props) {
             backgroundColor: '#000',
           },
         }}>
-        <View style={{flex: 1, paddingLeft: 20}}>
-          <View style={{flex: 1}}>
-            <Text style={{color: 'black', fontSize: 22}}>Upload Image</Text>
+        <View style={{ flex: 1, paddingLeft: 20 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: 'black', fontSize: 22 }}>Upload Image</Text>
           </View>
-          <View style={{flex: 1.5, flexDirection: 'column'}}>
+          <View style={{ flex: 1.5, flexDirection: 'column' }}>
             <TouchableOpacity
               onPress={() => getImage(false)}
               style={{
@@ -2294,7 +2357,7 @@ export default function PreArrival(props) {
                 justifyContent: 'flex-start',
               }}>
               <Icons name="camera-outline" size={25} color={'black'} />
-              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                 Upload from Camera
               </Text>
             </TouchableOpacity>
@@ -2307,7 +2370,7 @@ export default function PreArrival(props) {
                 justifyContent: 'flex-start',
               }}>
               <Icons name="image-outline" size={25} color={'black'} />
-              <Text style={{color: 'black', fontSize: 18, paddingLeft: 20}}>
+              <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
                 Upload from Gallery
               </Text>
             </TouchableOpacity>
@@ -2323,7 +2386,7 @@ const styleSheet = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f2f2f2',
   },
-  imgName: {color: 'black', fontSize: 12, fontWeight: '600'},
+  imgName: { color: 'black', fontSize: 12, fontWeight: '600' },
   checkbox: {
     width: 40,
     height: 40,
@@ -2354,7 +2417,7 @@ const styleSheet = StyleSheet.create({
     textAlignVertical: 'top',
     color: 'black',
     backgroundColor: 'white',
-    fontSize: 20,
+    fontSize: 16,
   },
   picker: {
     flex: 1,
