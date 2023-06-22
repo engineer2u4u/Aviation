@@ -556,9 +556,9 @@ const App = () => {
             {/* <Stack.Screen name="FlightDetails" component={FlightDetails} /> */}
             <Stack.Screen name="GroundHandling" component={GroundHandling} />
             <Stack.Screen name="LogDetails" component={LogDetails} options={{ orientation: 'landscape' }} />
-            <Stack.Screen name="Risk" component={Risk} />
-            <Stack.Screen name="Log2" component={Log2} />
-            <Stack.Screen name="Log1" component={Log1} />
+            <Stack.Screen name="Risk" component={Risk} options={{ orientation: 'landscape' }} />
+            <Stack.Screen name="Log2" component={Log2} options={{ orientation: 'landscape' }} />
+            <Stack.Screen name="Log1" component={Log1} options={{ orientation: 'landscape' }} />
             <Stack.Screen name="Rectification" component={Rectification} />
             <Stack.Screen
               name="FlightDetailsRoute"
