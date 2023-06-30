@@ -28,6 +28,9 @@ build/
 .idea
 .gradle
 local.properties
+node_modules
+node_modules/
+/node_modules/
 *.iml
 *.hprof
 .cxx/
