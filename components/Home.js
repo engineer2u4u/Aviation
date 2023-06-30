@@ -262,8 +262,12 @@ export default function Home({navigation}) {
             <Text style={{color: 'white'}}>Flight Log</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            activeOpacity={0}
-            style={{flex: 1}}></TouchableOpacity>
+            onPress={() => navigation.navigate('LogDetails')}
+            style={[styles.card]}>
+            <Icons color="white" name="date-range" size={50} />
+            <Text style={{color: 'white'}}>Calender</Text>
+          </TouchableOpacity>
+          
         </View>
       </View>
 

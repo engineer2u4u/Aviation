@@ -1200,7 +1200,7 @@ export default function PreDepartureChecklist(props) {
                     numberOfLines={1}
                   />
                   <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
-                    Pax Details:
+                    Crew Details:
                   </Text>
                   <LabelledInput
 
@@ -1656,7 +1656,7 @@ export default function PreDepartureChecklist(props) {
                   </Text>
                   <LabelledInput
 
-                    label={'Lead Crew Name'} //mark
+                    label={'Lead Pax Name'} //mark
                     data={val.PDCT_LEAD_NAME}
                     datatype={'text'}
                     index={12}
@@ -1670,7 +1670,7 @@ export default function PreDepartureChecklist(props) {
                   />
                   <LabelledInput
 
-                    label={'No. of Crew'} //mark
+                    label={'No. of Pax'} //mark
                     data={val.PDCT_PASSENGER_NO}
                     datatype={'text'}
                     index={12}

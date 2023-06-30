@@ -272,7 +272,7 @@ const EditFlight = props => {
     <View>
       <Header
         headingSize={HeadingTextSize}
-        heading={'Edit Flight'}
+        heading={UID ? 'Edit Flight' : 'Add Flight'}
         sendForm={sendForm}
         nav={"GroundHandling"}
         navigation={props.navigation}
