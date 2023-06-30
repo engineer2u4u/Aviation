@@ -302,9 +302,21 @@ const EditFlight = props => {
             multiline={true}
             numberOfLines={1}
           />
+          <LabelledInput
+            label={'Flight No.'} //mark
+            datatype={'text'}
+            data={formpayload.FLIGHT_NO}
+            disabled={false}
+            setText={(index, text, type, section) => {
+              sethasUnsavedChanges(true);
+              setformpayload({ ...formpayload, FLIGHT_NO: text });
+            }}
+            multiline={true}
+            numberOfLines={1}
+          />
           {UID ? (
             <LabelledInput
-              label={'Registration'} //mark
+              label={'Aircraft Registration'} //mark
               data={formpayload.FLIGHT_REGISTRATION}
               datatype={'text'}
               index={57}
@@ -317,7 +329,7 @@ const EditFlight = props => {
             />
           ) : (
             <>
-              <Text style={styleSheet.label}>Registration</Text>
+              <Text style={styleSheet.label}>Aircraft Registration</Text>
               <View>
                 <TouchableOpacity
                   style={styleSheet.input}
@@ -355,6 +367,18 @@ const EditFlight = props => {
             setText={(index, text, type, section) => {
               sethasUnsavedChanges(true);
               setformpayload({ ...formpayload, FLIGHT_BILLING_PARTY: text });
+            }}
+            multiline={true}
+            numberOfLines={1}
+          />
+          <LabelledInput
+            label={'Flight Purpose'} //mark
+            datatype={'text'}
+            data={formpayload.FLIGHT_PURPOSE}
+            disabled={false}
+            setText={(index, text, type, section) => {
+              sethasUnsavedChanges(true);
+              setformpayload({ ...formpayload, FLIGHT_PURPOSE: text });
             }}
             multiline={true}
             numberOfLines={1}
