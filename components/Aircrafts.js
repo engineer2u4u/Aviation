@@ -13,10 +13,12 @@ import Icons from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5Icons from 'react-native-vector-icons/FontAwesome5';
 const { width, height } = Dimensions.get('window');
+import { SERVER_URL, getDomain } from './constants/env';
 
 const HeadingTextSize = width / 15;
 const labelTextSize = width / 25;
 export default function Aircrafts(props) {
+
   const [listData, setListData] = useState([]);
   const [callLoad, setcallLoad] = useState(false);
 
@@ -26,6 +28,7 @@ export default function Aircrafts(props) {
     }
   };
   useEffect(() => {
+    var domain = getDomain();
     setcallLoad(true)
     var myHeaders = new Headers();
     myHeaders.append("Accept", "application/json");
@@ -34,9 +37,21 @@ export default function Aircrafts(props) {
       headers: myHeaders,
     };
 
-    fetch("https://demo.vellas.net:94/arrowdemoapi/api/Values/GetAlAviationAirCraft?_token=AF8C96FB-6D64-4E5D-91C2-F2282EA7DB7C&_opco=&_uid=", requestOptions)
+    fetch(`${domain}/GetAlAviationAirCraft?_token=AF8C96FB-6D64-4E5D-91C2-F2282EA7DB7C&_opco=&_uid=`, requestOptions)
       .then(response => response.text())
-      .then(result => { setListData(JSON.parse(result)); setcallLoad(false) })
+      .then(result => {
+        try {
+          var data = JSON.parse(result);
+          console.log(data)
+          data = data.filter(val => val.STATUS != 5)
+          setListData(data);
+          setcallLoad(false);
+        }
+        catch (e) {
+          console.log('error', error);
+          setcallLoad(false)
+        }
+      })
       .catch(error => { console.log('error', error); setcallLoad(false) });
   }, []);
   const deleteRow = (rowMap, rowKey) => {
@@ -74,7 +89,7 @@ export default function Aircrafts(props) {
       <TouchableOpacity
         style={[styles.backLeftBtn, styles.backLeftBtnRight]}
         onPress={() => deleteRow(rowMap, data.item.key)}>
-        <MaterialIcons color="white" name="delete-forever" size={40} />
+        {/* <MaterialIcons color="white" name="delete-forever" size={40} /> */}
       </TouchableOpacity>
       {/* <TouchableOpacity
                 style={[styles.backRightBtn, styles.backRightBtnLeft]}
@@ -195,7 +210,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 8,
   },
   backLeftBtnRight: {
-    backgroundColor: 'red',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     left: 0,
     borderTopLeftRadius: 8,
     borderBottomLeftRadius: 8,

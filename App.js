@@ -3,11 +3,16 @@ import Home from './components/Home';
 import LogDetails from './components/LogDetails';
 import Risk from './components/Risk';
 import Log2 from './components/Log2';
+import Calendar from './components/Calendar';
 import Rectification from './components/Rectification';
 import Log1 from './components/Log1';
+import UserLogin from './components/UserLogin';
 import GroundHandling from './components/GroundHandling';
 import AircraftDetails from './components/AircraftDetails';
 import Scanner from './components/Scanner';
+import RiskList from './components/etech_log/RiskList';
+import LogList from './components/etech_log/LogList';
+import ReportList from './components/etech_log/ReportList';
 import FlightDetailsRoute from './components/FlightDetailsRoute';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -116,8 +121,17 @@ const Login = props => {
           setloading(false);
         })
         .catch(error => {
-          if (error.code === 'auth/user-not-found')
+          if (error.code === 'auth/user-not-found') {
             inValidator(true, 'Incorrect Credentials');
+          }
+          else if (error.code === 'auth/wrong-password') {
+            inValidator(true, 'Password is incorrect');
+          }
+          else {
+            inValidator(true, 'Error in login. Try again');
+
+          }
+          console.log(error);
           setloading(false);
         });
     }
@@ -261,7 +275,7 @@ const Login = props => {
               </TouchableOpacity>
             )}
 
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'flex-start',
@@ -283,7 +297,7 @@ const Login = props => {
                   Sign Up
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
         </View>
 
@@ -540,10 +554,11 @@ const App = () => {
       <UserDetails.Provider value={{ user, setUser }}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName={loggedIn ? 'Home' : 'Login'}
+            initialRouteName={loggedIn ? 'UserLogin' : 'Login'}
             screenOptions={{ headerShown: false }}>
             {loggedIn ? (
-              <Stack.Screen name="Home" component={Home} />
+              <Stack.Screen name="UserLogin" component={UserLogin} />
+
             ) : (
               <>
                 <Stack.Screen name="Login" component={Login} />
@@ -554,12 +569,19 @@ const App = () => {
             )}
 
             {/* <Stack.Screen name="FlightDetails" component={FlightDetails} /> */}
+            <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="GroundHandling" component={GroundHandling} />
-            <Stack.Screen name="LogDetails" component={LogDetails} options={{ orientation: 'landscape' }} />
-            <Stack.Screen name="Risk" component={Risk} options={{ orientation: 'landscape' }} />
-            <Stack.Screen name="Log2" component={Log2} options={{ orientation: 'landscape' }} />
-            <Stack.Screen name="Log1" component={Log1} options={{ orientation: 'landscape' }} />
+
+            {/* <Stack.Screen name="LogDetails" component={LogDetails} options={{ orientation: 'landscape' }} /> */}
+            <Stack.Screen name="LogDetails" options={{ orientation: 'landscape' }} component={LogDetails} />
+            <Stack.Screen name="Risk" options={{ orientation: 'landscape' }} component={Risk} />
+            <Stack.Screen name="RiskList" options={{ orientation: 'landscape' }} component={RiskList} />
+            <Stack.Screen name="ReportList" options={{ orientation: 'landscape' }} component={ReportList} />
+            <Stack.Screen name="LogList" options={{ orientation: 'landscape' }} component={LogList} />
+            <Stack.Screen name="Log2" options={{ orientation: 'landscape' }} component={Log2} />
+            <Stack.Screen name="Log1" options={{ orientation: 'landscape' }} component={Log1} />
             <Stack.Screen name="Rectification" component={Rectification} />
+            <Stack.Screen name="Calendar" component={Calendar} />
             <Stack.Screen
               name="FlightDetailsRoute"
               component={FlightDetailsRoute}

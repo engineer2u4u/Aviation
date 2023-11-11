@@ -6,59 +6,86 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  Dimensions
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import functions from '@react-native-firebase/functions';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {ActivityIndicator} from 'react-native';
-import {firebase} from '@react-native-firebase/functions';
+import { ActivityIndicator } from 'react-native';
+import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
+import { SERVER_URL, getDomain } from '../constants/env';
+import Header from '../subcomponents/Forms/Header';
+const { width, height } = Dimensions.get('window');
 
 export default function InterimService(props) {
   const FUID = props.route.params.UID;
   const [uid, setuid] = useState(null);
+  const [formReady, setformReady] = useState(true);
 
   const [Iservices, setIservices] = useState([]);
   useEffect(() => {
+    readData();
+  }, []);
+
+  const readData = () => {
     setcallLoad(true);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetInterimServices',
-      )()
+    var domain = getDomain();
+
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders
+    };
+    fetch(
+      `${domain}/GetInterimServices?_token=8746A6BE-8BB1-4D08-9E68-A15982110834&_opco=&_fuid=${FUID}&_uid=`,
+      requestOptions,
+    )
+      .then(response => response.text())
       .then(response => {
         setcallLoad(false);
 
-        var packet = JSON.parse(response.data.body);
+        var packet = JSON.parse(response);
         var res = packet.Table;
         console.log(res);
         if (res.length > 0) {
           var y = [...Iservices];
           y = [];
           res.forEach((val, index) => {
-            y.push({
-              service: val.INS_SERVICE.trim().replace('""', ''),
-              remarks: val.INS_REM.trim().replace('""', ''),
-              UID: val.UID,
-            });
+            if (val.STATUS != 5) {
+              y.push({
+                service: val.INS_SERVICE.trim().replace('""', ''),
+                remarks: val.INS_REM.trim().replace('""', ''),
+                UID: val.UID,
+              });
+            }
           });
           setIservices([...y]);
+        }
+        else {
+          setIservices([]);
         }
       })
       .catch(error => {
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-  }, []);
+  }
 
   const onAddServices = () => {
-    setIservices([...Iservices, {service: null, remarks: null}]);
+    setIservices([...Iservices, { service: null, remarks: null }]);
   };
+  const [deleteService, setdeleteService] = useState([]);
   const onRemoveService = index => {
     var service = [...Iservices];
-    service.splice(index, 1);
+    var delService = service.splice(index, 1);
     setIservices(service);
+    if (delService[0].UID) {
+      setdeleteService([...deleteService, { UID: delService[0].UID, TableName: 'INTERIMSERVICES' }]);
+    }
+
   };
 
   const onChangeService = (text, index, type) => {
@@ -70,35 +97,101 @@ export default function InterimService(props) {
   const sendForm = () => {
     const email = auth().currentUser.email;
     setcallLoad(true);
-    Iservices.map(val => {
-      firebase
-        .app()
-        .functions('asia-southeast1')
-        .httpsCallable('updateFlightModule?module=PostInterimServices')(
-          JSON.stringify({
-            INS_SERVICE: val.service ? val.service : '""',
-            INS_REM: val.remarks ? val.remarks : '""',
-            UID: val.UID ? val.UID : '',
-            STATUS: 0,
-            FUID: FUID,
-            UPDATE_BY: email,
-          }),
-        )
+    var domain = getDomain();
+
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    if (Iservices.length > 0) {
+
+      var sendData = {
+        "UID": [],
+        "FUID": FUID,
+        "INS_SERVICE": [],
+        "INS_REM": [],
+        "STATUS": 0,
+        "UPDATE_BY": email
+      };
+      Iservices.map(val => {
+        sendData.UID.push(val.UID ? val.UID : "");
+        sendData.INS_SERVICE.push(val.service);
+        sendData.INS_REM.push(val.remarks);
+      })
+      console.log(sendData);
+      // Iservices.map(val => {
+
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify(sendData)
+      };
+      fetch(
+        `${domain}/PostInterimServices`,
+        requestOptions,
+      )
+        .then(response => response.text())
         .then(response => {
           Alert.alert('Success');
           setcallLoad(false);
           console.log(response);
+          readData();
         })
         .catch(error => {
           Alert.alert('Error in updation');
           setcallLoad(false);
           console.log(error, 'Function error');
         });
-    });
+      // });
+    }
+    else {
+      console.log("deleteService", deleteService)
+      if (deleteService.length > 0) {
+        var requestOptions1 = {
+          method: 'POST',
+          headers: myHeaders,
+          body: JSON.stringify(deleteService)
+        };
+        fetch(
+          `${domain}/DeleteAPI`,
+          requestOptions1,
+        )
+          .then(response => response.text())
+          .then(result => {
+            setdeleteService([])
+            setcallLoad(false);
+            console.log(result);
+          })
+          .catch(error => {
+            Alert.alert('Error in updation');
+            setcallLoad(false);
+            console.log(error, 'Function error');
+          });
+      }
+
+    }
   };
   return (
     <View>
-      <View
+      <Header
+        headingSize={width / 15}
+        heading={'Interim Services'}
+        sendForm={sendForm}
+        nav={"IntialScreenView"}
+        navigation={props.navigation}
+        Icon={
+          callLoad ? (
+            <ActivityIndicator size={'small'} color="green" />
+          ) : (
+            <Icons
+              name="content-save"
+              color={formReady ? 'green' : '#aeaeae'}
+              size={30}
+            />
+          )
+        }
+      />
+      {/* <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -115,17 +208,17 @@ export default function InterimService(props) {
           Interim Services
         </Text>
         {callLoad ? (
-          <View style={{paddingRight: 20}}>
+          <View style={{ paddingRight: 20 }}>
             <ActivityIndicator color="green" size={'small'} />
           </View>
         ) : (
-          <TouchableOpacity onPress={sendForm} style={{marginRight: 20}}>
+          <TouchableOpacity onPress={sendForm} style={{ marginRight: 20 }}>
             <Icons name="content-save" color="green" size={30} />
           </TouchableOpacity>
         )}
-      </View>
+      </View> */}
       <ScrollView>
-        <View style={{padding: 10, paddingBottom: 100}}>
+        <View style={{ padding: 10, paddingBottom: 100 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -134,8 +227,8 @@ export default function InterimService(props) {
             }}>
             <TouchableOpacity
               onPress={onAddServices}
-              style={[styleSheet.button, {marginHorizontal: 30}]}>
-              <Text style={{color: 'white', textAlign: 'center'}}>
+              style={[styleSheet.button, { marginHorizontal: 30 }]}>
+              <Text style={{ color: 'white', textAlign: 'center' }}>
                 Add Service
               </Text>
             </TouchableOpacity>
@@ -176,7 +269,7 @@ export default function InterimService(props) {
                         </TouchableOpacity>
                       </View>
                       <View
-                        style={{flexDirection: 'row', alignItems: 'center'}}>
+                        style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <TextInput
                           style={styleSheet.input}
                           value={Iservices[index].service}

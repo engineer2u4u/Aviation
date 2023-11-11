@@ -9,6 +9,7 @@ import {
   Alert,
   Modal,
   StyleSheet,
+  FlatList
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -18,11 +19,12 @@ import { firebase } from '@react-native-firebase/functions';
 import Header from '../subcomponents/Forms/Header';
 import auth from '@react-native-firebase/auth';
 const { width } = Dimensions.get('window');
+import { SERVER_URL, getDomain } from '../constants/env';
 
 const HeadingTextSize = width / 15;
 const EditFlight = props => {
   const UID = props.route.params.UID;
-  // console.log(UID);
+  console.log(UID);
   const [mode, setMode] = useState('time');
   const [regList, setregList] = useState([]);
   const [hasUnsavedChanges, sethasUnsavedChanges] = useState(false);
@@ -30,6 +32,16 @@ const EditFlight = props => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   const [modalVisible, setmodalVisible] = useState(false);
+  const [OriginModalList, setOriginModalList] = useState(false);
+  const [HanlderModalList, setHanlderModalList] = useState(false);
+  const [OriginList, setOriginList] = useState([]);
+  const [HandlerList, setHandlerList] = useState(["AVIATION ALLIANCE NETWORK",
+    "SKYPARK",
+    "DHT",
+    "PREMIER AERO SERVICES",
+    "JET AVIATION SERVICES"]);
+  const [currOrigin, setcurrOrigin] = useState(null);
+  const [currHandler, setcurrHandler] = useState(null);
   const [modalVisibleList, setmodalVisibleList] = useState(false);
   const [reg, setreg] = useState(null);
   const [callLoad, setcallLoad] = useState(false);
@@ -152,13 +164,19 @@ const EditFlight = props => {
     return null;
   };
   const ISOconvert = dateT => {
-    return new Date();
+    var datetime = new Date(dateT).toLocaleString('en-US', {
+      hour12: false,
+    });
+
+    return datetime;
   };
   useEffect(() => {
+    var domain = getDomain();
     if (UID) {
+      console.log('Edit')
       setcallLoad(true);
       const url =
-        'https://demo.vellas.net:94/arrowdemoapi/api/Values/GetGroundHandlingList?_token=66D64C12-2055-4F11-BCF1-9F563ACB032F&_opco=&_uid=' +
+        `${domain}/GetGroundHandlingList?_token=66D64C12-2055-4F11-BCF1-9F563ACB032F&_opco=&_uid=` +
         UID;
       fetch(url, { method: 'GET' })
         .then(data => {
@@ -166,7 +184,7 @@ const EditFlight = props => {
         })
         .then(data => {
           var res = data.Table;
-          console.log(res[0].FLIGHT_TYPE);
+          console.log(res);
           if (res[0]) {
             setformpayload(res[0])
           }
@@ -177,50 +195,107 @@ const EditFlight = props => {
 
           console.log(e);
         });
-    } else {
-      setcallLoad(true);
-
-      const url =
-        'https://demo.vellas.net:94/arrowdemoapi/api/Values/getAIRCRAFT?_token=CB9A5812-B894-469A-8CA4-15055DA6D7D6&_opco=&_an=';
-      fetch(url, { method: 'GET' })
-        .then(data => {
-          return data.json();
-        })
-        .then(data => {
-          var res = data;
-          console.log(res);
-          setregList(res);
-          setcallLoad(false);
-        })
-        .catch(e => {
-          setcallLoad(false);
-          console.log(e);
-        });
     }
+    const url =
+      `${domain}/getAIRCRAFT?_token=CB9A5812-B894-469A-8CA4-15055DA6D7D6&_opco=&_an=`;
+    fetch(url, { method: 'GET' })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        var res = data;
+        console.log("Aircraft", res);
+        res = res.filter(val => val.STATUS !== 5)
+        setregList(res);
+        setcallLoad(false);
+      })
+      .catch(e => {
+        setcallLoad(false);
+        console.log(e);
+      });
+
+    const originURL =
+      `${domain}/GetAddressList?_token=CE367E60-22DD-4420-9BA1-79D872CD16C9`;
+    fetch(originURL, { method: 'GET' })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        var res = data;
+        // console.log(res);
+        res = res.filter(val => val.STATUS !== 5)
+        if (res && res.length) {
+          setOriginList(res);
+        }
+        setcallLoad(false);
+      })
+      .catch(e => {
+        setcallLoad(false);
+        console.log(e);
+      });
+
+    const Handlerurl =
+      `${domain}/AviationAllianceNetworks?_token=619F27C1-3F12-439E-A934-7B068BE67BC1`;
+    fetch(Handlerurl, { method: 'GET' })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        var res = data;
+        // console.log(res);
+        setHandlerList(res);
+        setcallLoad(false);
+      })
+      .catch(e => {
+        setcallLoad(false);
+        console.log(e);
+      });
+
   }, []);
 
   const sendForm = () => {
+    var domain = getDomain();
     setcallLoad(true);
     const email = auth().currentUser.email;
     var payload = formpayload;
+    // Object.keys(payload).map(val => {
+    //   payload[val] = payload[val] == null || payload[val] == "" ? " " : payload[val];
+    // })
     if (UID) {
       payload.UID = UID;
     } else {
+      payload.UID = '';
       payload.CREATED_BY = email;
+      payload.UPDATE_BY = email;
     }
     console.log(payload);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable('updateFlightModule?module=PostFlightHeader')(
-        JSON.stringify(payload),
-      )
-      .then(response => {
+
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(payload)
+    };
+    fetch(
+      `${domain}/PostFlightHeader`,
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
         setcallLoad(false);
-        Alert.alert('Success', 'Flight successfully created', [
-          { text: 'OK', onPress: () => console.log('OK Pressed') },
-        ]);
-        console.log(response);
+        if (UID) {
+          Alert.alert('Success', 'Flight successfully updated', [
+            { text: 'OK', onPress: () => console.log('OK Pressed') },
+          ]);
+        }
+        else {
+          Alert.alert('Success', 'Flight successfully created', [
+            { text: 'OK', onPress: () => console.log('OK Pressed') },
+          ]);
+        }
+        console.log(result);
         sethasUnsavedChanges(false)
       })
       .catch(error => {
@@ -231,9 +306,6 @@ const EditFlight = props => {
   };
   const [fieldType, setfieldType] = useState(0);
   const showDatePicker = (type, index, pos, field) => {
-    // pos != undefined
-    //   ? (currentPicker.current = [index, pos, field])
-    //   : (currentPicker.current = [index]);
     setMode(type);
     setfieldType(index);
     setDatePickerVisibility(true);
@@ -246,28 +318,29 @@ const EditFlight = props => {
     var tarrival = date;
     console.log('Check', tarrival);
     setformpayload({ ...formpayload, [fieldType]: tarrival });
-    // switch (fieldType) {
-    //   case 0:
-    //     setdepdate(tarrival);
-    //     break;
-    //   case 1:
-    //     setarrdate(tarrival);
-    //     break;
-    //   case 2:
-    //     setdeptime(tarrival);
-    //     break;
-    //   case 3:
-    //     setarrtime(tarrival);
-    //     break;
-    //   default:
-    //     break;
-    // }
-
-    //setArrival(tarrival);
     hideDatePicker();
   };
 
-
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => {
+        sethasUnsavedChanges(true);
+        var payloadData = { ...formpayload };
+        payloadData[currOrigin] = item.ICAO_IATA;
+        setformpayload({ ...payloadData });
+        setOriginModalList(false);
+      }}
+      style={{
+        backgroundColor: 'white',
+        width: width * 0.9,
+        padding: 20,
+        borderBottomWidth: 2,
+      }}>
+      <Text style={{ color: 'black', fontSize: width / 20 }}>
+        {item.ICAO_IATA}
+      </Text>
+    </TouchableOpacity>
+  );
   return (
     <View>
       <Header
@@ -314,7 +387,7 @@ const EditFlight = props => {
             multiline={true}
             numberOfLines={1}
           />
-          {UID ? (
+          {/* {UID ? (
             <LabelledInput
               label={'Aircraft Registration'} //mark
               data={formpayload.FLIGHT_REGISTRATION}
@@ -328,20 +401,20 @@ const EditFlight = props => {
               numberOfLines={1}
             />
           ) : (
-            <>
-              <Text style={styleSheet.label}>Aircraft Registration</Text>
-              <View>
-                <TouchableOpacity
-                  style={styleSheet.input}
-                  onPress={() => {
-                    console.log(regList);
-                    setmodalVisibleList(true);
-                  }}>
-                  <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_REGISTRATION}</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
+            <> */}
+          <Text style={styleSheet.label}>Aircraft Registration</Text>
+          <View>
+            <TouchableOpacity
+              style={styleSheet.input}
+              onPress={() => {
+                console.log(regList);
+                setmodalVisibleList(true);
+              }}>
+              <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_REGISTRATION}</Text>
+            </TouchableOpacity>
+          </View>
+          {/* </>
+          )} */}
           {reg && (<View
 
             style={[styleSheet.rowFront]}
@@ -393,32 +466,45 @@ const EditFlight = props => {
           </View>
           {(formpayload.FLIGHT_TYPE == 'Full Ground Handling' || formpayload.FLIGHT_TYPE == 'Arrival') && <><Text style={styleSheet.label}>Arrival Schedule</Text>
             <View style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}>
-              <LabelledInput
-                label={'Origin'} //mark
-                datatype={'text'}
-                data={formpayload.FLIGHT_ARRIVAL_ORIGIN}
-                disabled={false}
-                index={57}
-                setText={(index, text, type, section) => {
-                  sethasUnsavedChanges(true);
-                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_ORIGIN: text });
-                }}
-                multiline={true}
-                numberOfLines={1}
-              />
-              <LabelledInput
-                label={'Destination'} //mark
-                datatype={'text'}
-                data={formpayload.FLIGHT_ARRIVAL_DESTINATION}
-                disabled={false}
-                index={57}
-                setText={(index, text, type, section) => {
-                  sethasUnsavedChanges(true);
-                  setformpayload({ ...formpayload, FLIGHT_ARRIVAL_DESTINATION: text });
-                }}
-                multiline={true}
-                numberOfLines={1}
-              />
+              <Text style={styleSheet.label}>Origin</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setOriginModalList(true);
+                  setcurrOrigin('FLIGHT_ARRIVAL_FROM_ICAO');
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_ARRIVAL_FROM_ICAO}</Text>
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Origin Handler</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setHanlderModalList(true);
+                  setcurrHandler('FLIGHT_ARRIVAL_FROM_HANDLER');
+
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_ARRIVAL_FROM_HANDLER}</Text>
+              </TouchableOpacity>
+
+              <Text style={styleSheet.label}>Destination</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setOriginModalList(true);
+                  setcurrOrigin('FLIGHT_ARRIVAL_TO_ICAO');
+
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_ARRIVAL_TO_ICAO}</Text>
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Destination Handler</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setHanlderModalList(true);
+                  setcurrHandler('FLIGHT_ARRIVAL_TO_HANDLER');
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_ARRIVAL_TO_HANDLER}</Text>
+              </TouchableOpacity>
               <DateTimeInput
                 label={'Departure Date Time'}
                 showDatePickerPostDepart={data => {
@@ -435,6 +521,7 @@ const EditFlight = props => {
                 size={12}
                 added={true}
                 type={'time'}
+                showTimeNow={false}
                 data={tConvert(formpayload.FLIGHT_ARRIVAL_EDD)}
               />
 
@@ -452,6 +539,7 @@ const EditFlight = props => {
                 size={12}
                 added={true}
                 type={'time'}
+                showTimeNow={false}
                 data={tConvert(formpayload.FLIGHT_ARRIVAL_EDA)}
               />
               <LabelledInput
@@ -483,32 +571,43 @@ const EditFlight = props => {
             </View></>}
           {(formpayload.FLIGHT_TYPE == 'Full Ground Handling' || formpayload.FLIGHT_TYPE == 'Departure') && <><Text style={styleSheet.label}>Departure Schedule</Text>
             <View style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}>
-              <LabelledInput
-                label={'Origin'} //mark
-                datatype={'text'}
-                data={formpayload.FLIGHT_DEPARTURE_ORIGIN}
-                disabled={false}
-                index={57}
-                setText={(index, text, type, section) => {
-                  sethasUnsavedChanges(true);
-                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_ORIGIN: text });
-                }}
-                multiline={true}
-                numberOfLines={1}
-              />
-              <LabelledInput
-                label={'Destination'} //mark
-                datatype={'text'}
-                data={formpayload.FLIGHT_DEPARTURE_DESTINATION}
-                disabled={false}
-                index={57}
-                setText={(index, text, type, section) => {
-                  sethasUnsavedChanges(true);
-                  setformpayload({ ...formpayload, FLIGHT_DEPARTURE_DESTINATION: text });
-                }}
-                multiline={true}
-                numberOfLines={1}
-              />
+              <Text style={styleSheet.label}>Origin</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setOriginModalList(true);
+                  setcurrOrigin('FLIGHT_DEPARTURE_FROM_ICAO');
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_DEPARTURE_FROM_ICAO}</Text>
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Origin Handler</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setHanlderModalList(true);
+                  setcurrHandler('FLIGHT_DEPARTURE_FROM_HANDLER');
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_DEPARTURE_FROM_HANDLER}</Text>
+              </TouchableOpacity>
+
+              <Text style={styleSheet.label}>Destination</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setOriginModalList(true);
+                  setcurrOrigin('FLIGHT_DEPARTURE_TO_ICAO');
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_DEPARTURE_TO_ICAO}</Text>
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Destination Handler</Text>
+              <TouchableOpacity
+                style={styleSheet.input}
+                onPress={() => {
+                  setHanlderModalList(true);
+                  setcurrHandler('FLIGHT_DEPARTURE_TO_HANDLER');
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{formpayload.FLIGHT_DEPARTURE_TO_HANDLER}</Text>
+              </TouchableOpacity>
               <DateTimeInput
                 label={'Departure Date Time'}
                 showDatePickerPostDepart={data => {
@@ -525,6 +624,7 @@ const EditFlight = props => {
                 added={true}
                 type={'time'}
                 data={tConvert(formpayload.FLIGHT_DEPARTURE_EDD)}
+                showTimeNow={false}
               />
 
               <DateTimeInput
@@ -541,6 +641,7 @@ const EditFlight = props => {
                 size={12}
                 added={true}
                 type={'time'}
+                showTimeNow={false}
                 data={tConvert(formpayload.FLIGHT_DEPARTURE_EDA)}
               />
               <LabelledInput
@@ -594,7 +695,7 @@ const EditFlight = props => {
             backgroundColor: 'rgba(0,0,0,0.8)',
             paddingTop: 80,
           }}>
-          <ScrollView contentContainerStyle={{ flex: 1 }}>
+          <ScrollView>
             <TouchableOpacity
               onPress={() => {
                 sethasUnsavedChanges(true);
@@ -666,14 +767,14 @@ const EditFlight = props => {
             backgroundColor: 'rgba(0,0,0,0.8)',
             paddingTop: 80,
           }}>
-          <ScrollView contentContainerStyle={{ flex: 1 }}>
+          <ScrollView >
             {regList.map((val, index) => {
               return (
                 <TouchableOpacity
                   key={index}
                   onPress={() => {
                     sethasUnsavedChanges(true);
-                    setformpayload({ ...formpayload, FLIGHT_REGISTRATION: val.AIRCRAFT_REGISTRATION });
+                    setformpayload({ ...formpayload, FLIGHT_REGISTRATION: val.AIRCRAFT_REGISTRATION, AIRCRAFT_TYPE: val.AIRCRAFT_TYPE, AIRCRAFT_OPERATOR: val.AIRCRAFT_OWNER });
                     setreg(val);
                     console.log(val)
                     setmodalVisibleList(false);
@@ -693,6 +794,92 @@ const EditFlight = props => {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* Get origin  */}
+      <Modal animationType="fade" transparent={true} visible={OriginModalList}>
+        <TouchableOpacity
+          style={{
+            top: 20,
+            right: 20,
+            position: 'absolute',
+            backgroundColor: 'white',
+            zIndex: 99,
+            padding: 10,
+          }}
+          onPress={() => setOriginModalList(false)}>
+          <Text style={{ color: 'black', fontSize: 20 }}>Close</Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            paddingTop: 80,
+          }}>
+          <FlatList
+            data={OriginList}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.ICAO_IATA}
+          />
+        </View>
+      </Modal>
+
+      {/* End of origin */}
+
+
+      {/* Get Handler  */}
+      <Modal animationType="fade" transparent={true} visible={HanlderModalList}>
+        <TouchableOpacity
+          style={{
+            top: 20,
+            right: 20,
+            position: 'absolute',
+            backgroundColor: 'white',
+            zIndex: 99,
+            padding: 10,
+          }}
+          onPress={() => setHanlderModalList(false)}>
+          <Text style={{ color: 'black', fontSize: 20 }}>Close</Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            paddingTop: 80,
+          }}>
+          <ScrollView >
+            {HandlerList.map((val, index) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    sethasUnsavedChanges(true);
+                    var payloadData = { ...formpayload };
+                    payloadData[currHandler] = val;
+                    setformpayload({ ...payloadData });
+                    setHanlderModalList(false);
+                  }}
+                  style={{
+                    backgroundColor: 'white',
+                    width: width * 0.9,
+                    padding: 20,
+                    borderBottomWidth: 2,
+                  }}>
+                  <Text style={{ color: 'black', fontSize: width / 20 }}>
+                    {val}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* End of Handler */}
+
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode={mode}

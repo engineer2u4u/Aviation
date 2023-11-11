@@ -7,6 +7,10 @@ import {
   Dimensions,
   ActivityIndicator,
   Alert,
+  TextInput,
+  Modal,
+  Image,
+  Platform
 } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
 import Loader from '../Loader';
@@ -20,7 +24,9 @@ import BroadTextInput from '../subcomponents/Forms/FlightPreparation/broadTextIn
 import BroadImageUpload from '../subcomponents/Forms/FlightPreparation/broadImageUpload';
 import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
-
+import s from '../subcomponents/Forms/FlightPreparation/form.styles';
+import m from '../styles/layouts/main.style';
+import { SERVER_URL, getDomain } from '../constants/env';
 
 // if (true) functions().useEmulator('192.168.29.75', 5001);
 const { width, height } = Dimensions.get('window');
@@ -28,20 +34,24 @@ const { width, height } = Dimensions.get('window');
 const HeadingTextSize = width / 15;
 const labelTextSize = width / 25;
 const uploadMenu = [
-  { id: 0, name: 'Slots', textId: 3 },
-  { id: 1, name: 'Parking', textId: 4 },
-  { id: 2, name: 'Landing Permit', textId: 5 },
+  { id: 1, name: 'Slots', textId: 3 },
+  { id: 2, name: 'Parking', textId: 4 },
+  { id: 3, name: 'Landing Permit', textId: 5 },
 ];
 
 export default function FlightPreparation(props) {
+
   const refRBSheet = useRef();
   const [uploadSection, setuploadSection] = useState(0);
   const [loading, setloading] = useState(false);
   const [uid, setuid] = useState(null);
+  const [imageVisible, setimageVisible] = useState(false);
+  const [showImage, setshowImage] = useState(null);
   const [fpreparation, setfpreparation] = useState([
-    { value: null, file: [] },
-    { value: null, file: [] },
-    { value: null, file: [] },
+    { value: null, file: [], label: 'NOTAMs' },
+    { value: null, file: [], label: 'Slots' },
+    { value: null, file: [], label: 'Parking' },
+    { value: null, file: [], label: 'Landing permit' },
   ]);
   const FUID = props.route.params.UID;
   const [hasUnsavedChanges, sethasUnsavedChanges] = useState(false);
@@ -51,24 +61,103 @@ export default function FlightPreparation(props) {
     setfpreparation(tfpreparation);
   };
 
+  const saveFile = (val, fileName) => {
+    const DownloadDir =
+      Platform.OS == 'ios'
+        ? RNFetchBlob.fs.dirs.DocumentDir
+        : RNFetchBlob.fs.dirs.DownloadDir + '/Aviation';
+    const headers = {
+      'data:image/png;base64': '.png',
+      'data:image/jpeg;base64': '.jpg',
+      'data:application/pdf;base64': '.pdf',
+      'data:application/msword;base64': '.doc',
+      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/vnd.ms-excel;base64': '.xls',
+      'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
+      'data:application/vnd.ms-powerpoint;base64': '.ppt',
+      'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64': '.pptx',
+      'data:application/zip;base64': '.zip',
+      // Add more checks for other file types as needed
+    };
+    var type = headers[val.split(",")[0]];
+    var bs64 = val.split(",")[1];
+    var pdfLocation = DownloadDir + '/' + fileName + type;
+    // console.log(pdfLocation);
+    // console.log(val)
+    RNFetchBlob.fs
+      .isDir(DownloadDir)
+      .then(isDir => {
+        if (isDir) {
+          console.log('iSDir');
+          RNFetchBlob.fs
+            .writeFile(pdfLocation, bs64, 'base64')
+            .then(res => {
+              // console.log('saved', res);
+              Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                {
+                  text: 'View', onPress: () => {
+                    // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                    RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                  }
+                },
+                { text: 'OK' },
+              ])
+            })
+            .catch(err => {
+              console.log(err)
+              Alert.alert('Error in saving file')
+            });
+        } else {
+          RNFetchBlob.fs
+            .mkdir(DownloadDir)
+            .then(() => {
+              console.log('Created Folder');
+              RNFetchBlob.fs
+                .writeFile(pdfLocation, bs64, 'base64')
+                .then(res => {
+                  console.log('saved');
+                  Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                    {
+                      text: 'View', onPress: () => {
+                        // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                        RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                      }
+                    },
+                    { text: 'OK' },
+                  ])
+                })
+                .catch(err => {
+                  Alert.alert('Error in saving file')
+                });
+            })
+            .catch(err => {
+              console.log('is Not dir', err);
+              Alert.alert('Error in saving file')
+            });
+        }
+      })
+      .catch(err => {
+        Alert.alert('Error in saving file')
+      });
+  }
+
   const onPressDocPreA_New = async (index, res) => {
     setloading(false);
+    // res.map(value => {
     RNFetchBlob.fs
       .readFile(res.uri, 'base64')
       .then(encoded => {
         // console.log(encoded, 'reports.base64');
         setloading(false);
         var tfpreparation = [...fpreparation];
-        tfpreparation[index].file.push({
-          name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
-          base64: 'data:' + res.type + ';base64,' + encoded,
-        });
-        setfpreparation(tfpreparation);
+        tfpreparation[index].file.push('data:' + res.type + ';base64,' + encoded);
+        setfpreparation([...tfpreparation]);
       })
       .catch(error => {
         setloading(false);
         console.log(error);
       });
+    // })
 
     refRBSheet.current.close();
   };
@@ -80,6 +169,7 @@ export default function FlightPreparation(props) {
       includeBase64: false,
       maxHeight: 800,
       maxWidth: 800,
+      // selectionLimit: 0
     };
     console.log(options);
     switch (type) {
@@ -88,7 +178,7 @@ export default function FlightPreparation(props) {
           options.mediaType = 'photo';
           const result = await ImagePicker.launchImageLibrary(options);
           const file = result.assets[0];
-
+          console.log(file)
           onPressDocPreA_New(uploadSection, file);
         } catch (error) {
           console.log(error);
@@ -186,32 +276,46 @@ export default function FlightPreparation(props) {
   };
   const [callLoad, setcallLoad] = useState(false);
   const sendtoApi = data => {
+
     setcallLoad(true);
     const email = auth().currentUser.email;
+    var domain = getDomain();
     var send = {
-      FLP_AP: data.textFields.Airport_Information || '""',
-      FLP_NOTAMS: data.textFields.Notams || '""',
-      FLP_SPECIAL: data.textFields.Special_Procedures || '""',
-      FLP_SLOTS: data.uploadFields.Slots.text || '""',
-      FLP_PARKING: data.uploadFields.Parking.text || '""',
-      FLP_PERMIT: data.uploadFields.LandingPermit.text || '""',
+      FLP_AP: airinfo,
+      FLP_NOTAMS: notams,
+      FLP_SPECIAL: specialproc,
+      FLP_SLOTS: slot,
+      FLP_PARKING: parking,
+      FLP_PERMIT: landingperm,
       FUID: FUID,
       UID: uid,
       STATUS: '0',
       UPDATE_BY: email,
+      FLP_NOTAMS_String: fpreparation[0]?.file,
+      FLP_SLOTS_String: fpreparation[1]?.file,
+      FLP_PARKING_String: fpreparation[2].file,
+      FLP_PERMIT_String: fpreparation[3]?.file,
     };
     console.log(send);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable('updateFlightModule?module=PostFlightPreparation')(
-        JSON.stringify(send),
-      )
-      .then(response => {
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(send)
+    };
+    fetch(
+      `${domain}/PostFlightPreparation`,
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
         setcallLoad(false);
         Alert.alert('Success');
-        console.log(response);
-        sethasUnsavedChanges(false)
+        console.log(result);
+        sethasUnsavedChanges(false);
+        getAllData();
       })
       .catch(error => {
         setcallLoad(false);
@@ -249,37 +353,83 @@ export default function FlightPreparation(props) {
   };
 
   useEffect(() => {
-    setcallLoad(true);
+    getAllData();
+  }, []);
 
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetFlightPreparation',
-      )()
-      .then(response => {
-        setcallLoad(true);
-        console.log(response);
-        var packet = JSON.parse(response.data.body);
-        var res = packet.Table[0];
-        if (res) {
-          setuid(res.UID);
-          setSlot(res.FLP_SLOTS == '""' ? '' : res.FLP_SLOTS);
-          setParking(res.FLP_PARKING == '""' ? '' : res.FLP_PARKING);
-          setlandingperm(res.FLP_PERMIT == '""' ? '' : res.FLP_PERMIT);
-          setnotams(res.FLP_NOTAMS == '""' ? '' : res.FLP_NOTAMS);
-          setAirInfo(res.FLP_AP == '""' ? '' : res.FLP_AP);
-          setspecialproc(res.FLP_SPECIAL == '""' ? '' : res.FLP_SPECIAL);
-        } else {
-          setuid('');
+  const getAllData = () => {
+    setcallLoad(true);
+    var domain = getDomain();
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders
+    };
+    fetch(
+      `${domain}/GetFlightPreparation?_token=CDAC498B-116F-4346-AD72-C3F65A902FFD&_opco=&_fuid=${FUID}&_uid=`,
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
+        // setcallLoad(false);
+        try {
+          var packet = JSON.parse(result);
+          console.log('flightPreparation', result);
+          var res = packet.Table[0];
+          if (res) {
+            setuid(res.UID);
+            setSlot(res.FLP_SLOTS);
+            setParking(res.FLP_PARKING);
+            setlandingperm(res.FLP_PERMIT);
+            setnotams(res.FLP_NOTAMS);
+            setAirInfo(res.FLP_AP);
+            setspecialproc(res.FLP_SPECIAL);
+            fetch(
+              `${domain}/GetFlightPreparationFiles?_token=CDAC498B-116F-4346-AD72-C3F65A902FFD&_opco=&_fuid=${FUID}&_uid=${res.UID}`,
+              requestOptions,
+            )
+              .then(response => response.text())
+              .then(result => {
+                setcallLoad(false);
+                try {
+                  setcallLoad(false);
+                  var packet = JSON.parse(result);
+                  console.log(packet);
+                  if (packet) {
+                    var temp = [...fpreparation];
+                    temp[0].file = packet.FLP_NOTAMS_String;
+                    temp[1].file = packet.FLP_SLOTS_String;
+                    temp[2].file = packet.FLP_PARKING_String;
+                    temp[3].file = packet.FLP_PERMIT_String;
+                    setfpreparation([...temp])
+                  }
+                }
+                catch (e) {
+                  setcallLoad(false);
+                  console.log(e, 'Function error');
+                }
+              })
+              .catch(error => {
+                setcallLoad(false);
+                console.log(error, 'Function error');
+              });
+          } else {
+            setcallLoad(false);
+            setuid('');
+          }
+          // setcallLoad(false);
         }
-        setcallLoad(false);
+        catch (e) {
+          setcallLoad(false);
+          console.log(e, 'Function error');
+        }
       })
       .catch(error => {
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-  }, []);
+  }
 
   //NEW STRUCtURE ENDS
 
@@ -314,13 +464,67 @@ export default function FlightPreparation(props) {
             text={airinfo}
             textSeeker={textSeeker}
           />
-          <BroadTextInput
+          {/* <BroadTextInput
             type={1}
             label={'NOTAMs'}
             labelSize={labelTextSize}
             text={notams}
             textSeeker={textSeeker}
-          />
+          /> */}
+          <View>
+            <Text style={s.label}>{'NOTAMs'}</Text>
+            <View style={[m.row, m.alighItemCenter]}>
+              <TextInput
+                style={s.input}
+                multiline={true}
+                numberOfLines={2}
+                value={notams}
+                onChangeText={(e) => textSeeker(1, e)}
+              />
+              <TouchableOpacity
+                //onPress={() => onPressDocFPreparation(3)}
+                onPress={() => uploadInitiator(0)}
+                style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginBottom: 20 }}
+              >
+                <Icons
+                  style={{ marginLeft: 10 }}
+                  color={'green'}
+                  name="upload"
+                  size={40}
+                />
+              </TouchableOpacity>
+            </View>
+            {fpreparation[0].file.length > 0 && (
+              <View style={{ marginBottom: 20 }}>
+                {fpreparation[0].file.map((value, index) => {
+                  return (
+                    <TouchableOpacity onPress={() => {
+
+                      if (value.split(",")[0].startsWith('data:image')) {
+                        setimageVisible(true);
+                        setshowImage(value);
+                      }
+                      else {
+                        // saveFile(value, 'Notams Document' + (index + 1))
+                        saveFile(value, 'Notams Document' + (index + 1))
+                      }
+                    }} key={index} style={styleSheet.attachment}>
+                      <Text style={{ color: 'black' }}>{'Notams Document' + (index + 1)}</Text>
+                      <TouchableOpacity
+                        onPress={() => removeFileFP(0, index)}>
+                        <Icons
+                          style={{ color: 'green', marginLeft: 10 }}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+
+          </View>
           <BroadTextInput
             type={2}
             label={'Special Procedures'}
@@ -331,13 +535,13 @@ export default function FlightPreparation(props) {
           {uploadMenu.map((data, index) => {
             return (
               <BroadImageUpload
-                key={index}
-                type={index}
+                key={data.id}
+                type={data.id}
                 textId={data.textId}
                 label={data.name}
-                text={index === 0 ? slot : index === 1 ? parking : landingperm}
+                text={data.id === 1 ? slot : data.id === 2 ? parking : landingperm}
                 textSeeker={textSeeker}
-                uploadType={index}
+                uploadType={data.id}
                 uploadInitiator={uploadInitiator}
                 icon={
                   <Icons
@@ -353,8 +557,17 @@ export default function FlightPreparation(props) {
                       <View style={{ marginBottom: 20 }}>
                         {fpreparation[data.id].file.map((value, index) => {
                           return (
-                            <View key={index} style={styleSheet.attachment}>
-                              <Text style={{ color: 'black' }}>{value.name}</Text>
+                            <TouchableOpacity onPress={() => {
+                              if (value.split(",")[0].startsWith('data:image')) {
+                                setimageVisible(true);
+                                setshowImage(value);
+                              }
+                              else {
+                                saveFile(value, fpreparation[data.id].label + ' ' + (index + 1))
+                                // Alert.alert('This file type cannot be opened')
+                              }
+                            }} key={index} style={styleSheet.attachment}>
+                              <Text style={{ color: 'black' }}>{fpreparation[data.id].label + ' ' + (index + 1)}</Text>
                               <TouchableOpacity
                                 onPress={() => removeFileFP(data.id, index)}>
                                 <Icons
@@ -363,7 +576,7 @@ export default function FlightPreparation(props) {
                                   size={30}
                                 />
                               </TouchableOpacity>
-                            </View>
+                            </TouchableOpacity >
                           );
                         })}
                       </View>
@@ -421,6 +634,16 @@ export default function FlightPreparation(props) {
             </View>
           </RBSheet>
         </View>
+        <Modal transparent={false} visible={imageVisible} style={{ width: '100%', height: '100%', backgroundColor: 'red' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <TouchableOpacity onPress={() => { setimageVisible(false) }}><Text style={{ color: 'white', backgroundColor: '#3b7dfc', padding: 10, fontSize: 20 }}>Close</Text></TouchableOpacity>
+          </View>
+          <Image
+            style={{ width: '100%', height: 'auto', flex: 1 }}
+            source={{ uri: showImage }}
+            resizeMode="contain"
+          />
+        </Modal>
       </ScrollView>
     </>
   );
@@ -429,13 +652,13 @@ export default function FlightPreparation(props) {
 const styleSheet = StyleSheet.create({
   attachment: {
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
-    marginHorizontal: 5,
+    // marginHorizontal: 5,
     ...Platform.select({
       ios: {
         shadowColor: '#000',

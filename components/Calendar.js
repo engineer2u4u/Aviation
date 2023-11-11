@@ -7,16 +7,19 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
-import {Agenda} from 'react-native-calendars';
-import {Card} from 'react-native-paper';
+import { Agenda } from 'react-native-calendars';
+import { Card } from 'react-native-paper';
 
 const timeToString = (time) => {
   const date = new Date(time);
   return date.toISOString().split('T')[0];
 };
-const vacation = {key: 'vacation', color: 'red', selectedDotColor: 'blue'};
-const massage = {key: 'massage', color: 'orange', selectedDotColor: 'blue'};
-const workout = {key: 'workout', color: 'green'};
+const Urgent = { key: 'Urgent', color: 'red', selectedDotColor: 'red' };
+const Cancelled = { key: 'Cancelled', color: 'purple', selectedDotColor: 'purple' };
+const Hold = { key: 'Hold', color: 'yellow', selectedDotColor: 'yellow' };
+const Arrived = { key: 'Arrived', color: 'green', selectedDotColor: 'green' };
+const Departed = { key: 'Departed', color: 'orange', selectedDotColor: 'orange' };
+const TBA = { key: 'To Be Action', color: 'blue', selectedDotColor: 'blue' };
 const Calendar = () => {
   const [items, setItems] = React.useState({});
 
@@ -51,11 +54,11 @@ const Calendar = () => {
             day: '2022-09-16',
             startTime: '10 a.m',
             endTime: '12 p.m',
-            meetingType: 'Meeting',
+            meetingType: 'Cancelled',
           },
           {
             name: 'DG:1981',
-
+            meetingType: 'TBA',
             day: '2022-09-16',
           },
         ],
@@ -77,11 +80,9 @@ const Calendar = () => {
           styles.item,
           {
             backgroundColor:
-              item.meetingType == 'Meeting' ? '#ffa500' : '#71d8c7',
+              item.meetingType == 'TBA' ? 'blue' : 'purple',
           },
         ]}>
-        {/* <Card>
-          <Card.Content> */}
         <View>
           <Text
             style={{
@@ -109,8 +110,6 @@ const Calendar = () => {
             </Text>
           )}
         </View>
-        {/* </Card.Content>
-        </Card> */}
       </TouchableOpacity>
     );
   };
@@ -124,11 +123,11 @@ const Calendar = () => {
         markingType={'multi-dot'}
         markedDates={{
           '2022-09-16': {
-            dots: [massage, workout],
+            dots: [TBA, Cancelled],
             marked: true,
           },
           '2022-09-17': {
-            dots: [workout],
+            dots: [Cancelled],
             marked: true,
           },
         }}
@@ -137,7 +136,6 @@ const Calendar = () => {
         refreshing={false}
         renderItem={renderItem}
       />
-      {/* <StatusBar /> */}
     </View>
   );
 };

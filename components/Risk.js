@@ -1,5 +1,5 @@
 //import liraries
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,16 @@ import {
   Dimensions,
   TextInput,
   ScrollView,
+  ActivityIndicator,
+  Modal,
+  FlatList,
+  Alert
 } from 'react-native';
+import { SERVER_URL, getDomain } from './constants/env';
 const { width, height } = Dimensions.get('window');
+import Header from './subcomponents/Forms/Header';
+import auth from '@react-native-firebase/auth';
+
 import {
   Collapse,
   CollapseHeader,
@@ -20,153 +28,298 @@ import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5Icons from 'react-native-vector-icons/FontAwesome5';
 
 // create a component
-const Risk = ({ navigation }) => {
+const Risk = (props) => {
+  const [regList, setregList] = useState([]);
+  const [registrationModel, setregistrationModel] = useState(false);
+  const [OriginModalList, setOriginModalList] = useState(false);
+  const originType = useRef(null);
+  const [OriginList, setOriginList] = useState([]);
+
   const [score, setScore] = useState(0);
   const [status, setStatus] = useState(null);
+  const [FR_DATA, setFR_DATA] = useState(props.route.params.FR_DATA);
+  const [callLoad, setcallLoad] = useState(false);
+  const [RiskHeader, setRiskHeader] = useState(null);
+  const [RiskDetail, setRiskDetail] = useState(null);
+  const [formReady, setformReady] = useState(true);
 
-  const [list, setlist] = useState([
-    {
-      id: 0,
-      title: 'Pre-Trip Planning',
-      count: 0,
-      body: [
-        { title: 'Pop up trip < 12 hrs notice', applied: false, score: 4 },
-        { title: 'Quick Turn', applied: false, score: 2 },
-        { title: 'Non-standard Crew', applied: false, score: 4 },
-        { title: 'Positioning flight no passengers', applied: false, score: 2 },
-        { title: 'Reserves / Fuel at destination', applied: false, score: 3 },
-      ],
-    },
-    {
-      id: 1,
-      title: 'Departure Airport/Operating Environment',
-      count: 0,
-      body: [
-        { title: 'Runway < 6000 × 100', applied: false, score: 5 },
-        { title: 'Airport elevation > 5000*', applied: false, score: 5 },
-        { title: "(Visbility on takeoff < 1600' (< 500m)", applied: false, score: 3 },
-        { title: 'Mountains within airport MSA < 25 m', applied: false, score: 5 },
-        { title: 'Language Barriers', applied: false, score: 3 },
-        { title: 'Contaminated / Wet Runway', applied: false, score: 4 },
-        { title: "CB's < 5nm from airport", applied: false, score: 5 },
-        { title: 'High / Cross Wind > 30kts or Gust > 15 kts (TEMPO INTER)', applied: false, score: 5 },
-        { title: 'ATC Radar not available', applied: false, score: 3 },
-        { title: 'Noise abatement procedures', applied: false, score: 2 },
-        { title: 'Control tower not available', applied: false, score: 5 },
-        { title: 'Night operation', applied: false, score: 3 },
-        { title: 'NOTAMS', applied: false, score: 3 },
-        { title: 'Abnormal (Heavy) take-off weight', applied: false, score: 2 },
-      ],
-    },
-    {
-      id: 2,
-      title: 'Arrival Airport / Operating Environment',
-      count: 0,
-      body: [
-        { title: 'Runway < 6000 × 100', applied: false, score: 5 },
-        { title: "Airport elevation > 5000'", applied: false, score: 5 },
-        { title: "Ceiling forecast < 500' and 1 mile (1,600m)", applied: false, score: 3 },
-        { title: 'Mountains within airport MSA < 25 m', applied: false, score: 5 },
-        { title: 'Language Barriers', applied: false, score: 3 },
-        { title: 'Contaminated / Wet Runway', applied: false, score: 4 },
-        { title: "CB's < 5nm from airport", applied: false, score: 5 },
-        { title: 'High / Cross Wind > 30kts or Gust > 15 kts (TEMPO INTER)', applied: false, score: 5 },
-        { title: 'ATC Radar not available', applied: false, score: 3 },
-        { title: 'Control tower not available', applied: false, score: 5 },
-        { title: 'Night operation', applied: false, score: 3 },
-        { title: 'NOTAMS', applied: false, score: 3 },
-        { title: 'Glidepath > 3 degrees', applied: false, score: 3 },
-        { title: 'Circling Approach', applied: false, score: 4 },
-        { title: 'GPS FDE or RAIM outage', applied: false, score: 3 },
-        { title: 'Abnormal (Heavy) take-off weight', applied: false, score: 2 }
-      ],
-    },
-    {
-      id: 3,
-      title: 'Enroute Weather',
-      count: 0,
-      body: [
-        { title: 'Thunder Storms / Convective SIGMETS', applied: false, score: 3 },
-        { title: "Turbulance SR index ≥ 3 (Moderate)", applied: false, score: 5 },
-      ],
-    },
-    {
-      id: 4,
-      title: 'Winter Operations',
-      count: 0,
-      body: [
-        { title: 'Snow', applied: false, score: 3 },
-        { title: "Freezing drizzle/rain", applied: false, score: 21 },
-        { title: "Anti/Deice not available", applied: false, score: 21 },
-        { title: "Braking action fair to poor", applied: false, score: 5 },
-      ],
-    },
-    {
-      id: 5,
-      title: 'Crew Fatigue',
-      count: 0,
-      body: [
-        { title: 'Fatigue Moderate', applied: false, score: 5 },
-        { title: "Fatigue High", applied: false, score: 10 },
-        { title: "Flight time > 10 hrs or duty Day >14 hrs", applied: false, score: 10 },
-        { title: "Flight into / thru circadian low", applied: false, score: 10 },
-        { title: "Crew rest < 12hrs overnight", applied: false, score: 20 },
-      ],
-    },
-    {
-      id: 6,
-      title: 'International Operations',
-      count: 0,
-      body: [
-        { title: 'Asia', applied: false, score: 3 },
-        { title: 'Mexico/South America', applied: false, score: 5 },
-        { title: 'Africa', applied: false, score: 7 },
-        { title: 'New Destination (One Pilot has been to the New Routng)', applied: false, score: 5 },
-        { title: 'New Destination (Neither Plot has been to the New Routing)', applied: false, score: 10 },
-        { title: 'High security concern', applied: false, score: 7 },
-      ],
-    },
-    {
-      id: 7,
-      title: 'Aircraft Equipment',
-      count: 0,
-      body: [
-        { title: 'Special flight permit required', applied: false, score: 3 },
-        { title: 'Return to service flight', applied: false, score: 5 },
-        { title: 'LNAV-VNAV-VGP unavailable', applied: false, score: 5 },
-        { title: 'ADS-B / CPDLC outage', applied: false, score: 5 },
-        { title: "Departing w/Airworthiness MEL's", applied: false, score: 5 },
-      ],
-    },
-  ]);
-  const selectRisk = (item, index) => {
-    var temp = list;
-    var selected = temp[item.id].body[index].applied;
-    var count = score;
-    if (selected) {
-      temp[item.id].count =
-        temp[item.id].count - temp[item.id].body[index].score;
-      count = count - temp[item.id].body[index].score;
-    } else {
-      temp[item.id].count =
-        temp[item.id].count + temp[item.id].body[index].score;
-      count = count + temp[item.id].body[index].score;
+  const getTitleHeader = (data) => {
+    var structuredData = [];
+    var totalCount = 0;
+    data.Title.map(val => {
+      var oData = val;
+      // var cData = structuredData.filter(value => value == val.UID);
+      // if (cData.length === 0) {
+
+      //   oData.DESC = [];
+      //   structuredData.push(oData);
+      // }
+      var count = 0;
+      var aDesc = data.Detail.filter(value => {
+        if (value.TUID == val.UID) {
+          if (value.APPLIES === 1) {
+            count += value.SCORE;
+          }
+
+          return true;
+        }
+
+        return false
+      });
+
+      // console.log(val.FRA_DESCRIPTION, aDesc)
+      oData.DESC = [...aDesc];
+      oData.SCORE = count;
+      totalCount += oData.SCORE;
+      structuredData.push(oData);
+      setRiskDetail([...structuredData]);
+
+    });
+    if (totalCount > 35) {
+      setStatus({ title: 'NO-GO', color: 'red' });
+    } else if (totalCount >= 21) {
+      setStatus({ title: 'Approval Required', color: 'orange' });
+    } else if (totalCount >= 11) {
+      setStatus({ title: 'Good to go with mitigation', color: 'black' });
+    } else if (totalCount >= 0) {
+      setStatus({ title: 'Good to go', color: 'green' });
     }
+    setScore(totalCount)
+    console.log('structuredData', JSON.stringify(structuredData))
 
-    temp[item.id].body[index].applied = !selected;
-    setlist([...temp]);
+  }
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => {
+        setOriginModalList(false);
+        if (originType.current === 0) {
+          setFR_DATA({ ...FR_DATA, FROM_ICAO: item.ICAO_IATA })
+        }
+        else {
+          setFR_DATA({ ...FR_DATA, TO_ICAO: item.ICAO_IATA })
+        }
+
+      }}
+      style={{
+        backgroundColor: 'white',
+        width: width * 0.7,
+        padding: 10,
+        borderBottomWidth: 2,
+      }}>
+      <Text style={{ color: 'black', fontSize: width / 40 }}>
+        {item.ICAO_IATA}
+      </Text>
+    </TouchableOpacity>
+  );
+  useEffect(() => {
+    setcallLoad(true);
+    var domain = getDomain();
+    const originURL =
+      `${domain}/GetAddressList?_token=CE367E60-22DD-4420-9BA1-79D872CD16C9`;
+    fetch(originURL, { method: 'GET' })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        var res = data;
+        // console.log(res);
+        res = res.filter(val => val.STATUS !== 5)
+        if (res && res.length) {
+          setOriginList(res);
+        }
+        setcallLoad(false);
+      })
+      .catch(e => {
+        setcallLoad(false);
+        console.log(e);
+      });
+    const url =
+      `${domain}/getAIRCRAFT?_token=CB9A5812-B894-469A-8CA4-15055DA6D7D6&_opco=&_an=`;
+    fetch(url, { method: 'GET' })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        var res = data;
+        // console.log(res);
+        res = res.filter(val => val.STATUS !== 5)
+        setregList(res);
+        // setcallLoad(false);
+      })
+      .catch(e => {
+        // setcallLoad(false);
+        console.log(e);
+      });
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders
+    };
+    if (FR_DATA && FR_DATA.UID) {
+
+      // console.log(`${domain}/GetRiskManagementTitleAndHeader?_token=1458C635-6FB6-41BA-9C1C-C336150A79C1&huid=${FRAID}`)
+      fetch(
+        `${domain}/GetRiskManagementTitleAndHeader?_token=1458C635-6FB6-41BA-9C1C-C336150A79C1&huid=${FR_DATA.UID}`,
+        requestOptions,
+      )
+        .then(response => response.text())
+        .then(result => {
+          setcallLoad(false);
+          console.log('Title', result)
+          try {
+            var packet = JSON.parse(result);
+            // console.log(packet);
+            if (packet) {
+              getTitleHeader(packet)
+            }
+            else {
+              // props.navigation.pop();
+            }
+
+          }
+          catch (e) {
+            setcallLoad(false);
+            // alert(e);
+          }
+        })
+        .catch(error => {
+          setcallLoad(false);
+          alert(error);
+        });
+    }
+    else {
+      setcallLoad(false);
+      fetch(
+        `${domain}/GetRiskManagementTitleAndHeader?_token=1458C635-6FB6-41BA-9C1C-C336150A79C1&huid=${FR_DATA.UID}`,
+        requestOptions,
+      )
+        .then(response => response.text())
+        .then(result => {
+          setcallLoad(false);
+          console.log('Title', result)
+          try {
+            var packet = JSON.parse(result);
+            // console.log(packet);
+            if (packet) {
+              getTitleHeader(packet)
+            }
+            else {
+              // props.navigation.pop();
+            }
+
+          }
+          catch (e) {
+            setcallLoad(false);
+            // alert(e);
+          }
+        })
+        .catch(error => {
+          setcallLoad(false);
+          alert(error);
+        });
+    }
+  }, []);
+
+
+  const selectRisk = (TUID, UID) => {
+    var temp = RiskDetail;
+    var count = 0;
+    // var selectedT = temp.filter(val => val.UID === TUID);
+    // var selectedD = temp.filter(val => val.UID === TUID);
+    temp.map(val => {
+      if (val.UID === TUID) {
+        val.DESC.map(value => {
+          if (value.UID === UID) {
+            if (value.APPLIES) {
+              val.SCORE -= value.SCORE;
+              value.APPLIES = 0
+            }
+            else {
+              val.SCORE += value.SCORE;
+              value.APPLIES = 1
+            }
+
+          }
+        })
+      }
+      count += val.SCORE;
+    })
+    setRiskDetail([...temp])
+    // var selected = temp[item.SN - 1].body[index].APPLIES;
+    // var count = score;
+    // if (selected) {
+    //   temp[item.SN - 1].count =
+    //     temp[item.SN - 1].count - temp[item.SN - 1].body[index].SCORE;
+    //   count = count - temp[item.SN - 1].body[index].SCORE;
+    // } else {
+    //   temp[item.SN - 1].count =
+    //     temp[item.SN - 1].count + temp[item.SN - 1].body[index].SCORE;
+    //   count = count + temp[item.SN - 1].body[index].SCORE;
+    // }
+
+    // temp[item.SN - 1].body[index].APPLIES = selected === 1 ? 0 : 1;
+    // setRiskDetail([...temp]);
 
     if (count > 35) {
-      setStatus({ title: 'NO-GO', color: 'black' });
+      setStatus({ title: 'NO-GO', color: 'red' });
     } else if (count >= 21) {
-      setStatus({ title: 'Approval Required', color: 'red' });
+      setStatus({ title: 'Approval Required', color: 'orange' });
     } else if (count >= 11) {
-      setStatus({ title: 'Good to go with mitigation', color: 'orange' });
+      setStatus({ title: 'Good to go with mitigation', color: 'black' });
     } else if (count >= 0) {
       setStatus({ title: 'Good to go', color: 'green' });
     }
     setScore(count);
   };
+
+  const sendForm = () => {
+    console.log(JSON.stringify({ 'Detail': RiskDetail, 'header': FR_DATA }));
+    var domain = getDomain();
+    setcallLoad(true);
+    const email = auth().currentUser.email;
+    var payload = {
+      riskHeader: { ...FR_DATA, UPDATE_BY: email },
+      riskTitle: {},
+      riskDetails: [...RiskDetail]
+    };
+    console.log(payload);
+
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify(payload)
+    };
+    fetch(
+      `${domain}/PostFligRiskAssessmentHeaderNo`,
+      requestOptions,
+    )
+      .then(response => response.text())
+      .then(result => {
+        setcallLoad(false);
+        if (FR_DATA.UID) {
+          Alert.alert('Success', 'Record updated', [
+            { text: 'OK', onPress: () => console.log('OK Pressed') },
+          ]);
+        }
+        else {
+          Alert.alert('Success', 'Record successfully created', [
+            { text: 'OK', onPress: () => console.log('OK Pressed') },
+          ]);
+        }
+        console.log(result);
+      })
+      .catch(error => {
+        setcallLoad(false);
+        Alert.alert('Error in updating');
+        console.log(error, 'Function error');
+      });
+  }
+
 
   const _head = item => {
     return (
@@ -175,22 +328,23 @@ const Risk = ({ navigation }) => {
           backgroundColor: '#3b7dfc',
           flexDirection: 'row',
           justifyContent: 'space-between',
+          borderBottomWidth: 2
         }}>
         <Text style={{ fontSize: 24, color: 'white', padding: 5 }}>
-          {item.title}
+          {item.FRA_DESCRIPTION}
         </Text>
         <Text style={{ fontSize: 24, color: 'white', padding: 5 }}>
-          {item.count}
+          {item.SCORE}
         </Text>
       </View>
     );
   };
 
   const _body = item => {
-    return item.body.map((val, index) => {
+    return item.DESC.map((val, index) => {
       return (
         <TouchableOpacity
-          onPress={() => selectRisk(item, index)}
+          onPress={() => selectRisk(val.TUID, val.UID)}
           key={index}
           style={{
             flexDirection: 'row',
@@ -198,23 +352,26 @@ const Risk = ({ navigation }) => {
             padding: 5,
             paddingVertical: 15,
             borderBottomWidth: 2,
-            backgroundColor: val.applied ? '#b43b3b' : '#fff',
+            backgroundColor: val.APPLIES == 1 ? '#b43b3b' : '#fff',
           }}>
           <Text
             style={{
               fontSize: 20,
-              color: val.applied ? 'white' : 'black',
+              color: val.APPLIES == 1 ? 'white' : 'black',
+              marginRight: 10,
+              flex: 1
             }}>
-            {val.title}
+            {val.FRS_DESCRIPTION}
           </Text>
-          {val.applied && (
+          {val.APPLIES == 1 && (
             <Text
               style={{
                 fontSize: 20,
-                color: val.applied ? 'white' : 'black',
-                paddingRight: 10,
+                color: val.APPLIES == 1 ? 'white' : 'black',
+                marginRight: 10,
+
               }}>
-              {val.score}
+              {val.SCORE}
             </Text>
           )}
         </TouchableOpacity>
@@ -223,72 +380,97 @@ const Risk = ({ navigation }) => {
   };
   return (
     <ScrollView>
-      <View style={styles.container}>
+      <View style={{ backgroundColor: 'white' }}>
+        <Header
+          headingSize={width / 25}
+          heading={'Risk Assessment'}
+          sendForm={sendForm}
+          nav={"RiskList"}
+          navigation={props.navigation}
+          Icon={
+            callLoad ? (
+              <ActivityIndicator size={'small'} color="green" />
+            ) : (
+              <Icons
+                name="content-save"
+                color={formReady ? 'green' : '#aeaeae'}
+                size={30}
+              />
+            )
+          }
+        />
+      </View>
+      {FR_DATA && <View style={styles.container}>
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 20,
-          }}>
-          <TouchableOpacity
-            style={{ paddingRight: 10 }}
-            onPress={() => navigation.navigate('LogDetails')}>
-            <FontAwesome5Icons name="caret-left" color={'black'} size={40} />
-          </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: 'bold',
-              color: 'black',
-            }}>
-            Risk Assessment
-          </Text>
-        </View>
-        <View
-          style={{
-            width: width - 60,
+            // width: width - 60,
             borderWidth: 2,
             borderColor: status ? status.color : 'black',
             borderRadius: 8,
             padding: 10,
+            flexDirection: 'row'
           }}>
-          <Text style={{ color: 'black', fontSize: 24, fontWeight: 'bold' }}>
-            Phongsubthavy Group Sole Co. Ltd
-          </Text>
-          <View style={{ flexDirection: 'row', marginTop: 10 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: 'black', fontSize: 20 }}>17-Jan-2023</Text>
-              <Text style={{ color: 'black', fontSize: 20 }}>H25B</Text>
-              <Text style={{ color: 'black', fontSize: 20 }}>From: WSSL</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>Aircraft Registration</Text>
+            <View>
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => {
+                  setregistrationModel(true);
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{FR_DATA.AIRCRAFT_REGISTRATION}</Text>
+              </TouchableOpacity>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: 'black', fontSize: 20 }}>
-                Registration: T7-5678
-              </Text>
-              <Text style={{ color: 'black', fontSize: 20 }}>Ref#: 3</Text>
-              <Text style={{ color: 'black', fontSize: 20 }}>To: VTBT</Text>
-            </View>
+            <Text style={styles.label}>Aircraft Type</Text>
+            <Text style={{ color: 'black', fontSize: 20 }}>{FR_DATA.AIRCRAFT_TYPE}</Text>
+            <Text style={{ color: 'black', fontSize: 20 }}>{FR_DATA.FRA_DATE && new Date(FR_DATA.FRA_DATE).toLocaleDateString()}</Text>
+            {status && (
+              <View style={{ flexDirection: 'row', flexWrap: "wrap" }}>
+                <Text style={{ color: 'black', fontSize: 24, fontWeight: 'bold' }}>
+                  Status:{' '}
+                </Text>
+                <Text style={{ color: status.color, fontSize: 24, flexWrap: "wrap" }}>
+                  {status.title}: [{score}]
+                </Text>
+              </View>
+            )}
           </View>
-          {status && (
-            <View style={{ flexDirection: 'row', flexWrap: "wrap" }}>
-              <Text style={{ color: 'black', fontSize: 24, fontWeight: 'bold' }}>
-                Status:{' '}
-              </Text>
-              <Text style={{ color: status.color, fontSize: 24, flexWrap: "wrap" }}>
-                {status.title}: [{score}]
-              </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>From:</Text>
+            <View>
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => {
+                  originType.current = 0;
+                  setOriginModalList(true);
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{FR_DATA.FROM_ICAO}</Text>
+              </TouchableOpacity>
             </View>
-          )}
+            <Text style={styles.label}>To:</Text>
+            <View>
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => {
+                  originType.current = 1;
+
+                  setOriginModalList(true);
+                }}>
+                <Text style={{ fontSize: 20, color: 'black' }}>{FR_DATA.TO_ICAO}</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: 'black', fontSize: 20 }}>Ref#: {FR_DATA.FRA_REF_NO}</Text>
+          </View>
         </View>
 
-        <AccordionList
+        {RiskDetail && <AccordionList
           style={{ marginTop: 10 }}
-          list={list}
+          list={RiskDetail}
           header={_head}
           body={_body}
-          keyExtractor={item => `${item.id}`}
-          expandedIndex={0}
-        />
+          keyExtractor={item => `${item.UID}`}
+        // expandedIndex={0}
+        />}
         <View
           style={{
             width: width - 60,
@@ -379,8 +561,87 @@ const Risk = ({ navigation }) => {
             </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </View>}
+      <Modal animationType="fade" transparent={false} visible={registrationModel}>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+        }}>
+          <TouchableOpacity
+            style={{
+              zIndex: 99,
+              padding: 10,
+              backgroundColor: 'white',
+            }}
+            onPress={() => setregistrationModel(false)}>
+            <Text style={{ color: 'black', fontSize: 20 }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            paddingTop: 10,
+          }}>
+          <ScrollView >
+            {regList.map((val, index) => {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    setregistrationModel(false);
+                    setFR_DATA({ ...FR_DATA, AIRCRAFT_REGISTRATION: val.AIRCRAFT_REGISTRATION, AIRCRAFT_TYPE: val.AIRCRAFT_TYPE })
+                  }}
+                  style={{
+                    backgroundColor: 'white',
+                    width: width * 0.7,
+                    padding: 10,
+                    borderBottomWidth: 2,
+                  }}>
+                  <Text style={{ color: 'black', fontSize: width / 40 }}>
+                    {val.AIRCRAFT_REGISTRATION}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Modal>
+      <Modal animationType="fade" transparent={true} visible={OriginModalList}>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+        }}>
+          <TouchableOpacity
+            style={{
+              zIndex: 99,
+              padding: 10,
+              backgroundColor: 'white',
+            }}
+            onPress={() => setOriginModalList(false)}>
+            <Text style={{ color: 'black', fontSize: 20 }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            paddingTop: 10,
+          }}>
+          <FlatList
+            data={OriginList}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.ICAO_IATA}
+          />
+        </View>
+      </Modal>
+    </ScrollView >
   );
 };
 
@@ -391,6 +652,39 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     backgroundColor: '#FFF',
     padding: 30,
+    paddingTop: 0
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginVertical: 10,
+    textAlignVertical: 'top',
+    color: 'black',
+    backgroundColor: 'white',
+    marginBottom: 10,
+    marginRight: 10,
+    fontSize: 20,
+    padding: 5,
+  },
+  label: {
+    // fontSize: Dimensions.get('window').width / 25,
+    color: 'black',
+  },
+  rowFront: {
+    backgroundColor: '#3b7dfc',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    height: 100,
+    borderColor: '#000',
+    borderRadius: 8,
+    flexDirection: 'row',
+    shadowColor: '#ccc',
+    shadowOpacity: 0.5,
+    elevation: 10,
+    shadowOffset: { width: 0, height: 3 },
+    marginBottom: 20,
   },
 });
 

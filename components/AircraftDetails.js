@@ -18,6 +18,7 @@ import { firebase } from '@react-native-firebase/functions';
 import Header from './subcomponents/Forms/Header';
 import auth from '@react-native-firebase/auth';
 const { width, height } = Dimensions.get('window');
+import { SERVER_URL, getDomain } from './constants/env';
 
 const HeadingTextSize = width / 15;
 const labelTextSize = width / 25;
@@ -61,6 +62,7 @@ const AircraftDetails = props => {
     );
 
     useEffect(() => {
+        var domain = getDomain();
         if (UID) {
             console.log(UID, "found");
 
@@ -73,13 +75,13 @@ const AircraftDetails = props => {
             };
 
             fetch(
-                'https://demo.vellas.net:94/arrowdemoapi/api/Values/GetAviationAirCraftById?_token=A3EF9E63-4962-43A6-9FD3-E99625C2747B&_opco=&_uid=' +
+                `${domain}/GetAviationAirCraftById?_token=A3EF9E63-4962-43A6-9FD3-E99625C2747B&_opco=&_uid=${UID}` +
                 UID,
                 requestOptions,
             )
                 .then(response => response.text())
                 .then(result => {
-                    console.log(result);
+                    console.log(result, 'aircraft');
                     setaircraftData(JSON.parse(result)[0]);
                     setcallLoad(false);
 
@@ -92,6 +94,7 @@ const AircraftDetails = props => {
     }, []);
     const sendForm = () => {
         setcallLoad(true);
+        var domain = getDomain();
         const email = auth().currentUser.email;
         var send = aircraftData;
         send.UPDATED_BY = email;
@@ -106,16 +109,13 @@ const AircraftDetails = props => {
                 body: JSON.stringify(send)
             };
             fetch(
-                'https://demo.vellas.net:94/arrowdemoapi/api/Values/UpdateAviationAirCraft',
+                `${domain}/UpdateAviationAirCraft`,
                 requestOptions,
             )
                 .then(response => response.text())
                 .then(result => {
                     setcallLoad(false);
-                    Alert.alert('Success', 'Record updated', [
-
-                        { text: 'OK', onPress: () => props.navigation.navigate("Home") },
-                    ]);
+                    Alert.alert('Success', 'Record updated');
                     sethasUnsavedChanges(false);
                     console.log(result);
                     // props.navigation.navigate("Home");
@@ -136,16 +136,13 @@ const AircraftDetails = props => {
                 body: JSON.stringify(send)
             };
             fetch(
-                'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostAviationAirCraft',
+                `${domain}/PostAviationAirCraft`,
                 requestOptions,
             )
                 .then(response => response.text())
                 .then(result => {
                     setcallLoad(false);
-                    Alert.alert('Success', 'Record updated', [
-
-                        { text: 'OK', onPress: () => props.navigation.navigate("Home") },
-                    ]);
+                    Alert.alert('Success', 'Aircraft created');
                     sethasUnsavedChanges(false);
                     // props.navigation.navigate("Home");
                     console.log(result);
@@ -155,23 +152,6 @@ const AircraftDetails = props => {
                     Alert.alert('Error in updating');
                     console.log(error, 'Function error');
                 });
-            // firebase
-            //     .app()
-            //     .functions('asia-southeast1')
-            //     .httpsCallable('updateFlightModule?module=PostAviationAirCraft')(
-            //         JSON.stringify(send),
-            //     )
-            //     .then(response => {
-            //         setcallLoad(false);
-            //         Alert.alert('Success');
-            //         sethasUnsavedChanges(false);
-            //         console.log(response);
-            //     })
-            //     .catch(error => {
-            //         setcallLoad(false);
-            //         Alert.alert('Error in updating');
-            //         console.log(error, 'Function error');
-            //     });
         }
 
     };

@@ -18,7 +18,7 @@ export default function InitialScreen(props) {
         passengers={props.params.flights?.FLIGHT_PAX_DEPARTURE}
         item={props.params.flights}
       />
-      <FlightMenu navigation={props.navigation} uid={props.params.uid} />
+      <FlightMenu navigation={props.navigation} uid={props.params.uid} type={props.params.flights.FLIGHT_TYPE} />
     </ScrollView>
   );
 }

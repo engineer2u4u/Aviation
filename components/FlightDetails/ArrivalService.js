@@ -10,9 +10,15 @@ import {
   Button,
   Alert,
   ScrollView,
+  Modal,
+  Image
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { SERVER_URL, getDomain } from '../constants/env';
+
 import React, { useRef, useState, useEffect } from 'react';
+import Header from '../subcomponents/Forms/Header';
+
 import DocumentPicker from 'react-native-document-picker';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -26,14 +32,20 @@ import { ActivityIndicator } from 'react-native';
 const { width, height } = Dimensions.get('window');
 import auth from '@react-native-firebase/auth';
 import s from '../subcomponents/Forms/FlightPreparation/form.styles';
+const HeadingTextSize = width / 15;
+
 export default function ArrivalService(props) {
+  // const [timerDate, settimerDate] = useState(new Date());
+  const timerDate = useRef(new Date());
+  const [formReady, setformReady] = useState(true);
   const currentPicker = useRef(0);
   const refRBSheet = useRef();
   const [uid, setuid] = useState(null);
   const FUID = props.route.params.UID;
   //upload funcs
   const [uploadSection, setuploadSection] = useState(0);
-
+  const [imageVisible, setimageVisible] = useState(false);
+  const [showImage, setshowImage] = useState(null);
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
   const [aService, setaService] = useState({
@@ -43,7 +55,7 @@ export default function ArrivalService(props) {
     "ARS_CRM_CDA": "", "ARS_CRM_CDT": "", "ARS_CRM_CVA": "",
     "ARS_CRM_REM": "", "ARS_CRM_TAT": "", "ARS_CTR_CDT": "",
     "ARS_CTR_CEL": "", "ARS_CTR_CEO": "", "ARS_CTR_NCO": "",
-    "ARS_CTR_REM": "", "ARS_CTR_REQ": 1, "ARS_DS_CONTACT_NO": "",
+    "ARS_CTR_REM": "", "ARS_CTR_REQ": 0, "ARS_DS_CONTACT_NO": "",
     "ARS_DS_NAME": "", "ARS_FOA_END": "",
     "ARS_FOA_FTAT": "", "ARS_FOA_RECEIPT": "",
     "ARS_FOA_REM": "", "ARS_FOA_REQ": 0,
@@ -66,119 +78,100 @@ export default function ArrivalService(props) {
     "CREATED_DATE": "", "FLIGHT_ARRIVAL_CREW": null,
     "FLIGHT_ARRIVAL_PAX": null, "FUID": "",
     "LAST_UPDATE": "", "STATUS": 1,
-    "UID": "", "UPDATE_BY": ""
+    "UID": "", "UPDATE_BY": "",
+    "ARS_BAGGAGE_String": [],
+    "ARS_CTR_CEL_String": [],
+    "ARS_CTR_NCO_String": [],
+    "ARS_FOA_FR_String": [],
+    "ARS_TOS_PHOTO_STring": [],
+    "ARS_LC_PHOTO_STring": [],
+    "ARS_CEC_PHOTO_STring": [],
+    "ARS_CRM_CVOA": 0,
+    ARS_LAS_CT_C: 0,
+    ARS_LAS_ET_C: 0,
+    ARS_LAS_ST_C: 0,
   })
   const [paxmovement, setpaxmovement] = useState([]);
   const [crewmovement, setcrewmovement] = useState([]);
-  const [arrival, setArrival] = useState([
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    { value: '', file: [] },
-    null,
-    null,
-    { checked: false },
-    null, //10
-    null,
-    { checked: false },
-    { checked: false },
-    null,
-    null,
-    { value: null, file: [] },
-    { value: null, file: [] },
-    null,
-    null,
-    { checked: false },
-    null,
-    null,
-    null,
-    { checked: false },
-    null,
-    null,
-    null,
-    { checked: false },
-    null,
-    null,
-    { checked: false },
-    null,
-    null,
-    null,
-    { value: null, file: [] },
-    'For remarks; if the fuel truck needs to  come around a second time, they can put the details of the second time it comes around into the remarks here',
-    { checked: false },
-    null,
-    null,
-    { value: null, file: [] },
-    null, //41
-    { checked: false },
-    null,
-    { checked: false },
-    null,
-    null,
-    { checked: false },
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    { value: null, file: [] },
-    null,
-    null,
-    null,
-    null,
-    null,
-    [],
-    [], //61
-    [], //62
-    {}, //63
-    null, //64
-    null, //65
-  ]);
+  const [deleteService, setdeleteService] = useState([]);
+
   const addMovement = () => {
     const email = auth().currentUser.email;
-    setpaxmovement([...paxmovement, { "ARS_PM_ATAT": "", "ARS_PM_PDFT": "", "ARS_PM_REMARK": "", "ARS_PM_TYPE": "Pax", "CREATED_BY": email, "CREATED_DATE": "", "FUID": FUID, "LAST_UPDATE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
-    // var tarrival = [...arrival];
-    // tarrival[60] = [
-    //   ...arrival[60],
-    //   { arrival: null, departed: null, remarks: null, type: 'Pax' },
-    // ];
-    // setArrival([...tarrival]);
+    setpaxmovement([...paxmovement, { "ARS_PM_ATAT": "", "ARS_PM_PDFT": "", "ARS_PM_REMARK": "", "ARS_PM_TYPE": "Pax", "FUID": FUID, "STATUS": 1, "UID": '', "UPDATE_BY": email }]);
   };
   const onRemoveMovement = index => {
     var service = [...paxmovement];
-    service.splice(index, 1);
+    var delService = service.splice(index, 1);
     setpaxmovement(service);
+    if (delService[0].UID) {
+      setdeleteService([...deleteService, { UID: delService[0].UID, TableName: 'ARRIVALSERVICES' }]);
+    }
   };
   useEffect(() => {
+    readData();
+  }, []);
+
+  const readData = () => {
     setcallLoad(true);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetArrivalServices',
-      )()
+    var domain = getDomain();
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders
+    };
+    fetch(
+      `${domain}/GetArrivalServices?_token=8746A6BE-8BB1-4D08-9E68-A15982110834&_opco=&_fuid=${FUID}&_uid=`,
+      requestOptions,
+    )
+      .then(response => response.text())
       .then(response => {
-        // console.log(response);
-        var packet = JSON.parse(response.data.body);
+        console.log(response, 'arrival');
+        var packet = JSON.parse(response);
         var res = [...packet.Table];
         if (res[0]) {
           console.log(res)
           setaService(res[0]);
           console.log(res[0]);
           setuid(res[0].UID);
+          fetch(
+            `${domain}/GetArrivalServicesFiles?_token=CDAC498B-116F-4346-AD72-C3F65A902FFD&_opco=&_fuid=${FUID}&_uid=${res[0].UID}`,
+            requestOptions,
+          )
+            .then(response => response.text())
+            .then(result => {
+              setcallLoad(false);
+              try {
+                var packet = JSON.parse(result);
+                console.log(packet);
+                var temp = { ...res[0] };
+                temp.ARS_CTR_CEL_String = packet.ARS_CTR_CEL_String,
+                  temp.ARS_BAGGAGE_String = packet.ARS_BAGGAGE_String,
+                  temp.ARS_CTR_NCO_String = packet.ARS_CTR_NCO_String,
+                  temp.ARS_FOA_FR_String = packet.ARS_FOA_FR_String,
+                  temp.ARS_TOS_PHOTO_STring = packet.ARS_TOS_PHOTO_STring,
+                  temp.ARS_LC_PHOTO_STring = packet.ARS_LC_PHOTO_STring,
+                  temp.ARS_CEC_PHOTO_STring = packet.ARS_CEC_PHOTO_STring,
+                  setaService({ ...temp })
+              }
+              catch (e) {
+                setcallLoad(false);
+                console.log(e, 'Function error');
+              }
+            })
+            .catch(error => {
+              setcallLoad(false);
+              console.log(error, 'Function error');
+            });
 
-          firebase
-            .app()
-            .functions('asia-southeast1')
-            .httpsCallable(
-              'getFlightModule?fuid=' + FUID + '&module=GetArrivalServicesPM',
-            )()
+          fetch(
+            `${domain}/GetArrivalServicesPM?_token=8746A6BE-8BB1-4D08-9E68-A15982110834&_opco=&_fuid=${FUID}&_uid=`,
+            requestOptions,
+          )
+            .then(response => response.text())
             .then(response => {
-              var packet = JSON.parse(response.data.body);
+              var packet = JSON.parse(response);
               var res = packet.Table;
               console.log(res, 'res');
               if (res && res.length > 0) {
@@ -186,19 +179,20 @@ export default function ArrivalService(props) {
                 var paxmov = [];
                 var crewmov = [];
                 res.forEach((val, index) => {
-                  if (val.ARS_PM_TYPE == 'Pax') {
-                    paxmov.push(val);
+                  if (val.STATUS != 5) {
+                    if (val.ARS_PM_TYPE == 'Pax') {
+                      paxmov.push(val);
 
-                  } else {
-                    crewmov.push(val);
-                    setcrewmovement([...crewmovement, val]);
-
+                    } else {
+                      crewmov.push(val);
+                      setcrewmovement([...crewmovement, val]);
+                    }
                   }
                 });
                 setpaxmovement([...paxmov]);
                 setcrewmovement([...crewmov]);
               } else {
-                console.log(x, 'res');
+                console.log(res, 'res');
               }
               setcallLoad(false);
             })
@@ -216,9 +210,8 @@ export default function ArrivalService(props) {
 
         console.log(error, 'Function error');
       });
+  }
 
-    // pax crew movement
-  }, []);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = (type, index, arr, pos) => {
     currentPicker.current = [index, arr, pos];
@@ -229,17 +222,19 @@ export default function ArrivalService(props) {
     setDatePickerVisibility(false);
   };
   const handleConfirm = date => {
-
+    // settimerDate(new Date(date));
+    // timerDate.current = new Date(date)
     switch (currentPicker.current[1]) {
-      case 'aService':
-        var tcheckList = {
-          ...aService, [currentPicker.current[2]]: tConvert(
-            new Date(date).toLocaleString('en-US', {
-              hour12: false,
-            }),
-          )
-        };
-        setaService({ ...tcheckList }); break;
+      case 'crewmovement':
+        var tcheckList = [...crewmovement];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setcrewmovement([...tcheckList]); break;
       case 'paxmovement':
         var tcheckList = [...paxmovement];
         tcheckList[currentPicker.current[0]][
@@ -250,6 +245,18 @@ export default function ArrivalService(props) {
           }),
         );
         setpaxmovement([...tcheckList]); break;
+      case 'aService':
+        console.log('aDeparture me aya')
+        var tcheckList = { ...aService };
+        tcheckList[
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        console.log("datetimeset", tcheckList)
+        setaService({ ...tcheckList }); break;
     }
     hideDatePicker();
   };
@@ -273,59 +280,7 @@ export default function ArrivalService(props) {
   };
   const setNow = (index, arr, pos) => {
     currentPicker.current = [index, arr, pos];
-    handleConfirm(new Date())
-    // console.log(field);
-    // var tarrival = [...arrival];
-    // console.log(field);
-    // if (pos != undefined) {
-    //   tarrival[index][pos][field] = tConvert(
-    //     new Date().toLocaleString('en-US', {
-    //       hour12: false,
-    //     }),
-    //   );
-    // } else {
-    //   tarrival[index] = tConvert(
-    //     new Date().toLocaleString('en-US', {
-    //       hour12: false,
-    //     }),
-    //   );
-    // }
-    // setArrival(tarrival);
-  };
-  const onPressDocPreA = async index => {
-    try {
-      setloading(true);
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.images],
-      });
-      // console.log(res);
-      RNFetchBlob.fs
-        .readFile(res.uri, 'base64')
-        .then(encoded => {
-          // console.log(encoded, 'reports.base64');
-          setloading(false);
-          var tarrival = [...arrival];
-          tarrival[index].file.push({
-            name: res.name,
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setArrival(tarrival);
-        })
-        .catch(error => {
-          setloading(false);
-          console.log(error);
-        });
-
-      // }
-    } catch (err) {
-      setloading(false);
-      console.log(JSON.stringify(err), 'Errorss');
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker, exit any dialogs or menus and move on
-      } else {
-        // throw err;
-      }
-    }
+    handleConfirm(new Date());
   };
 
   const onPressDocPreA_New = async (index, res) => {
@@ -335,12 +290,9 @@ export default function ArrivalService(props) {
       .then(encoded => {
         // console.log(encoded, 'reports.base64');
         setloading(false);
-        var tarrival = [...arrival];
-        tarrival[index].file.push({
-          name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
-          base64: 'data:' + res.type + ';base64,' + encoded,
-        });
-        setArrival(tarrival);
+        var temp = { ...aService };
+        temp[uploadSection] ? temp[uploadSection].push('data:' + res.type + ';base64,' + encoded) : temp[uploadSection] = ['data:' + res.type + ';base64,' + encoded];
+        setaService({ ...temp })
       })
       .catch(error => {
         setloading(false);
@@ -386,25 +338,31 @@ export default function ArrivalService(props) {
     }
   };
 
-  const removeFilePreA = (arrayIndex, index) => {
-    var tarrival = [...arrival];
-    tarrival[arrayIndex].file.splice(index, 1);
-    setArrival(tarrival);
+  const removeFilePreA = (field, index) => {
+    var temp = { ...aService };
+    temp[field].splice(index, 1);
+    setaService({ ...temp });
+    console.log(temp);
   };
 
   const addCrewMovement = () => {
     const email = auth().currentUser.email;
-    setcrewmovement([...crewmovement, { "ARS_PM_ATAT": "", "ARS_PM_PDFT": "", "ARS_PM_REMARK": "", "ARS_PM_TYPE": "Crew", "CREATED_BY": email, "CREATED_DATE": "", "FUID": FUID, "LAST_UPDATE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
+    setcrewmovement([...crewmovement, { "ARS_PM_ATAT": "", "ARS_PM_PDFT": "", "ARS_PM_REMARK": "", "ARS_PM_TYPE": "Crew", "CREATED_BY": email, "CREATED_DATE": "", "FUID": FUID, "LAST_UPDATE": "", "STATUS": 1, "UID": '', "UPDATE_BY": email }])
 
   };
   const removeCrewMovement = index => {
     var service = [...crewmovement];
-    service.splice(index, 1);
+    var delService = service.splice(index, 1);
     setcrewmovement(service);
+    if (delService[0].UID) {
+      setdeleteService([...deleteService, { UID: delService[0].UID, TableName: 'ARRIVALSERVICES' }]);
+    }
+
   };
 
   const [callLoad, setcallLoad] = useState(false);
   const sendForm = () => {
+    var domain = getDomain();
     const email = auth().currentUser.email;
     const payload = {
       ...aService,
@@ -424,110 +382,173 @@ export default function ArrivalService(props) {
       body: JSON.stringify(payload)
     };
     fetch(
-      'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostArrivalServices',
+      `${domain}/PostArrivalServices`,
       requestOptions,
     )
       .then(response => response.text())
       .then(result => {
         Alert.alert('Success');
         setcallLoad(false);
-        console.log(result);
+        console.log('All Data', result);
+        console.log('movement', paxmovement.concat(crewmovement));
+        //   });
+        if (paxmovement.concat(crewmovement).length > 0) {
+
+          var requestOptions1 = {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSON.stringify(paxmovement.concat(crewmovement))
+          };
+          fetch(
+            `${domain}/PostArrivalServicesPM`,
+            requestOptions1,
+          )
+            .then(response => response.text())
+            .then(result => {
+              Alert.alert('Success');
+              setcallLoad(false);
+              console.log('Movement', result);
+              readData();
+            })
+            .catch(error => {
+              Alert.alert('Error in updation');
+              setcallLoad(false);
+              console.log(error, 'Function error');
+            });
+        }
       })
       .catch(error => {
         Alert.alert('Error in updation');
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-    // firebase
-    //   .app()
-    //   .functions('asia-southeast1')
-    //   .httpsCallable('updateFlightModule?module=PostArrivalServices')(
-    //     JSON.stringify(payload),
-    //   )
-    //   .then(response => {
-    //     Alert.alert('Success');
-    //     setcallLoad(false);
-    //     console.log(response);
-    //   })
-    //   .catch(error => {
-    //     Alert.alert('Error in updation');
-    //     setcallLoad(false);
-    //     console.log(error, 'Function error');
-    //   });
-    if (paxmovement.concat(crewmovement).length > 0) {
-      paxmovement.concat(crewmovement).map(val => {
-        var requestOptions1 = {
-          method: 'POST',
-          headers: myHeaders,
-          body: JSON.stringify(val)
-        };
-        fetch(
-          'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostArrivalServicesPM',
-          requestOptions1,
-        )
-          .then(response => response.text())
-          .then(result => {
-            Alert.alert('Success');
-            setcallLoad(false);
-            console.log(result);
-          })
-          .catch(error => {
-            Alert.alert('Error in updation');
-            setcallLoad(false);
-            console.log(error, 'Function error');
-          });
 
-      });
-    }
-    else {
-      // firebase
-      //   .app()
-      //   .functions('asia-southeast1')
-      //   .httpsCallable('updateFlightModule?module=PostArrivalServicesPM')(
-      //     JSON.stringify({}),
-      //   )
-      //   .then(response => {
-      //     Alert.alert('Success');
-      //     setcallLoad(false);
-      //     console.log(response);
-      //   })
-      //   .catch(error => {
-      //     Alert.alert('Error in updation');
-      //     setcallLoad(false);
-      //     console.log(error, 'Function error');
-      //   });
+
+    console.log("deleteService", deleteService)
+    if (deleteService.length > 0) {
+      var requestOptions1 = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify(deleteService)
+      };
+      fetch(
+        `${domain}/DeleteAPI`,
+        requestOptions1,
+      )
+        .then(response => response.text())
+        .then(result => {
+          setdeleteService([])
+          setcallLoad(false);
+          console.log(result);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
     }
 
   };
-
+  const saveFile = (val, fileName) => {
+    const DownloadDir =
+      Platform.OS == 'ios'
+        ? RNFetchBlob.fs.dirs.DocumentDir
+        : RNFetchBlob.fs.dirs.DownloadDir + '/Aviation';
+    const headers = {
+      'data:image/png;base64': '.png',
+      'data:image/jpeg;base64': '.jpg',
+      'data:application/pdf;base64': '.pdf',
+      'data:application/msword;base64': '.doc',
+      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/vnd.ms-excel;base64': '.xls',
+      'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
+      'data:application/vnd.ms-powerpoint;base64': '.ppt',
+      'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64': '.pptx',
+      'data:application/zip;base64': '.zip',
+      // Add more checks for other file types as needed
+    };
+    var type = headers[val.split(",")[0]];
+    var bs64 = val.split(",")[1];
+    var pdfLocation = DownloadDir + '/' + fileName + type;
+    // console.log(pdfLocation);
+    // console.log(val)
+    RNFetchBlob.fs
+      .isDir(DownloadDir)
+      .then(isDir => {
+        if (isDir) {
+          console.log('iSDir');
+          RNFetchBlob.fs
+            .writeFile(pdfLocation, bs64, 'base64')
+            .then(res => {
+              // console.log('saved', res);
+              Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                {
+                  text: 'View', onPress: () => {
+                    // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                    RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                  }
+                },
+                { text: 'OK' },
+              ])
+            })
+            .catch(err => {
+              console.log(err)
+              Alert.alert('Error in saving file')
+            });
+        } else {
+          RNFetchBlob.fs
+            .mkdir(DownloadDir)
+            .then(() => {
+              console.log('Created Folder');
+              RNFetchBlob.fs
+                .writeFile(pdfLocation, bs64, 'base64')
+                .then(res => {
+                  console.log('saved');
+                  Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                    {
+                      text: 'View', onPress: () => {
+                        // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                        RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                      }
+                    },
+                    { text: 'OK' },
+                  ])
+                })
+                .catch(err => {
+                  Alert.alert('Error in saving file')
+                });
+            })
+            .catch(err => {
+              console.log('is Not dir', err);
+              Alert.alert('Error in saving file')
+            });
+        }
+      })
+      .catch(err => {
+        Alert.alert('Error in saving file')
+      });
+  }
   return (
     <View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginVertical: 20,
-        }}>
-        <Text
-          style={{
-            fontSize: Dimensions.get('window').width / 15,
-            fontWeight: 'bold',
-            color: 'black',
-            paddingLeft: 20,
-          }}>
-          Arrival Services
-        </Text>
-        {callLoad ? (
-          <View style={{ paddingRight: 20 }}>
-            <ActivityIndicator color="green" size={'small'} />
-          </View>
-        ) : (
-          <TouchableOpacity onPress={sendForm} style={{ marginRight: 20 }}>
-            <Icons name="content-save" color="green" size={30} />
-          </TouchableOpacity>
-        )}
-      </View>
+
+      <Header
+        headingSize={HeadingTextSize}
+        heading={'Arrival'}
+        sendForm={sendForm}
+        nav={"IntialScreenView"}
+        navigation={props.navigation}
+        Icon={
+          callLoad ? (
+            <ActivityIndicator size={'small'} color="green" />
+          ) : (
+            <Icons
+              name="content-save"
+              color={formReady ? 'green' : '#aeaeae'}
+              size={30}
+            />
+          )
+        }
+      />
       <ScrollView>
         <Loader visible={loading} />
 
@@ -571,7 +592,11 @@ export default function ArrivalService(props) {
             showDatePickerPostDepart={() => {
               showDatePicker('time', 0, 'aService', "ARS_MOVACLANDED");
             }}
-            setNowPostDepart={() => setNow(0, 'aService', "ARS_MOVACLANDED")}
+            setNowPostDepart={(indexx, x) => {
+              var tcheckList = { ...aService };
+              tcheckList.ARS_MOVACLANDED = x
+              setaService({ ...tcheckList });
+            }}
             size={12}
             type={'time'}
             data={aService.ARS_MOVACLANDED}
@@ -583,7 +608,11 @@ export default function ArrivalService(props) {
             showDatePickerPostDepart={() => {
               showDatePicker('time', 0, 'aService', "ARS_MOVCHOCKIN");
             }}
-            setNowPostDepart={() => setNow(0, 'aService', "ARS_MOVCHOCKIN")}
+            setNowPostDepart={(indexx, x) => {
+              var tcheckList = { ...aService };
+              tcheckList.ARS_MOVCHOCKIN = x
+              setaService({ ...tcheckList });
+            }}
             size={12}
             type={'time'}
             data={aService.ARS_MOVCHOCKIN}
@@ -607,7 +636,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_GPU_REQ: !aService.ARS_GPU_REQ, ARS_GPU_START: "", ARS_GPU_STOP: "" })
+                  setaService({ ...aService, ARS_GPU_REQ: aService.ARS_GPU_REQ == 1 ? 0 : 1, ARS_GPU_START: "", ARS_GPU_STOP: "" })
                 }}>
                 <Icons
                   name={
@@ -627,7 +656,11 @@ export default function ArrivalService(props) {
               showDatePickerPostDepart={() => {
                 showDatePicker('time', 0, 'aService', "ARS_GPU_START");
               }}
-              setNowPostDepart={() => setNow(0, 'aService', "ARS_GPU_START")}
+              setNowPostDepart={(indexx, x) => {
+                var tcheckList = { ...aService };
+                tcheckList.ARS_GPU_START = x
+                setaService({ ...tcheckList });
+              }}
               size={12}
               type={'time'}
               data={aService.ARS_GPU_START}
@@ -639,7 +672,11 @@ export default function ArrivalService(props) {
               showDatePickerPostDepart={() => {
                 showDatePicker('time', 0, 'aService', "ARS_GPU_STOP");
               }}
-              setNowPostDepart={() => setNow(0, 'aService', "ARS_GPU_STOP")}
+              setNowPostDepart={(indexx, x) => {
+                var tcheckList = { ...aService };
+                tcheckList.ARS_GPU_STOP = x
+                setaService({ ...tcheckList });
+              }}
               size={12}
               type={'time'}
               data={aService.ARS_GPU_STOP}
@@ -678,20 +715,35 @@ export default function ArrivalService(props) {
               borderRadius: 10,
               marginVertical: 10,
             }}>
-            <Text style={styleSheet.label}>Number of Baggage Offloaded</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TextInput
-                style={styleSheet.input}
-                value={aService.ARS_CREW}
-                onChangeText={text => {
-                  setaService({ ...aService, ARS_CREW: text });
-                }}
-              />
+            <LabelledInput
+              label={'Number of Baggage Offloaded'} //mark
+              data={aService.ARS_BAGGAGE}
+              datatype={'text'}
+              index={20}
+              setText={(index, text, type, section) => {
+                var tcheckList = { ...aService };
+                tcheckList.ARS_BAGGAGE = text;
+                setaService({ ...tcheckList });
+              }}
+              multiline={true}
+              numberOfLines={1}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 10,
+
+              }}>
+              <Text style={styleSheet.label}>
+                Baggage Photo
+              </Text>
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(6)}
                 onPress={() => {
-                  // setuploadSection(6);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_BAGGAGE_String');
+                  refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -708,47 +760,49 @@ export default function ArrivalService(props) {
                 </Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[6].file.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                {arrival[6].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(6, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_BAGGAGE_String && aService.ARS_BAGGAGE_String.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_BAGGAGE_DOCUMENT` + indexxx)
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_BAGGAGE_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_BAGGAGE_String', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
+
           </View>
           {/* ---------------------------Pax Movement-----------------------*/}
           <Text style={styleSheet.label}>Pax Movement :</Text>
@@ -763,12 +817,12 @@ export default function ArrivalService(props) {
             <DateTimeInput
               label={'Left Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'aService', "ARS_MOV_PXDT");
+                showDatePicker('time', 0, 'aService', "ARS_MOV_PXDA");
               }}
-              setNowPostDepart={() => setNow(0, 'aService', "ARS_MOV_PXDT")}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_MOV_PXDA")}
               size={12}
               type={'time'}
-              data={aService.ARS_MOV_PXDT}
+              data={aService.ARS_MOV_PXDA}
             />
             <DateTimeInput
               label={'Pax Arrived at Terminal (Local Time)'}
@@ -788,7 +842,7 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_MOV_PXVA: !aService.ARS_MOV_PXVA })}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_MOV_PXVA: aService.ARS_MOV_PXVA == 1 ? 0 : 1 })}>
                 <Icons
                   name={
                     aService.ARS_MOV_PXVA == 1
@@ -807,7 +861,7 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_MOV_VOA: !aService.ARS_MOV_VOA })}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_MOV_VOA: aService.ARS_MOV_VOA == 1 ? 0 : 1 })}>
                 <Icons
                   name={
                     aService.ARS_MOV_VOA == 1
@@ -935,16 +989,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_CTR_REQ: !aService.ARS_CTR_REQ, ARS_CTR_CEO: "", ARS_CTR_CDT: "", ARS_CTR_REM: "" })
-                  // setArrivalcheck(20);
-                  // var x = [...arrival];
-                  // //come here
-                  // x[15] = null;
-                  // x[16] = { value: null, file: [] };
-                  // x[17] = { value: null, file: [] };
-                  // x[18] = null;
-                  // x[19] = null;
-                  // setArrival(x);
+                  setaService({ ...aService, ARS_CTR_REQ: aService.ARS_CTR_REQ == 1 ? 0 : 1, ARS_CTR_CEO: "", ARS_CTR_CDT: "", ARS_CTR_REM: "", ARS_CTR_CEL_String: [], ARS_CTR_NCO_String: [] })
                 }}>
                 <Icons
                   name={
@@ -991,8 +1036,8 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(16)}
                 onPress={() => {
-                  // setuploadSection(16);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_CTR_CEL_String');
+                  refRBSheet.current.open();
                 }}
                 disabled={!aService.ARS_CTR_REQ ? false : true}
                 style={{
@@ -1008,47 +1053,48 @@ export default function ArrivalService(props) {
                 <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[16].file.length > 0 && (
-              <View style={{ marginBottom: 20, marginTop: 10 }}>
-                {arrival[16].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(16, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_CTR_CEL_String && aService.ARS_CTR_CEL_String.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_CTR_CEL_DOCUMENT` + indexxx)
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_CTR_CEL_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_CTR_CEL_String', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
             <View
               style={{
                 flexDirection: 'row',
@@ -1060,8 +1106,8 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 //onPress={event => onPressDocPreA(17)}
                 onPress={() => {
-                  // setuploadSection(17);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_CTR_NCO_String');
+                  refRBSheet.current.open();
                 }}
                 disabled={!aService.ARS_CTR_REQ ? false : true}
                 style={{
@@ -1077,47 +1123,48 @@ export default function ArrivalService(props) {
                 <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[17].file.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                {arrival[17].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(17, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_CTR_NCO_String && aService.ARS_CTR_NCO_String.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_CTR_NCO_DOCUMENT` + indexxx)
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_CTR_NCO_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_CTR_NCO_String', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
 
             <DateTimeInput
               disabled={aService.ARS_CTR_REQ}
@@ -1161,7 +1208,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_WAS_REQ: !aService.ARS_WAS_REQ, ARS_WAS_CT: "", ARS_WAS_ET: "", ARS_WAS_REM: "" })
+                  setaService({ ...aService, ARS_WAS_REQ: aService.ARS_WAS_REQ == 1 ? 0 : 1, ARS_WAS_CT: "", ARS_WAS_ET: "", ARS_WAS_REM: "" })
                   // setArrivalcheck(24);
                   // var x = [...arrival];
                   // x[21] = null;
@@ -1235,7 +1282,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_LAS_REQ: !aService.ARS_LAS_REQ, ARS_LAS_CT: "", ARS_LAS_ET: "", ARS_LAS_REM: "" })
+                  setaService({ ...aService, ARS_LAS_REQ: aService.ARS_LAS_REQ == 1 ? 0 : 1, ARS_LAS_CT: "", ARS_LAS_ET: "", ARS_LAS_REM: "" })
                 }}>
                 <Icons
                   name={
@@ -1247,11 +1294,17 @@ export default function ArrivalService(props) {
                   size={40}
                 />
               </TouchableOpacity>
-              <Text style={styleSheet.label}>Not Required</Text>
+              <Text style={styleSheet.label}>Not required</Text>
             </View>
             <DateTimeInput
+              notrequiredtext={'Completed'}
+              notrequiredSection={true}
+              isnotrequired={aService.ARS_LAS_CT_C == 1 ? true : false}
+              setnotrequired={value => {
+                setaService({ ...aService, ARS_LAS_CT_C: value ? 1 : 0 })
+              }}
               disabled={aService.ARS_LAS_REQ}
-              label={'Start Time (Local Time)'}
+              label={'Completion Time (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePicker('time', 0, 'aService', "ARS_LAS_CT");
               }}
@@ -1262,6 +1315,30 @@ export default function ArrivalService(props) {
               index={12}
             />
             <DateTimeInput
+              notrequiredtext={'Completed'}
+              isnotrequired={aService.ARS_LAS_ST_C == 1 ? true : false}
+              setnotrequired={value => {
+                setaService({ ...aService, ARS_LAS_ST_C: value ? 1 : 0 })
+              }}
+              notrequiredSection={true}
+              disabled={aService.ARS_LAS_REQ}
+              label={'Start Time (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_LAS_ST");
+              }}
+              setNowPostDepart={() => setNow(0, 'aService', "ARS_LAS_ST")}
+              size={12}
+              type={'time'}
+              data={aService.ARS_LAS_ST}
+              index={12}
+            />
+            <DateTimeInput
+              notrequiredtext={'Completed'}
+              notrequiredSection={true}
+              isnotrequired={aService.ARS_LAS_ET_C == 1 ? true : false}
+              setnotrequired={value => {
+                setaService({ ...aService, ARS_LAS_ET_C: value ? 1 : 0 })
+              }}
               disabled={aService.ARS_LAS_REQ}
               label={'End Time (Local Time)'}
               showDatePickerPostDepart={() => {
@@ -1303,7 +1380,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_RUS_REQ: !aService.ARS_RUS_REQ, ARS_RUS_CT: "", ARS_RUS_REM: "" })
+                  setaService({ ...aService, ARS_RUS_REQ: aService.ARS_RUS_REQ == 1 ? 0 : 1, ARS_RUS_CT: "", ARS_RUS_REM: "" })
                 }}>
                 <Icons
                   name={
@@ -1413,7 +1490,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_FOA_REQ: !aService.ARS_FOA_REQ, ARS_FOA_FTAT: "", ARS_FOA_START: "", ARS_FOA_END: "", ARS_FOA_REM: "" })
+                  setaService({ ...aService, ARS_FOA_REQ: aService.ARS_FOA_REQ == 1 ? 0 : 1, ARS_FOA_FTAT: "", ARS_FOA_START: "", ARS_FOA_END: "", ARS_FOA_REM: "" })
                 }}>
                 <Icons
                   name={
@@ -1474,11 +1551,11 @@ export default function ArrivalService(props) {
               }}>
               <Text style={styleSheet.label}>Fuel Receipt (signed)</Text>
               <TouchableOpacity
-                disabled={arrival[37].checked}
+                disabled={aService.ARS_FOA_REQ ? true : false}
                 onPress={event => {
                   //onPressDocPreA(35)
-                  // setuploadSection(35);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_FOA_FR_String');
+                  refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -1486,54 +1563,55 @@ export default function ArrivalService(props) {
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: arrival[37].checked
+                  backgroundColor: aService.ARS_FOA_REQ
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
                 <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[35].file.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                {arrival[35].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(35, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_FOA_FR_String && aService.ARS_FOA_FR_String.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_FOA_FR_DOCUMENT` + indexxx)
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_FOA_FR_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_FOA_FR_String', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
             <LabelledInput
               disabled={aService.ARS_FOA_REQ}
               label={'Remarks'} //mark
@@ -1565,7 +1643,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_TOS_REQ: !aService.ARS_TOS_REQ, ARS_TOS_START: "", ARS_TOS_END: "", ARS_TOS_REM: "" })
+                  setaService({ ...aService, ARS_TOS_REQ: aService.ARS_TOS_REQ == 1 ? 0 : 1, ARS_TOS_START: "", ARS_TOS_END: "", ARS_TOS_REM: "" })
                 }}>
                 <Icons
                   name={
@@ -1613,11 +1691,11 @@ export default function ArrivalService(props) {
               }}>
               <Text style={styleSheet.label}>Photo (if required)</Text>
               <TouchableOpacity
-                disabled={arrival[42].checked}
+                disabled={aService.ARS_TOS_REQ ? true : false}
                 //onPress={event => onPressDocPreA(40)}
                 onPress={() => {
-                  // setuploadSection(40);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_TOS_PHOTO_STring');
+                  refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -1625,54 +1703,56 @@ export default function ArrivalService(props) {
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: arrival[42].checked
+                  backgroundColor: aService.ARS_TOS_REQ
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
                 <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[40].file.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                {arrival[40].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(40, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_TOS_PHOTO_STring && aService.ARS_TOS_PHOTO_STring.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_TOS_PHOTO_DOCUMENT` + indexxx)
+
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_TOS_PHOTO_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_TOS_PHOTO_STring', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
             <LabelledInput
               disabled={aService.ARS_TOS_REQ}
               label={'Remarks'} //mark
@@ -1705,7 +1785,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_OVB_REQ: !aService.ARS_OVB_REQ, ARS_OVB_NUMBER: "" })
+                  setaService({ ...aService, ARS_OVB_REQ: aService.ARS_OVB_REQ == 1 ? 0 : 1, ARS_OVB_NUMBER: "" })
                 }}>
                 <Icons
                   name={
@@ -1752,7 +1832,7 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_CEC_REQ: !aService.ARS_CEC_REQ, ARS_CEC_REM: "" })
+                  setaService({ ...aService, ARS_CEC_REQ: aService.ARS_CEC_REQ == 1 ? 0 : 1, ARS_CEC_REM: "" })
                 }}>
                 <Icons
                   name={
@@ -1777,11 +1857,11 @@ export default function ArrivalService(props) {
               }}>
               <Text style={styleSheet.label}>Photo (if required)</Text>
               <TouchableOpacity
-                disabled={aService.ARS_CEC_REQ ? true : true}
+                disabled={aService.ARS_CEC_REQ ? true : false}
                 //onPress={event => onPressDocPreA(40)}
                 onPress={() => {
-                  // setuploadSection(40);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_CEC_PHOTO_STring');
+                  refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -1796,55 +1876,57 @@ export default function ArrivalService(props) {
                 <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[40].file.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                {arrival[40].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(40, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_CEC_PHOTO_STring && aService.ARS_CEC_PHOTO_STring.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_CEC_PHOTO_DOCUMENT` + indexxx)
+
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_CEC_PHOTO_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_CEC_PHOTO_STring', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
             <LabelledInput
               disabled={aService.ARS_CEC_REQ}
               label={'Remarks'} //mark
-              data={aService.ARS_CEC_REM}
+              data={aService.ARS_CEC_REMARKS}
               datatype={'text'}
               index={12}
               setText={(i, text, type, section) => {
-                setaService({ ...aService, ARS_CEC_REM: text });
+                setaService({ ...aService, ARS_CEC_REMARKS: text });
               }}
               multiline={false}
               numberOfLines={1}
@@ -1870,15 +1952,15 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_LC_NR: !aService.ARS_LC_NR, ARS_LC_REM: "" })
+                  setaService({ ...aService, ARS_LC_NR: aService.ARS_LC_NR == 1 ? 0 : 1, ARS_LC_REM: "" })
                 }}>
                 <Icons
                   name={
-                    aService.ARS_LC_REQ == 1
+                    aService.ARS_LC_NR == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={aService.ARS_LC_REQ == 1 ? 'green' : 'black'}
+                  color={aService.ARS_LC_NR == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -1895,11 +1977,11 @@ export default function ArrivalService(props) {
               }}>
               <Text style={styleSheet.label}>Photo (if required)</Text>
               <TouchableOpacity
-                disabled={aService.ARS_LC_REQ ? true : true}
+                disabled={aService.ARS_LC_NR == 1 ? true : false}
                 //onPress={event => onPressDocPreA(40)}
                 onPress={() => {
-                  // setuploadSection(40);
-                  // refRBSheet.current.open();
+                  setuploadSection('ARS_LC_PHOTO_STring');
+                  refRBSheet.current.open();
                 }}
                 style={{
                   marginLeft: 10,
@@ -1907,62 +1989,63 @@ export default function ArrivalService(props) {
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: aService.ARS_LC_REQ == 1
+                  backgroundColor: aService.ARS_LC_NR == 1
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
                 <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
-            {/* {arrival[40].file.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                {arrival[40].file.map((value, index) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 16,
-                        padding: 10,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                        marginHorizontal: 5,
-                        ...Platform.select({
-                          ios: {
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.8,
-                            shadowRadius: 2,
-                          },
-                          android: {
-                            elevation: 3,
-                          },
-                        }),
-                      }}>
-                      <Text style={styleSheet.imgName}>{value.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeFilePreA(40, index)}>
-                        <Icons
-                          style={{ color: 'green', marginLeft: 10 }}
-                          name="close"
-                          size={30}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
+            {aService.ARS_LC_PHOTO_STring && aService.ARS_LC_PHOTO_STring.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_LC_PHOTO_DOCUMENT` + indexxx)
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_LC_PHOTO_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_LC_PHOTO_STring', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
             <LabelledInput
-              disabled={aService.ARS_LC_REQ}
+              disabled={aService.ARS_LC_NR == 1 ? true : false}
               label={'Remarks'} //mark
-              data={aService.ARS_LC_REM}
+              data={aService.ARS_LC_REMARKS}
               datatype={'text'}
               index={12}
               setText={(i, text, type, section) => {
-                setaService({ ...aService, ARS_LC_REM: text });
+                setaService({ ...aService, ARS_LC_REMARKS: text });
               }}
               multiline={false}
               numberOfLines={1}
@@ -2009,7 +2092,7 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_CRM_CVA: !aService.ARS_CRM_CVA })}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_CRM_CVA: aService.ARS_CRM_CVA == 1 ? 0 : 1 })}>
                 <Icons
                   name={
                     aService.ARS_CRM_CVA == 1
@@ -2028,14 +2111,14 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 20,
               }}>
-              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_CRM_TAT: !aService.ARS_CRM_TAT })}>
+              <TouchableOpacity onPress={event => setaService({ ...aService, ARS_CRM_CVOA: aService.ARS_CRM_CVOA == 1 ? 0 : 1 })}>
                 <Icons
                   name={
-                    aService.ARS_CRM_TAT == 1
+                    aService.ARS_CRM_CVOA == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={aService.ARS_CRM_TAT == 1 ? 'green' : 'black'}
+                  color={aService.ARS_CRM_CVOA == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -2099,7 +2182,7 @@ export default function ArrivalService(props) {
                     index={12}
                   />
                   <DateTimeInput
-                    label={' Left Terminal (Local Time)'}
+                    label={'Left Terminal (Local Time)'}
                     showDatePickerPostDepart={() => {
                       showDatePicker('time', index, 'crewmovement', "ARS_PM_PDFT");
                     }}
@@ -2140,6 +2223,7 @@ export default function ArrivalService(props) {
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
           is24Hour={true}
+          date={timerDate.current}
         />
         <RBSheet
           ref={refRBSheet}
@@ -2187,6 +2271,16 @@ export default function ArrivalService(props) {
             </View>
           </View>
         </RBSheet>
+        <Modal transparent={false} visible={imageVisible} style={{ width: '100%', height: '100%', backgroundColor: 'red' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <TouchableOpacity onPress={() => { setimageVisible(false) }}><Text style={{ color: 'white', backgroundColor: '#3b7dfc', padding: 10, fontSize: 20 }}>Close</Text></TouchableOpacity>
+          </View>
+          <Image
+            style={{ width: '100%', height: 'auto', flex: 1 }}
+            source={{ uri: showImage }}
+            resizeMode="contain"
+          />
+        </Modal>
       </ScrollView>
     </View>
   );

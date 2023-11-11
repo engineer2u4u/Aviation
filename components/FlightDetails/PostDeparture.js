@@ -7,6 +7,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
+  Image
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import React, { useRef, useState, useEffect } from 'react';
@@ -22,6 +24,7 @@ import DateTimeInput from '../subcomponents/Forms/universal/datetimeinput';
 import LabelledInput from '../subcomponents/Forms/universal/labelledinput';
 import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
+import { SERVER_URL, getDomain } from '../constants/env';
 
 const { width, height } = Dimensions.get('window');
 const HeadingTextSize = width / 15;
@@ -32,11 +35,13 @@ export default function PostDeparture(props) {
   const [mode, setMode] = useState('time');
   const [loading, setloading] = useState(false);
   const [uid, setuid] = useState(null);
-
+  const timerDate = useRef(new Date());
+  const [imageVisible, setimageVisible] = useState(false);
+  const [showImage, setshowImage] = useState(null);
   const [uploadSection, setuploadSection] = useState(0);
 
   const [postdeparture, setpostdeparture] = useState([
-    { value: null, file: [] },
+    [],
     null,
     null,
     null,
@@ -46,13 +51,12 @@ export default function PostDeparture(props) {
     var time24 = datetime.split(', ')[1];
     var time = time24.split(':');
     return (
-      date[1] + '/' + date[0] + '/' + date[2] + ', ' + time[0] + ':' + time[1]
+      time[0] + ':' + time[1]
     );
   };
   const [isDatePickerVisiblePostDepart, setDatePickerVisibilityPostDepart] =
     useState(false);
   const showDatePickerPostDepart = (type, index) => {
-    currentPostDepart.current = index;
     setMode(type);
     setDatePickerVisibilityPostDepart(true);
   };
@@ -64,7 +68,7 @@ export default function PostDeparture(props) {
   const handleConfirmPostDepart = date => {
     // console.log("A date has been picked: ",date);
     var tpostdeparture = [...postdeparture];
-    tpostdeparture[currentDepart.current] = tConvert(
+    tpostdeparture[1] = tConvert(
       new Date(date).toLocaleString('en-US', {
         hour12: false,
       }),
@@ -82,13 +86,13 @@ export default function PostDeparture(props) {
     setpostdeparture(tpostdeparture);
   };
 
-  const removeFilePreA = (arrayIndex, index) => {
+  const removeFilePreA = (index) => {
     var tpostdeparture = [...postdeparture];
-    tpostdeparture[arrayIndex].file.splice(index, 1);
+    tpostdeparture[0].splice(index, 1);
     setpostdeparture(tpostdeparture);
   };
 
-  const onPressDocPreA_New = async (index, res) => {
+  const onPressDocPreA_New = async (res) => {
     setloading(false);
     RNFetchBlob.fs
       .readFile(res.uri, 'base64')
@@ -96,10 +100,7 @@ export default function PostDeparture(props) {
         // console.log(encoded, 'reports.base64');
         setloading(false);
         var tpostdeparture = [...postdeparture];
-        tpostdeparture[index].file.push({
-          name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
-          base64: 'data:' + res.type + ';base64,' + encoded,
-        });
+        tpostdeparture[0].push('data:' + res.type + ';base64,' + encoded);
         setpostdeparture(tpostdeparture);
       })
       .catch(error => {
@@ -124,7 +125,7 @@ export default function PostDeparture(props) {
           options.mediaType = 'photo';
           const result = await ImagePicker.launchImageLibrary(options);
           const file = result.assets[0];
-          onPressDocPreA_New(uploadSection, file);
+          onPressDocPreA_New(file);
         } catch (error) {
           console.log(error);
         }
@@ -133,7 +134,7 @@ export default function PostDeparture(props) {
         try {
           const result = await ImagePicker.launchCamera(options);
           const file = result.assets[0];
-          onPressDocPreA_New(uploadSection, file);
+          onPressDocPreA_New(file);
         } catch (error) {
           console.log(error);
         }
@@ -158,39 +159,46 @@ export default function PostDeparture(props) {
 
   const sendForm = () => {
     setcallLoad(true);
+    var domain = getDomain();
     const email = auth().currentUser.email;
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
     console.log(
       {
-        POD_SEV_TIME: postdeparture[1] ? postdeparture[1] : '""',
-        POD_SEV_NAME: postdeparture[2] ? postdeparture[2] : '""',
-        POD_REM: postdeparture[3] ? postdeparture[3] : '""',
+        POD_SGD_String: [],
+        POD_SEV_TIME: postdeparture[1],
+        POD_SEV_NAME: postdeparture[2],
+        POD_REM: postdeparture[3],
         UID: uid ? uid : '',
         STATUS: 0,
         FUID: FUID,
         UPDATE_BY: email,
       },
-      'res',
+      'ressss',
     );
-
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable('updateFlightModule?module=PostPostDepartureChecklist')(
-        JSON.stringify({
-          POD_GENDEC: '""',
-          POD_SEV_TIME: postdeparture[1] ? postdeparture[1] : '""',
-          POD_SEV_NAME: postdeparture[2].trim()
-            ? postdeparture[2].trim()
-            : '""',
-          POD_REM: postdeparture[3] ? postdeparture[3] : '""',
-          UID: uid ? uid : '',
-          STATUS: 0,
-          FUID: FUID,
-          UPDATE_BY: email,
-        }),
-      )
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify({
+        POD_SGD_String: postdeparture[0],
+        POD_SEV_TIME: postdeparture[1],
+        POD_SEV_NAME: postdeparture[2],
+        POD_REM: postdeparture[3],
+        UID: uid ? uid : '',
+        STATUS: 0,
+        FUID: FUID,
+        UPDATE_BY: email,
+      })
+    };
+    fetch(
+      `${domain}/PostPostDepartureChecklist`,
+      requestOptions,
+    )
+      .then(response => response.text())
       .then(response => {
         Alert.alert('Success');
+        readData()
         setcallLoad(false);
         console.log(response);
       })
@@ -202,15 +210,26 @@ export default function PostDeparture(props) {
   };
 
   useEffect(() => {
+    readData();
+  }, []);
+
+  const readData = () => {
     setcallLoad(true);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetPostDepartureChecklist',
-      )()
+    var domain = getDomain();
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders
+    };
+    fetch(
+      `${domain}/GetPostDepartureChecklist?_token=59E0D05E-2F33-458E-9769-3884C3ACB9B6&_opco=&_fuid=${FUID}&_uid=`,
+      requestOptions,
+    )
+      .then(response => response.text())
       .then(response => {
-        var packet = JSON.parse(response.data.body);
+        var packet = JSON.parse(response);
         var res = [...packet.Table];
         console.log(res, 'res');
         if (res.length > 0) {
@@ -221,16 +240,120 @@ export default function PostDeparture(props) {
           x[2] = res[0].POD_SEV_NAME.trim().replace('""', '');
           x[3] = res[0].POD_REM.trim().replace('""', '');
           setpostdeparture([...x]);
+          fetch(
+            `${domain}/GetDepartureChecklistFiles?_token=CDAC498B-116F-4346-AD72-C3F65A902FFD&_opco=&_fuid=${FUID}&_uid=${res[0].UID}`,
+            requestOptions,
+          )
+            .then(response => response.text())
+            .then(result => {
+              setcallLoad(false);
+              try {
+                var packet = JSON.parse(result);
+                console.log('Files', packet);
+                // var temp = [...x];
+                x[0] = packet.POD_SGD_String;
+                setpostdeparture([...x])
+              }
+              catch (e) {
+                setcallLoad(false);
+                console.log(e, 'Function error');
+              }
+            })
+            .catch(error => {
+              setcallLoad(false);
+              console.log(error, 'Function error');
+            });
         }
-        setcallLoad(false);
+        else {
+          setcallLoad(false);
+        }
+
       })
       .catch(error => {
         setcallLoad(false);
         console.log(error, 'Function error');
         // setpostdeparture([...x]);
       });
-  }, []);
-
+  }
+  const saveFile = (val, fileName) => {
+    const DownloadDir =
+      Platform.OS == 'ios'
+        ? RNFetchBlob.fs.dirs.DocumentDir
+        : RNFetchBlob.fs.dirs.DownloadDir + '/Aviation';
+    const headers = {
+      'data:image/png;base64': '.png',
+      'data:image/jpeg;base64': '.jpg',
+      'data:application/pdf;base64': '.pdf',
+      'data:application/msword;base64': '.doc',
+      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/vnd.ms-excel;base64': '.xls',
+      'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
+      'data:application/vnd.ms-powerpoint;base64': '.ppt',
+      'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64': '.pptx',
+      'data:application/zip;base64': '.zip',
+      // Add more checks for other file types as needed
+    };
+    var type = headers[val.split(",")[0]];
+    var bs64 = val.split(",")[1];
+    var pdfLocation = DownloadDir + '/' + fileName + type;
+    // console.log(pdfLocation);
+    // console.log(val)
+    RNFetchBlob.fs
+      .isDir(DownloadDir)
+      .then(isDir => {
+        if (isDir) {
+          console.log('iSDir');
+          RNFetchBlob.fs
+            .writeFile(pdfLocation, bs64, 'base64')
+            .then(res => {
+              // console.log('saved', res);
+              Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                {
+                  text: 'View', onPress: () => {
+                    // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                    RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                  }
+                },
+                { text: 'OK' },
+              ])
+            })
+            .catch(err => {
+              console.log(err)
+              Alert.alert('Error in saving file')
+            });
+        } else {
+          RNFetchBlob.fs
+            .mkdir(DownloadDir)
+            .then(() => {
+              console.log('Created Folder');
+              RNFetchBlob.fs
+                .writeFile(pdfLocation, bs64, 'base64')
+                .then(res => {
+                  console.log('saved');
+                  Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                    {
+                      text: 'View', onPress: () => {
+                        // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                        RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                      }
+                    },
+                    { text: 'OK' },
+                  ])
+                })
+                .catch(err => {
+                  Alert.alert('Error in saving file')
+                });
+            })
+            .catch(err => {
+              console.log('is Not dir', err);
+              Alert.alert('Error in saving file')
+            });
+        }
+      })
+      .catch(err => {
+        Alert.alert('Error in saving file')
+      });
+  }
   return (
     <ScrollView>
       <Loader visible={loading} />
@@ -253,7 +376,7 @@ export default function PostDeparture(props) {
         }
       />
       <View style={{ padding: 20 }}>
-        <TakeCamera
+        {/* <TakeCamera
           label={'Stamped GenDec'}
           type={0}
           uploadInitiator={uploadInitiator}
@@ -271,7 +394,76 @@ export default function PostDeparture(props) {
               size={30}
             />
           }
-        />
+        /> */}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 10,
+          }}>
+          <Text style={styleSheet.label}>
+            Stamped GenDec
+          </Text>
+          <TouchableOpacity
+            //onPress={event => onPressDocPreA(16)}
+            onPress={() => {
+              refRBSheet.current.open();
+            }}
+
+            style={{
+              marginLeft: 10,
+              paddingVertical: 5,
+              paddingHorizontal: 10,
+              borderWidth: 1,
+              borderRadius: 8,
+              backgroundColor: 'white',
+            }}>
+            <Text style={{ color: 'green' }}>Upload</Text>
+          </TouchableOpacity>
+        </View>
+        {postdeparture[0] && postdeparture[0].map((val, indexxx) => {
+          return (<TouchableOpacity onPress={() => {
+            if (val.split(",")[0].startsWith('data:image')) {
+              setimageVisible(true);
+              setshowImage(val);
+            }
+            else {
+              saveFile(val, `Stamped_GENDEC_DOCUMENTS` + indexxx)
+            }
+          }}
+            key={indexxx}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 8,
+              padding: 10,
+              marginVertical: 10,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 2,
+                },
+                android: {
+                  elevation: 3,
+                },
+              }),
+            }}>
+            <Text style={{ color: 'black' }}>{`Stamped_GENDEC_DOCUMENTS` + indexxx}</Text>
+            <TouchableOpacity onPress={() => removeFilePreA(indexxx)}>
+              <Icons
+                style={{ color: 'green', marginLeft: 10 }}
+                name="close"
+                size={30}
+              />
+            </TouchableOpacity>
+          </TouchableOpacity>)
+        })}
 
         <Text style={[styleSheet.label, { marginTop: 10 }]}>
           Services Verified:
@@ -291,12 +483,17 @@ export default function PostDeparture(props) {
             data={postdeparture[1]}
             size={width / 25}
             index={1}
+            type={'time'}
           />
           <LabelledInput
             label={'Name of Verifier'}
             data={postdeparture[2]}
             index={2}
-            setText={setText}
+            setText={(index, text) => {
+              var temp = [...postdeparture];
+              temp[2] = text;
+              setpostdeparture([...temp])
+            }}
             multiline={false}
             numberOfLines={1}
           />
@@ -306,7 +503,11 @@ export default function PostDeparture(props) {
           label={'Additional Remarks'}
           data={postdeparture[3]}
           index={3}
-          setText={setText}
+          setText={(index, text) => {
+            var temp = [...postdeparture];
+            temp[3] = text;
+            setpostdeparture([...temp])
+          }}
           multiline={true}
           numberOfLines={2}
         />
@@ -317,6 +518,7 @@ export default function PostDeparture(props) {
         onConfirm={handleConfirmPostDepart}
         onCancel={hideDatePickerPostDepart}
         is24Hour={true}
+        date={timerDate.current}
       />
       <RBSheet
         ref={refRBSheet}
@@ -364,6 +566,16 @@ export default function PostDeparture(props) {
           </View>
         </View>
       </RBSheet>
+      <Modal transparent={false} visible={imageVisible} style={{ width: '100%', height: '100%', backgroundColor: 'red' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+          <TouchableOpacity onPress={() => { setimageVisible(false) }}><Text style={{ color: 'white', backgroundColor: '#3b7dfc', padding: 10, fontSize: 20 }}>Close</Text></TouchableOpacity>
+        </View>
+        <Image
+          style={{ width: '100%', height: 'auto', flex: 1 }}
+          source={{ uri: showImage }}
+          resizeMode="contain"
+        />
+      </Modal>
     </ScrollView>
   );
 }

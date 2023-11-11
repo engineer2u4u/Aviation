@@ -12,7 +12,7 @@ const firebaseConfig = {
 };
 
 if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
 }
 
 const fc = firebase.functions();
@@ -20,4 +20,4 @@ const fc = firebase.functions();
 
 
 
-export { firebase,fc };
+export { firebase, fc };

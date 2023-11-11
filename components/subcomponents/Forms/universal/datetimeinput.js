@@ -7,6 +7,8 @@ const DateTimeInput = ({
   label,
   showLabel = true,
   notrequiredSection = false,
+  isnotrequired,
+  setnotrequired,
   disabled,
   showDatePickerPostDepart,
   ini,
@@ -18,9 +20,11 @@ const DateTimeInput = ({
   sectionName = 'crew',
   added = false,
   setflightdoc = null,
+  showTimeNow = true,
+  notrequiredtext = null
 }) => {
   const [date, setdate] = useState(data);
-  const [notreq, setnotreq] = useState(disabled);
+  const [notreq, setnotreq] = useState(isnotrequired);
   const [color, setcolor] = useState('white');
   const [touchableactive, setdisabletouchable] = useState(true);
 
@@ -60,27 +64,37 @@ const DateTimeInput = ({
   useEffect(() => {
     setdate(data);
   }, [data]);
+  useEffect(() => {
+    setnotreq(isnotrequired)
+  }, [isnotrequired]);
 
   useEffect(() => {
-    if (notrequiredSection) {
-      if (notreq) {
-        setcolor('rgba(0,0,0,0.3)');
-        setdisabletouchable(true);
-        setdate(null);
-      } else {
-        setcolor('white');
-        setdisabletouchable(false);
-      }
+    // if (notrequiredSection) {
+    // if (disabled) {
+    //   setnotreq(true)
+    // }
+    // else if(!disabled) {
+    //   setnotreq(false)
+    // }
+    if (notreq || disabled) {
+      setcolor('rgba(0,0,0,0.3)');
+      setdisabletouchable(true);
+      setdate(null);
     } else {
-      if (disabled) {
-        setcolor('rgba(0,0,0,0.3)');
-        setdisabletouchable(true);
-        setdate(null);
-      } else {
-        setcolor('white');
-        setdisabletouchable(false);
-      }
+      setcolor('white');
+      setdisabletouchable(false);
+      setnotreq(false)
     }
+    // } else {
+    //   if (disabled) {
+    //     setcolor('rgba(0,0,0,0.3)');
+    //     setdisabletouchable(true);
+    //     setdate(null);
+    //   } else {
+    //     setcolor('white');
+    //     setdisabletouchable(false);
+    //   }
+    // }
   }, [disabled, notreq]);
   return (
     <>
@@ -94,6 +108,8 @@ const DateTimeInput = ({
             // setpaxhotelactivesections(!x);
             // console.log(x);
             //setpaxboardedtimeactive
+
+            setnotrequired(!notreq);
             setnotreq(!notreq);
             //come here
             //setpaxarrivaltimeaddedactive(x);
@@ -118,7 +134,7 @@ const DateTimeInput = ({
             size={35}
           />
           <Text style={[{ fontSize: 15, paddingLeft: 10, color: 'black' }]}>
-            Not Required
+            {notrequiredtext ? notrequiredtext : 'Not Required'}
           </Text>
         </TouchableOpacity>
       )}
@@ -132,7 +148,7 @@ const DateTimeInput = ({
             {date != null ? date : (type == 'date' ? 'dd/mm/yy' : type == 'time' ? '-- : --' : 'dd/mm/yy, -- : --')}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {showTimeNow && <TouchableOpacity
           disabled={touchableactive}
           onPress={() => {
             setTime(); //  :  setNowPostDepart(index)
@@ -145,7 +161,7 @@ const DateTimeInput = ({
             }}>
             {type == 'date' ? 'Today' : 'Time Now'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
     </>
   );

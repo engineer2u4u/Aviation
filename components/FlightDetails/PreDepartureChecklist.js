@@ -8,6 +8,8 @@ import {
   Dimensions,
   Alert,
   ActivityIndicator,
+  Modal,
+  Image
 } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -25,6 +27,7 @@ import TakeCamera from '../subcomponents/Forms/takecamera';
 import Header from '../subcomponents/Forms/Header';
 import { firebase } from '@react-native-firebase/functions';
 import auth from '@react-native-firebase/auth';
+import { SERVER_URL, getDomain } from '../constants/env';
 
 const { width, height } = Dimensions.get('window');
 const HeadingTextSize = width / 15;
@@ -32,12 +35,15 @@ const HeadingTextSize = width / 15;
 export default function PreDepartureChecklist(props) {
   const FUID = props.route.params.UID;
   const refRBSheet = useRef();
+  const timerDate = useRef(new Date());
   const [uid, setuid] = useState(null);
   const currentPicker = useRef(0);
+  const [imageVisible, setimageVisible] = useState(false);
+  const [showImage, setshowImage] = useState(null);
   const [uploadSection, setuploadSection] = useState(0);
   const [uploadaddedSection, setuploadAddedSection] = useState(false);
   const [uploadaddedSectionindex, setuploadAddedSectionindex] = useState(false);
-
+  const [deleteService, setdeleteService] = useState([]);
   const [pdaddmovement, setpdaddmovement] = useState(false);
   const [pdaddmovementnum, setpdaddmovementnum] = useState(0);
   const [paxpdaddmovement, setpaxpdaddmovement] = useState(false);
@@ -50,10 +56,7 @@ export default function PreDepartureChecklist(props) {
 
   const [mode, setMode] = useState('time');
   const currentDeparture = useRef(0);
-
-  const [paxhotelactivesections, setpaxhotelactivesections] = useState(false);
-  const [crewactivesections, setcrewactivesections] = useState(false);
-  const [pdchecklist, setpdchecklist] = useState({ "CREATED_BY": "", "CREATED_DATE": "", "FUID": "", "LAST_UPDATE": "", "PDC_AFR": 0, "PDC_AFR_REM": "", "PDC_ASR": 0, "PDC_ASR_REM": "", "PDC_CAR": 0, "PDC_CAR_REM": "", "PDC_CCDD": null, "PDC_CCDT": "", "PDC_CIQ": 0, "PDC_CIQ_REM": "", "PDC_CML": "", "PDC_CML_PHOTO": "", "PDC_CNML": 0, "PDC_CNML_REM": "", "PDC_CTA": 0, "PDC_CTA_REM": "", "PDC_CTNR": 0, "PDC_CTPD": "", "PDC_CTPT": "", "PDC_FBO": 0, "PDC_FBO_REM": "", "PDC_FD": null, "PDC_FD_ATC": "", "PDC_FD_FDP": "", "PDC_FD_FDR": "", "PDC_FD_NOTAMS": "", "PDC_FD_SLOTS": "", "PDC_FD_WIU": "", "PDC_FT": "", "PDC_HAR": 0, "PDC_HAR_REM": "", "PDC_PAGD": 0, "PDC_PAGD_REM": "", "PDC_PNML": 0, "PDC_PNML_REM": "", "PDC_PTA": 0, "PDC_PTA_REM": "", "PDC_PTNR": 0, "PDC_REM": "", "PDC_TOR_CONTACT": "", "PDC_TOR_DRIVER": "", "PDC_TOR_REM": "", "PDC_TOR_TIME": "", "PDC_UDGD": "", "STATUS": 0, "UID": "", "UPDATE_BY": "" })
+  const [pdchecklist, setpdchecklist] = useState({ "CREATED_BY": "", "CREATED_DATE": "", "FUID": "", "LAST_UPDATE": "", "PDC_AFR": 0, "PDC_AFR_REM": "", "PDC_ASR": 0, "PDC_ASR_REM": "", "PDC_CAR": 0, "PDC_CAR_REM": "", "PDC_CCDD": null, "PDC_CCDT": "", "PDC_CIQ": 0, "PDC_CIQ_REM": "", "PDC_CML": "", "PDC_CML_PHOTO": "", "PDC_CNML": 0, "PDC_CNML_REM": "", "PDC_CTA": 0, "PDC_CTA_REM": "", "PDC_CTNR": 0, "PDC_CTPD": "", "PDC_CTPT": "", "PDC_FBO": 0, "PDC_FBO_REM": "", "PDC_FD": null, "PDC_FD_ATC": "", "PDC_FD_FDP": "", "PDC_FD_FDR": "", "PDC_FD_NOTAMS": "", "PDC_FD_SLOTS": "", "PDC_FD_WIU": "", "PDC_FT": "", "PDC_HAR": 0, "PDC_HAR_REM": "", "PDC_PAGD": 0, "PDC_PAGD_REM": "", "PDC_PNML": 0, "PDC_PNML_REM": "", "PDC_PTA": 0, "PDC_PTA_REM": "", "PDC_PTNR": 0, "PDC_REM": "", "PDC_TOR_CONTACT": "", "PDC_TOR_DRIVER": "", "PDC_TOR_REM": "", "PDC_TOR_TIME": "", "PDC_UDGD": "", "STATUS": 0, "UID": "", "UPDATE_BY": "", 'PDC_UDGD_String': [], PDC_FD_NOTAMS_C: 0, PDC_FD_WIU_C: 0 })
   const [crewtransport, setcrewtransport] = useState([]);
   const [paxtransport, setpaxtransport] = useState([]);
 
@@ -104,23 +107,62 @@ export default function PreDepartureChecklist(props) {
   ]);
 
   useEffect(() => {
+    readData();
+  }, []);
+
+  const readData = () => {
     setcallLoad(true);
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureChecklist',
-      )()
+
+    var domain = getDomain();
+
+    var myHeaders = new Headers();
+    myHeaders.append('Accept', 'application/json');
+    myHeaders.append("Content-Type", "application/json");
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders
+    };
+    console.log(`${domain}/GetPreDepartureChecklist?_token=C3FD9690-0EB3-4DEA-B4E9-CF9469E0F91C&_opco=&_fuid=${FUID}&_uid=`)
+    fetch(
+      `${domain}/GetPreDepartureChecklist?_token=C3FD9690-0EB3-4DEA-B4E9-CF9469E0F91C&_opco=&_fuid=${FUID}&_uid=`,
+      requestOptions,
+    )
+      .then(response => response.text())
       .then(response => {
 
-        var packet = JSON.parse(response.data.body);
+        var packet = JSON.parse(response);
         var res = [...packet.Table];
         if (res && res.length > 0) {
-          console.log(res[0]);
+          console.log(res, 'pre-depart');
           setpdchecklist(res[0])
           setuid(res[0].UID);
-          setcallLoad(false);
+          // setcallLoad(false);
+          fetch(
+            `${domain}/GetDepartureChecklistValueFiles?_token=CDAC498B-116F-4346-AD72-C3F65A902FFD&_opco=&_fuid=${FUID}&_uid=${res[0].UID}`,
+            requestOptions,
+          )
+            .then(response => response.text())
+            .then(result => {
+              setcallLoad(false);
+              try {
+                var packet = JSON.parse(result);
+                console.log('upload gendec', packet);
+                var temp = { ...res[0] };
+                if (packet.PDCT_PL_Files && packet.PDCT_PL_Files.length > 0) {
+                  temp.PDC_UDGD_String = packet.PDCT_PL_Files[0].PDCT_PL_String,
+                    setpdchecklist({ ...temp })
+                }
 
+              }
+              catch (e) {
+                setcallLoad(false);
+                console.log(e, 'Function error');
+              }
+            })
+            .catch(error => {
+              setcallLoad(false);
+              console.log(error, 'Function error');
+            });
         } else {
           setcallLoad(false);
           setuid('');
@@ -130,26 +172,38 @@ export default function PreDepartureChecklist(props) {
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-    firebase
-      .app()
-      .functions('asia-southeast1')
-      .httpsCallable(
-        'getFlightModule?fuid=' + FUID + '&module=GetPreDepartureTransport',
-      )()
+
+
+    fetch(
+      `${domain}/GetPreDepartureTransport?_token=C3FD9690-0EB3-4DEA-B4E9-CF9469E0F91C&_opco=&_fuid=${FUID}&_uid=`,
+      requestOptions,
+    )
+      .then(response => response.text())
       .then(response => {
         //get pax & crew transport
 
-        var packet = JSON.parse(response.data.body);
-        var res = packet.Table;
-        console.log(res);
+        var packet = JSON.parse(response);
+        var res = packet.ds.Table;
+        var resFile = packet.PDCT_PL_Files;
+        console.log('Transport', packet);
         if (res && res.length > 0) {
           var apaxTransport = [];
           var acrewTransport = [];
           res.forEach((val, index) => {
-            if (val.PDCT_TYPE.trim() == 'Pax') {
-              apaxTransport.push(val);
-            } else {
-              acrewTransport.push(val);
+            if (val.STATUS != 5) {
+              val.PDCT_PL_String = [];
+              resFile.map(file => {
+                if (file.uid == val.UID) {
+                  val.PDCT_PL_String = [...file.PDCT_PL_String];
+                }
+              })
+
+              if (val.PDCT_TYPE.trim() == 'Pax') {
+                apaxTransport.push(val);
+              } else {
+                acrewTransport.push(val);
+              }
+
             }
           });
           setpaxtransport([...apaxTransport]);
@@ -163,7 +217,8 @@ export default function PreDepartureChecklist(props) {
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-  }, []);
+  }
+
 
   const getFeedback = index => {
     setvFeedback(true);
@@ -177,50 +232,10 @@ export default function PreDepartureChecklist(props) {
   const removeFeedback = index => {
     setpdchecklist({ ...pdchecklist, [index]: '' })
   };
-  const onPressDocPreA = async index => {
-    try {
-      setloading(true);
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.images],
-      });
-      // console.log(res);
-      RNFetchBlob.fs
-        .readFile(res.uri, 'base64')
-        .then(encoded => {
-          // console.log(encoded, 'reports.base64');
-          setloading(false);
-          var tpdeparturecheck = [...pdeparturecheck];
-          tpdeparturecheck[index].file.push({
-            name: res.name,
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setpdeparturecheck(tpdeparturecheck);
-        })
-        .catch(error => {
-          setloading(false);
-          console.log(error);
-        });
-
-      // }
-    } catch (err) {
-      setloading(false);
-      console.log(JSON.stringify(err), 'Errorss');
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker, exit any dialogs or menus and move on
-      } else {
-        // throw err;
-      }
-    }
-  };
   const [isDatePickerVisibleDeparture, setDatePickerVisibilityDeparture] =
     useState(false);
   const showDatePicker = (type, index, arr, pos) => {
     currentPicker.current = [index, arr, pos];
-    setMode(type);
-    setDatePickerVisibilityDeparture(true);
-  };
-  const showDatePickerDeparture = (type, index) => {
-    currentDeparture.current = index;
     setMode(type);
     setDatePickerVisibilityDeparture(true);
   };
@@ -261,6 +276,26 @@ export default function PreDepartureChecklist(props) {
           )
         };
         setpdchecklist({ ...tcheckList }); break;
+      case 'crewtransport':
+        var tcheckList = [...crewtransport];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setcrewtransport([...tcheckList]); break;
+      case 'paxtransport':
+        var tcheckList = [...paxtransport];
+        tcheckList[currentPicker.current[0]][
+          currentPicker.current[2]
+        ] = tConvert(
+          new Date(date).toLocaleString('en-US', {
+            hour12: false,
+          }),
+        );
+        setpaxtransport([...tcheckList]); break;
     }
     hideDatePickerDeparture();
   };
@@ -310,22 +345,23 @@ export default function PreDepartureChecklist(props) {
     setpdeparturecheck(tpdeparturecheck);
     // console.log('triggered', tcheckList);
   };
-  const removeFilePreA = (arrayIndex, index, added = false) => {
-    console.log('REMOVER', added, arrayIndex, index);
-    if (added) {
-      var tpdeparturecheck = addedcrewSectionval;
-      tpdeparturecheck[arrayIndex].hotelMap.file.splice(index, 1);
-      setaddedcrewSectionval(tpdeparturecheck);
-      return;
+  const removeFilePreA = (field, type, index, aindex) => {
+    if (type == "Crew") {
+      var temp = [...crewtransport];
+
+      temp[index].PDCT_PL_String.splice(aindex, 1);
+      setcrewtransport([...temp])
     }
-    var tpdeparturecheck = [...pdeparturecheck];
-    console.log(tpdeparturecheck[arrayIndex].hotelMap.file.length);
-    if (tpdeparturecheck[arrayIndex].hotelMap.file.length === 1)
-      tpdeparturecheck[arrayIndex].hotelMap.file = [];
-    else tpdeparturecheck[arrayIndex].hotelMap.file.splice(index, 1);
-    console.log(tpdeparturecheck[arrayIndex].hotelMap.file.length);
-    //console.log(tpdeparturecheck[arrayIndex].hotelMap.file)
-    setpdeparturecheck(tpdeparturecheck);
+    else if (type == "Pax") {
+      var temp = [...paxtransport];
+      temp[index].PDCT_PL_String.splice(aindex, 1);
+      setpaxtransport([...temp])
+    }
+    else {
+      var temp = { ...pdchecklist };
+      temp[field].splice(aindex, 1);
+      setpdchecklist({ ...temp })
+    }
   };
 
   const [addedtestSection, setaddedtestsection] = useState([]);
@@ -349,27 +385,21 @@ export default function PreDepartureChecklist(props) {
       .then(encoded => {
         // console.log(encoded, 'reports.base64');
         setloading(false);
-
-        if (uploadaddedSection) {
-          var tpdeparturecheck =
-            activeSection === 'crew'
-              ? [...addedcrewSectionval]
-              : [...addedpaxSectionval];
-          tpdeparturecheck[index].hotelMap.file.push({
-            name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setaddedcrewSectionval(tpdeparturecheck);
-        } else {
-          console.log('HERE WE GO');
-
-          var tpdeparturecheck = [...pdeparturecheck]; //<- this line works
-
-          tpdeparturecheck[index].hotelMap.file.push({
-            name: res.fileName.replace('rn_image_picker_lib_temp_', ''),
-            base64: 'data:' + res.type + ';base64,' + encoded,
-          });
-          setpdeparturecheck(tpdeparturecheck);
+        if (uploadSection.type == "Crew") {
+          var temp = [...crewtransport];
+          temp[uploadSection.index].PDCT_PL_String ? temp[uploadSection.index].PDCT_PL_String.push('data:' + res.type + ';base64,' + encoded) : temp[uploadSection.index].PDCT_PL_String = ['data:' + res.type + ';base64,' + encoded];
+          console.log(temp)
+          setcrewtransport([...temp])
+        }
+        else if (uploadSection.type == "Pax") {
+          var temp = [...paxtransport];
+          temp[uploadSection.index].PDCT_PL_String ? temp[uploadSection.index].PDCT_PL_String.push('data:' + res.type + ';base64,' + encoded) : temp[uploadSection.index].PDCT_PL_String = ['data:' + res.type + ';base64,' + encoded];
+          setpaxtransport([...temp])
+        }
+        else {
+          var temp = { ...pdchecklist };
+          temp[uploadSection] ? temp[uploadSection].push('data:' + res.type + ';base64,' + encoded) : temp[uploadSection] = ['data:' + res.type + ';base64,' + encoded];
+          setpdchecklist({ ...temp })
         }
       })
       .catch(error => {
@@ -417,197 +447,42 @@ export default function PreDepartureChecklist(props) {
 
   const addnewpaxSection = () => {
     const email = auth().currentUser.email;
-    setpaxtransport([...paxtransport, { "CREATED_BY": email, "CREATED_DATE": new Date(), "FUID": FUID, "LAST_UPDATE": "", "PDCT_ADDRESS": "", "PDCT_DCN": "", "PDCT_DD_NR": 0, "PDCT_DN": "", "PDCT_DOD_ADDRESS": "", "PDCT_DOD_LOCATION": "", "PDCT_DOD_TIME": "", "PDCT_LEAD_NAME": "", "PDCT_PASSENGER_NO": 0, "PDCT_PD_NR": 0, "PDCT_PL": "", "PDCT_REMARK": "", "PDCT_SPT": "", "PDCT_TYPE": "Pax", "PDCT_VEHICLE_NO": "", "PDCT_VEHICLE_TYPE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
+    setpaxtransport([...paxtransport, { "CREATED_BY": email, "CREATED_DATE": new Date().toLocaleDateString().to, "FUID": FUID, "LAST_UPDATE": "", "PDCT_ADDRESS": "", "PDCT_DCN": "", "PDCT_DD_NR": 0, "PDCT_DN": "", "PDCT_DOD_ADDRESS": "", "PDCT_DOD_LOCATION": "", "PDCT_DOD_TIME": "", "PDCT_LEAD_NAME": "", "PDCT_PASSENGER_NO": 0, "PDCT_PD_NR": 0, "PDCT_PL": "", "PDCT_REMARK": "", "PDCT_SPT": "", "PDCT_TYPE": "Pax", "PDCT_VEHICLE_NO": "", "PDCT_VEHICLE_TYPE": "", "STATUS": 0, "UID": '', "UPDATE_BY": email, PDCT_PL_String: [] }])
 
   };
 
   const addnewcrewSection = () => {
     const email = auth().currentUser.email;
-    setcrewtransport([...crewtransport, { "CREATED_BY": email, "CREATED_DATE": new Date(), "FUID": FUID, "LAST_UPDATE": "", "PDCT_ADDRESS": "", "PDCT_DCN": "", "PDCT_DD_NR": 0, "PDCT_DN": "", "PDCT_DOD_ADDRESS": "", "PDCT_DOD_LOCATION": "", "PDCT_DOD_TIME": "", "PDCT_LEAD_NAME": "", "PDCT_PASSENGER_NO": 0, "PDCT_PD_NR": 0, "PDCT_PL": "", "PDCT_REMARK": "", "PDCT_SPT": "", "PDCT_TYPE": "Crew", "PDCT_VEHICLE_NO": "", "PDCT_VEHICLE_TYPE": "", "STATUS": 1, "UID": uid, "UPDATE_BY": email }])
+    setcrewtransport([...crewtransport, { "CREATED_BY": email, "CREATED_DATE": new Date().toLocaleDateString(), "FUID": FUID, "LAST_UPDATE": "", "PDCT_ADDRESS": "", "PDCT_DCN": "", "PDCT_DD_NR": 0, "PDCT_DN": "", "PDCT_DOD_ADDRESS": "", "PDCT_DOD_LOCATION": "", "PDCT_DOD_TIME": "", "PDCT_LEAD_NAME": "", "PDCT_PASSENGER_NO": 0, "PDCT_PD_NR": 0, "PDCT_PL": "", "PDCT_REMARK": "", "PDCT_SPT": "", "PDCT_TYPE": "Crew", "PDCT_VEHICLE_NO": "", "PDCT_VEHICLE_TYPE": "", "STATUS": 0, "UID": '', "UPDATE_BY": email, PDCT_PL_String: [] }])
   };
   const [ini, setini] = useState(false);
 
   const removepaxSection = index => {
-    //remove val
-    var val = [...addedpaxSectionval];
-    val.splice(index, 1);
-    if (val.length === 0) val = [];
-    console.log(val);
-    setaddedpaxSectionval(val);
+    var service = [...paxtransport];
+    var delService = service.splice(index, 1);
+    if (delService[0].UID) {
+      setdeleteService([...deleteService, { UID: delService[0].UID, TableName: 'PREDEPARTURECHECKLIST' }]);
+    }
+    setpaxtransport(service);
   };
 
   const removecrewSection = index => {
     var service = [...crewtransport];
-    service.splice(index, 1);
+    var delService = service.splice(index, 1);
+    if (delService[0].UID) {
+      setdeleteService([...deleteService, { UID: delService[0].UID, TableName: 'PREDEPARTURECHECKLIST' }]);
+    }
     setcrewtransport(service);
   };
 
-  const setAddedcrewData = (index, data, type, section = 'crew') => {
-    console.log(section, index);
-    var x;
-    if (section === 'crew') x = addedcrewSectionval;
-    else if (section === 'pax') x = addedpaxSectionval;
-    else if (section === 'departure') x = pdeparturecheck;
-
-    if (section === 'crew' || section === 'pax') {
-      if (type === 'time') x[index].time = data;
-      if (type === 'location') {
-        x[index].location = data;
-      }
-      if (type === 'contact') {
-        x[index].contact = data;
-      }
-      if (type === 'remarks') {
-        x[index].remarks = data;
-      } else if (type === 'text') x[index].name = data;
-    } else if (section === 'departure') {
-      if (type === 'recieved') {
-        x[index].recieved = data;
-      }
-      if (type === 'printed') x[index].printed = data;
-      if (type === 'notams') x[index].notams = data;
-      if (type === 'weather') x[index].weather_info_updated = data;
-      if (type === 'atc') x[index].atc_flight_plan = data;
-      if (type === 'slot') x[index].slot_confirmed = data;
-      if (type === 'catering') x[index].catering.delivery = data;
-      if (type === 'fueling_time') x[index].fueling_time = data;
-    }
-    console.log(x);
-    if (section === 'crew') setaddedcrewSectionval(x);
-    else if (section === 'departure') setpdeparturecheck(x);
-    else setaddedpaxSectionval(x);
-    //console.log(x);
-    //setaddedtestSectionval(x);
-    // currentDeparture.current = index;
-    // setMode(type);
-    // setDatePickerVisibilityDeparture(true);
-  };
-
-  const addnewtestSection = () => {
-    //add menu section
-    var section = [...addedtestSection];
-    var menu = { name: 'Added Test Section Field' };
-    section.push(menu);
-    setaddedtestsection(section);
-    //add menu value collection
-    var val = [...addedtestSectionval];
-    var data = {
-      name: null,
-      location: null,
-      hotelMap: { value: null, file: [] },
-      time: null,
-      remarks: null,
-    };
-    val.push(data);
-    setaddedtestSectionval(val);
-    settestmovement(true);
-    // var x = [...addedtestSection];
-    // var y= [...addedtestSectionval];
-    // console.log(x);
-    // var options={
-    // values:{  name: null,
-    //   location: null,
-    //   hotelMap: {value: null, file: []},
-    //   time: null,
-    //   remarks: null,}
-    // }
-    // var menu={
-    //   name:"Added Pickup Location"
-    // }
-    // x.push(menu);
-    // y.push(options);
-    // setaddedtestSectionval(x);
-    // setaddedtestsection(y);
-    // settestmovement(true);
-  };
-  const removetestSection = index => {
-    console.log(index);
-    //remove section
-    var s = [...addedtestSection];
-    s.splice(index, 1);
-    if (s.length === 0) s = [];
-    setaddedtestsection(s);
-    //remove val
-    var val = [...addedtestSectionval];
-    val.splice(index, 1);
-    if (val.length === 0) val = [];
-    setaddedtestSectionval(val);
-    console.log(addedtestSectionval);
-  };
-
-  const setAddedData = (index, data, type) => {
-    var x = addedtestSectionval;
-    x[index].location = data;
-    console.log(x);
-    setaddedtestSectionval(x);
-    //console.log(x);
-    //setaddedtestSectionval(x);
-    // currentDeparture.current = index;
-    // setMode(type);
-    // setDatePickerVisibilityDeparture(true);
-  };
-
-  const addMovement = (type, index) => {
-    // setpdeparturecheck(x);
-    switch (type) {
-      case true:
-        setpdaddmovement(true);
-        setpdaddmovementnum(pdaddmovementnum + 1);
-        break;
-      case false:
-        setpaxpdaddmovement(true);
-        setpaxpdaddmovementnum(paxpdaddmovementnum + 1);
-        break;
-    }
-
-    //console.log(index);
-    pdeparturecheck[index].push({
-      name: null,
-      location: null,
-      hotelMap: { value: null, file: [] },
-      time: null,
-      remarks: null,
-    });
-    setpdeparturecheck(pdeparturecheck);
-  };
-
-  const onRemoveMovement = type => {
-    switch (type) {
-      case true:
-        var x = pdaddmovementnum;
-        x = x - 1;
-        if (x == 0) {
-          setpdaddmovement(false);
-          setpdaddmovementnum(0);
-        } else {
-          setpdaddmovementnum(x);
-        }
-        break;
-      case false:
-        var x = paxpdaddmovementnum;
-        x = x - 1;
-        if (x == 0) {
-          setpaxpdaddmovement(false);
-          setpaxpdaddmovementnum(0);
-        } else {
-          setpaxpdaddmovementnum(x);
-        }
-        break;
-    }
-  };
 
   const [formReady, setformReady] = useState(true);
-  const [flightdocrecieved, setflightdoc] = useState(null);
-  const [printed, setprinted] = useState(null);
-  const [notams_updated, setnotams_updated] = useState(null);
-  const [weather_information, setweather_information] = useState(null);
-  const [atc_flight, setatc_flight] = useState(null);
-  const [slots_confirmed, setslots_confirmed] = useState(null);
   const [callLoad, setcallLoad] = useState(false);
   const sendForm = data => {
     setcallLoad(true);
     let x = [...pdeparturecheck];
     const email = auth().currentUser.email;
+    var domain = getDomain();
 
     var payload = {
       ...pdchecklist,
@@ -628,15 +503,38 @@ export default function PreDepartureChecklist(props) {
       body: JSON.stringify(payload)
     };
     fetch(
-      'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreDepartureChecklist',
+      `${domain}/PostPreDepartureChecklist`,
       requestOptions,
     )
       .then(response => response.text())
       .then(result => {
-        Alert.alert('Success', 'Record updated', [
+        console.log('Transport', crewtransport.concat(paxtransport));
 
-          { text: 'OK', onPress: () => props.navigation.pop() },
-        ]);
+        if (crewtransport.concat(paxtransport).length > 0) {
+          var requestOptions1 = {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSON.stringify(crewtransport.concat(paxtransport))
+          };
+          fetch(
+            `${domain}/PostPreDepartureChecklistTransport`,
+            requestOptions1,
+          )
+            .then(response => response.text())
+            .then(result => {
+              Alert.alert('Success');
+              readData();
+              setcallLoad(false);
+              console.log(result);
+            })
+            .catch(error => {
+              Alert.alert('Error in updation');
+              setcallLoad(false);
+              console.log(error, 'Function error');
+            });
+
+        }
+        Alert.alert('Success');
         setcallLoad(false);
         console.log(result);
       })
@@ -645,121 +543,115 @@ export default function PreDepartureChecklist(props) {
         setcallLoad(false);
         console.log(error, 'Function error');
       });
-
-    // console.log('addedcrewSectionval', addedcrewSectionval);
-    console.log(crewtransport.concat(paxtransport));
-
-    if (crewtransport.concat(paxtransport).length > 0) {
-      crewtransport.concat(paxtransport).map(val => {
-        var requestOptions1 = {
-          method: 'POST',
-          headers: myHeaders,
-          body: JSON.stringify(val)
-        };
-        fetch(
-          'https://demo.vellas.net:94/arrowdemoapi/api/Values/PostPreDepartureChecklistTransport',
-          requestOptions1,
-        )
-          .then(response => response.text())
-          .then(result => {
-            Alert.alert('Success', 'Record updated', [
-
-              { text: 'OK', onPress: () => props.navigation.pop() },
-            ]);
-            setcallLoad(false);
-            console.log(result);
-          })
-          .catch(error => {
-            Alert.alert('Error in updation');
-            setcallLoad(false);
-            console.log(error, 'Function error');
-          });
-
-      });
+    if (deleteService.length > 0) {
+      var requestOptions1 = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify(deleteService)
+      };
+      fetch(
+        `${domain}/DeleteAPI`,
+        requestOptions1,
+      )
+        .then(response => response.text())
+        .then(result => {
+          // Alert.alert('Success');
+          setcallLoad(false);
+          console.log(result);
+        })
+        .catch(error => {
+          Alert.alert('Error in updation');
+          setcallLoad(false);
+          console.log(error, 'Function error');
+        });
     }
-    // addedcrewSectionval.map(val => {
-    //   firebase
-    //     .app()
-    //     .functions('asia-southeast1')
-    //     .httpsCallable(
-    //       'updateFlightModule?module=PostPreDepartureChecklistTransport',
-    //     )(
-    //       JSON.stringify({
-    //         PDCT_SPT: val.time ? val.time : '""',
-    //         PDCT_PL: val.location ? val.location : '""',
-    //         PDCT_DN: val.name ? val.name : '""',
-    //         PDCT_DCN: val.contact ? val.contact : '""',
-    //         PDCT_REMARK: val.remarks ? val.remarks : '""',
-    //         PDCT_TYPE: val.type ? val.type : '""',
-    //         UID: val.UID ? val.UID : '',
-    //         STATUS: 0,
-    //         FUID: FUID,
-    //         UPDATE_BY: email,
-    //       }),
-    //     )
-    //     .then(response => {
-    //       Alert.alert('Success');
-    //       setcallLoad(false);
-    //       console.log(response);
-    //     })
-    //     .catch(error => {
-    //       Alert.alert('Error in updation');
-    //       setcallLoad(false);
-    //       console.log(error, 'Function error');
-    //     });
-    // });
+    // console.log('addedcrewSectionval', addedcrewSectionval);
 
-    // addedpaxSectionval.map(val => {
-    //   firebase
-    //     .app()
-    //     .functions('asia-southeast1')
-    //     .httpsCallable(
-    //       'updateFlightModule?module=PostPreDepartureChecklistTransport',
-    //     )(
-    //       JSON.stringify({
-    //         PDCT_SPT: val.time ? val.time : '""',
-    //         PDCT_PL: val.location ? val.location : '""',
-    //         PDCT_DN: val.name ? val.name : '""',
-    //         PDCT_DCN: val.contact ? val.contact : '""',
-    //         PDCT_REMARK: val.remarks ? val.remarks : '""',
-    //         PDCT_TYPE: val.type ? val.type : '""',
-    //         UID: val.UID ? val.UID : '',
-    //         STATUS: 0,
-    //         FUID: FUID,
-    //         UPDATE_BY: email,
-    //       }),
-    //     )
-    //     .then(response => {
-    //       Alert.alert('Success');
-    //       setcallLoad(false);
-    //       console.log(response);
-    //     })
-    //     .catch(error => {
-    //       Alert.alert('Error in updation');
-    //       setcallLoad(false);
-    //       console.log(error, 'Function error');
-    //     });
-    // });
   };
-
-  const uploadInitiator = (type, addedsection, section = 'crew') => {
-    setactiveSection(section);
-    setuploadAddedSection(addedsection);
-    setuploadSection(type);
-    refRBSheet.current.open();
-  };
-
-  const setText = (index, text, type, section = 'crew') => {
-    var tpdeparturecheck = [...pdeparturecheck];
-    tpdeparturecheck[index] = text;
-    setpdeparturecheck(tpdeparturecheck);
-  };
-
+  const saveFile = (val, fileName) => {
+    const DownloadDir =
+      Platform.OS == 'ios'
+        ? RNFetchBlob.fs.dirs.DocumentDir
+        : RNFetchBlob.fs.dirs.DownloadDir + '/Aviation';
+    const headers = {
+      'data:image/png;base64': '.png',
+      'data:image/jpeg;base64': '.jpg',
+      'data:application/pdf;base64': '.pdf',
+      'data:application/msword;base64': '.doc',
+      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/vnd.ms-excel;base64': '.xls',
+      'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
+      'data:application/vnd.ms-powerpoint;base64': '.ppt',
+      'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64': '.pptx',
+      'data:application/zip;base64': '.zip',
+      // Add more checks for other file types as needed
+    };
+    var type = headers[val.split(",")[0]];
+    var bs64 = val.split(",")[1];
+    var pdfLocation = DownloadDir + '/' + fileName + type;
+    // console.log(pdfLocation);
+    // console.log(val)
+    RNFetchBlob.fs
+      .isDir(DownloadDir)
+      .then(isDir => {
+        if (isDir) {
+          console.log('iSDir');
+          RNFetchBlob.fs
+            .writeFile(pdfLocation, bs64, 'base64')
+            .then(res => {
+              // console.log('saved', res);
+              Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                {
+                  text: 'View', onPress: () => {
+                    // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                    RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                  }
+                },
+                { text: 'OK' },
+              ])
+            })
+            .catch(err => {
+              console.log(err)
+              Alert.alert('Error in saving file')
+            });
+        } else {
+          RNFetchBlob.fs
+            .mkdir(DownloadDir)
+            .then(() => {
+              console.log('Created Folder');
+              RNFetchBlob.fs
+                .writeFile(pdfLocation, bs64, 'base64')
+                .then(res => {
+                  console.log('saved');
+                  Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                    {
+                      text: 'View', onPress: () => {
+                        // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                        RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                      }
+                    },
+                    { text: 'OK' },
+                  ])
+                })
+                .catch(err => {
+                  Alert.alert('Error in saving file')
+                });
+            })
+            .catch(err => {
+              console.log('is Not dir', err);
+              Alert.alert('Error in saving file')
+            });
+        }
+      })
+      .catch(err => {
+        Alert.alert('Error in saving file')
+      });
+  }
   return (
     <View>
       <Header
         headingSize={HeadingTextSize}
-        heading={'Pre-Departure Checklist'}
+        heading={'Pre-Departure'}
         nav={"IntialScreenView"}
         navigation={props.navigation}
         sendForm={() => sendForm(pdeparturecheck[2])}
@@ -915,7 +807,7 @@ export default function PreDepartureChecklist(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  { setpdchecklist({ ...pdchecklist, PDC_CTNR: pdchecklist.PDC_CTNR ? 0 : 1 }), setcrewtransport([]) }
+                  { setpdchecklist({ ...pdchecklist, PDC_CTNR: pdchecklist.PDC_CTNR == 1 ? 0 : 1 }), setcrewtransport([]) }
                 }}>
                 <Icons
                   name={
@@ -977,17 +869,17 @@ export default function PreDepartureChecklist(props) {
                     <TouchableOpacity
                       onPress={() => {
                         var tcheckList = [...crewtransport];
-                        tcheckList[index].PDCT_PD_NR = tcheckList[index].PDCT_PD_NR ? 0 : 1
+                        tcheckList[index].PDCT_PD_NR = tcheckList[index].PDCT_PD_NR == 1 ? 0 : 1
                         setcrewtransport([...tcheckList]);
                       }}
                     >
                       <Icons
                         name={
-                          val.PDCT_PD_NR
+                          val.PDCT_PD_NR == 1
                             ? 'checkbox-marked-outline'
                             : 'checkbox-blank-outline'
                         }
-                        color={val.PDCT_PD_NR ? 'green' : 'black'}
+                        color={val.PDCT_PD_NR == 1 ? 'green' : 'black'}
                         size={40}
                       />
                     </TouchableOpacity>
@@ -1022,34 +914,78 @@ export default function PreDepartureChecklist(props) {
                     numberOfLines={1}
                   />
 
-                  <TakeCamera
-                    label={'Photo of Pickup Location'}
-                    disabled={true}
-                    type={index}
-                    addedsection={true}
-                    init={ini}
-                    sectionName={'pax'}
-                    uploadInitiator={uploadInitiator}
-                    removeFilePreA={(a, b, c) => {
-                      //removeFilePreA
-
-                      //removeFilePreA(arrayIndex, index, added)
-                      if (addedpaxSectionval[index].hotelMap.file.length === 1)
-                        addedpaxSectionval[index].hotelMap.file = [];
-                      else addedpaxSectionval[index].hotelMap.file.splice(b, 1);
-
-                      //setpdeparturecheck(x);
-                      //console.log(arrayIndex,index)
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: 10,
+                      marginBottom: 10,
+                    }}>
+                    <Text style={styleSheet.label}>
+                      Photo of Pickup Location
+                    </Text>
+                    <TouchableOpacity
+                      //onPress={event => onPressDocPreA(16)}
+                      onPress={() => {
+                        setuploadSection({ field: 'PDCT_PL_String', type: "Crew", index: index });
+                        refRBSheet.current.open();
+                      }}
+                      disabled={val.PDCT_PD_NR == 1 ? true : false}
+                      style={{
+                        marginLeft: 10,
+                        paddingVertical: 5,
+                        paddingHorizontal: 10,
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        backgroundColor: val.PDCT_PD_NR == 1
+                          ? 'rgba(0,0,0,0.1)'
+                          : 'white',
+                      }}>
+                      <Text style={{ color: 'green' }}>Take Camera</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {val.PDCT_PL_String && val.PDCT_PL_String.map((val, indexxx) => {
+                    return (<TouchableOpacity onPress={() => {
+                      if (val.split(",")[0].startsWith('data:image')) {
+                        setimageVisible(true);
+                        setshowImage(val);
+                      }
+                      else {
+                        saveFile(val, `PDCT_PL_DOCUMENT` + indexxx)
+                      }
                     }}
-                    attachments={{ file: [] }}
-                    Icon={
-                      <Icons
-                        style={{ color: 'green', marginLeft: 10 }}
-                        name="close"
-                        size={30}
-                      />
-                    }
-                  />
+                      key={indexxx}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 8,
+                        padding: 10,
+                        marginVertical: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.8,
+                            shadowRadius: 2,
+                          },
+                          android: {
+                            elevation: 3,
+                          },
+                        }),
+                      }}>
+                      <Text style={{ color: 'black' }}>{`PDCT_PL_DOCUMENT` + indexxx}</Text>
+                      <TouchableOpacity onPress={() => removeFilePreA('PDCT_PL_String', "Crew", index, indexxx)}>
+                        <Icons
+                          style={{ color: 'green', marginLeft: 10 }}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </TouchableOpacity>)
+                  })}
 
                   <DateTimeInput
                     disabled={val.PDCT_PD_NR}
@@ -1063,7 +999,7 @@ export default function PreDepartureChecklist(props) {
                       setcrewtransport([...tcheckList]);
                     }}
                     size={12}
-                    type={'datetime'}
+                    type={'time'}
                     data={val.PDCT_SPT}
                     index={12}
                   />
@@ -1110,7 +1046,7 @@ export default function PreDepartureChecklist(props) {
                       setcrewtransport([...tcheckList]);
                     }}
                     size={12}
-                    type={'datetime'}
+                    type={'time'}
                     data={val.PDCT_DOD_TIME}
                     index={12}
                   />
@@ -1126,17 +1062,17 @@ export default function PreDepartureChecklist(props) {
                     <TouchableOpacity
                       onPress={() => {
                         var tcheckList = [...crewtransport];
-                        tcheckList[index].PDCT_DD_NR = tcheckList[index].PDCT_DD_NR ? 0 : 1
+                        tcheckList[index].PDCT_DD_NR = tcheckList[index].PDCT_DD_NR == 1 ? 0 : 1
                         setcrewtransport([...tcheckList]);
                       }}
                     >
                       <Icons
                         name={
-                          val.PDCT_DD_NR
+                          val.PDCT_DD_NR == 1
                             ? 'checkbox-marked-outline'
                             : 'checkbox-blank-outline'
                         }
-                        color={val.PDCT_DD_NR ? 'green' : 'black'}
+                        color={val.PDCT_DD_NR == 1 ? 'green' : 'black'}
                         size={40}
                       />
                     </TouchableOpacity>
@@ -1285,7 +1221,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_PTA_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_PTA_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_PTA_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_PTA_REM')}>
                 <Icons
@@ -1332,7 +1268,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_PNML_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_PNML_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_PNML_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_PNML_REM')}>
                 <Icons
@@ -1367,7 +1303,7 @@ export default function PreDepartureChecklist(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  { setpdchecklist({ ...pdchecklist, PDC_PTNR: pdchecklist.PDC_PTNR ? 0 : 1 }), setcrewtransport([]) }
+                  { setpdchecklist({ ...pdchecklist, PDC_PTNR: pdchecklist.PDC_PTNR == 1 ? 0 : 1 }), setpaxtransport([]) }
                 }}>
                 <Icons
                   name={
@@ -1413,7 +1349,7 @@ export default function PreDepartureChecklist(props) {
                   <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity
                       style={styleSheet.label}
-                      onPress={() => removecrewSection(index)}>
+                      onPress={() => removepaxSection(index)}>
                       <Icons name="minus-box-outline" color="red" size={30} />
                     </TouchableOpacity>
                   </View>
@@ -1429,17 +1365,17 @@ export default function PreDepartureChecklist(props) {
                     <TouchableOpacity
                       onPress={() => {
                         var tcheckList = [...paxtransport];
-                        tcheckList[index].PDCT_PD_NR = tcheckList[index].PDCT_PD_NR ? 0 : 1
+                        tcheckList[index].PDCT_PD_NR = tcheckList[index].PDCT_PD_NR == 1 ? 0 : 1
                         setpaxtransport([...tcheckList]);
                       }}
                     >
                       <Icons
                         name={
-                          val.PDCT_PD_NR
+                          val.PDCT_PD_NR == 1
                             ? 'checkbox-marked-outline'
                             : 'checkbox-blank-outline'
                         }
-                        color={val.PDCT_PD_NR ? 'green' : 'black'}
+                        color={val.PDCT_PD_NR == 1 ? 'green' : 'black'}
                         size={40}
                       />
                     </TouchableOpacity>
@@ -1473,8 +1409,80 @@ export default function PreDepartureChecklist(props) {
                     multiline={false}
                     numberOfLines={1}
                   />
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: 10,
+                      marginBottom: 10,
+                    }}>
+                    <Text style={styleSheet.label}>
+                      Photo of Pickup Location
+                    </Text>
+                    <TouchableOpacity
+                      //onPress={event => onPressDocPreA(16)}
+                      onPress={() => {
+                        setuploadSection({ field: 'PDCT_PL_String', type: "Pax", index: index });
+                        refRBSheet.current.open();
+                      }}
+                      disabled={val.PDCT_PD_NR == 1 ? true : false}
+                      style={{
+                        marginLeft: 10,
+                        paddingVertical: 5,
+                        paddingHorizontal: 10,
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        backgroundColor: val.PDCT_PD_NR == 1
+                          ? 'rgba(0,0,0,0.1)'
+                          : 'white',
+                      }}>
+                      <Text style={{ color: 'green' }}>Take Camera</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {val.PDCT_PL_String && val.PDCT_PL_String.map((val, indexxx) => {
+                    return (<TouchableOpacity onPress={() => {
+                      if (val.split(",")[0].startsWith('data:image')) {
+                        setimageVisible(true);
+                        setshowImage(val);
+                      }
+                      else {
+                        saveFile(val, `PDCT_PL_DOCUMENT` + indexxx)
 
-                  <TakeCamera
+                      }
+                    }}
+                      key={indexxx}
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 8,
+                        padding: 10,
+                        marginVertical: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.8,
+                            shadowRadius: 2,
+                          },
+                          android: {
+                            elevation: 3,
+                          },
+                        }),
+                      }}>
+                      <Text style={{ color: 'black' }}>{`PDCT_PL_DOCUMENT` + indexxx}</Text>
+                      <TouchableOpacity onPress={() => removeFilePreA('PDCT_PL_String', "Pax", index, indexxx)}>
+                        <Icons
+                          style={{ color: 'green', marginLeft: 10 }}
+                          name="close"
+                          size={30}
+                        />
+                      </TouchableOpacity>
+                    </TouchableOpacity>)
+                  })}
+                  {/* <TakeCamera
                     label={'Photo of Pickup Location'}
                     disabled={true}
                     type={index}
@@ -1501,7 +1509,7 @@ export default function PreDepartureChecklist(props) {
                         size={30}
                       />
                     }
-                  />
+                  /> */}
 
                   <DateTimeInput
                     disabled={val.PDCT_PD_NR}
@@ -1515,7 +1523,7 @@ export default function PreDepartureChecklist(props) {
                       setpaxtransport([...tcheckList]);
                     }}
                     size={12}
-                    type={'datetime'}
+                    type={'time'}
                     data={val.PDCT_SPT}
                     index={12}
                   />
@@ -1562,7 +1570,7 @@ export default function PreDepartureChecklist(props) {
                       setpaxtransport([...tcheckList]);
                     }}
                     size={12}
-                    type={'datetime'}
+                    type={'time'}
                     data={val.PDCT_DOD_TIME}
                     index={12}
                   />
@@ -1578,17 +1586,17 @@ export default function PreDepartureChecklist(props) {
                     <TouchableOpacity
                       onPress={() => {
                         var tcheckList = [...paxtransport];
-                        tcheckList[index].PDCT_DD_NR = tcheckList[index].PDCT_DD_NR ? 0 : 1
+                        tcheckList[index].PDCT_DD_NR = tcheckList[index].PDCT_DD_NR == 1 ? 0 : 1
                         setpaxtransport([...tcheckList]);
                       }}
                     >
                       <Icons
                         name={
-                          val.PDCT_DD_NR
+                          val.PDCT_DD_NR == 1
                             ? 'checkbox-marked-outline'
                             : 'checkbox-blank-outline'
                         }
-                        color={val.PDCT_DD_NR ? 'green' : 'black'}
+                        color={val.PDCT_DD_NR == 1 ? 'green' : 'black'}
                         size={40}
                       />
                     </TouchableOpacity>
@@ -1759,7 +1767,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_PAGD_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_PAGD_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_PAGD_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_PAGD_REM')}>
                 <Icons
@@ -1772,30 +1780,77 @@ export default function PreDepartureChecklist(props) {
             </View>
           )}
 
-          <TakeCamera
-            disabled={true}
-            label={'Upload Departure GenDec'}
-            type={4}
-            addedsection={false}
-            init={ini}
-            sectionName={'departure'}
-            uploadInitiator={uploadInitiator}
-            removeFilePreA={(a, b, c) => {
-              // console.log(a, b, c);
-              // var x = [...pdeparturecheck];
-              // if (x[4].hotelMap.file.length === 1) x[4].hotelMap.file = [];
-              // else x[4].hotelMap.file.splice(b, 1);
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 10,
+              marginBottom: 10,
+            }}>
+            <Text style={styleSheet.label}>
+              Upload Departure GenDec
+            </Text>
+            <TouchableOpacity
+              //onPress={event => onPressDocPreA(16)}
+              onPress={() => {
+                setuploadSection('PDC_UDGD_String');
+                refRBSheet.current.open();
+              }}
+              style={{
+                marginLeft: 10,
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+                borderWidth: 1,
+                borderRadius: 8,
+                backgroundColor: 'white',
+              }}>
+              <Text style={{ color: 'green' }}>Take Camera</Text>
+            </TouchableOpacity>
+          </View>
+          {pdchecklist.PDC_UDGD_String && pdchecklist.PDC_UDGD_String.map((val, indexxx) => {
+            return (<TouchableOpacity
+              onPress={() => {
+                if (val.split(",")[0].startsWith('data:image')) {
+                  setimageVisible(true);
+                  setshowImage(val);
+                }
+                else {
+                  saveFile(val, `PDC_UDGD_DOCUMENT` + indexxx)
 
-            }}
-            attachments={pdeparturecheck[4].hotelMap}
-            Icon={
-              <Icons
-                style={{ color: 'green', marginLeft: 10 }}
-                name="close"
-                size={30}
-              />
-            }
-          />
+                }
+              }}
+              key={indexxx}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 8,
+                padding: 10,
+                marginVertical: 10,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                ...Platform.select({
+                  ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.8,
+                    shadowRadius: 2,
+                  },
+                  android: {
+                    elevation: 3,
+                  },
+                }),
+              }}>
+              <Text style={{ color: 'black' }}>{`PDC_UDGD_DOCUMENT` + indexxx}</Text>
+              <TouchableOpacity onPress={() => removeFilePreA('PDC_UDGD_String', null, null, indexxx)}>
+                <Icons
+                  style={{ color: 'green', marginLeft: 10 }}
+                  name="close"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </TouchableOpacity>)
+          })}
 
 
           {/*   ------------------------------Flight Documents/Admin ----------- */}
@@ -1911,7 +1966,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_FBO_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_FBO_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_FBO_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_FBO_REM')}>
                 <Icons
@@ -1957,7 +2012,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_HAR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_HAR_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_HAR_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_HAR_REM')}>
                 <Icons
@@ -2003,7 +2058,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_CIQ_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_CIQ_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_CIQ_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_CIQ_REM')}>
                 <Icons
@@ -2049,7 +2104,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_ASR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_ASR_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_ASR_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_ASR_REM')}>
                 <Icons
@@ -2095,7 +2150,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_CAR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_CAR_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_CAR_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_CAR_REM')}>
                 <Icons
@@ -2142,7 +2197,7 @@ export default function PreDepartureChecklist(props) {
           {pdchecklist.PDC_AFR_REM && (
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
               <View style={styleSheet.remarks}>
-                <Text>{pdchecklist.PDC_AFR_REM}</Text>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_AFR_REM}</Text>
               </View>
               <TouchableOpacity onPress={() => removeFeedback('PDC_AFR_REM')}>
                 <Icons
@@ -2208,7 +2263,18 @@ export default function PreDepartureChecklist(props) {
           onConfirm={handleConfirmDeparture}
           onCancel={hideDatePickerDeparture}
           is24Hour={true}
+          date={timerDate.current}
         />
+        <Modal transparent={false} visible={imageVisible} style={{ width: '100%', height: '100%', backgroundColor: 'red' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <TouchableOpacity onPress={() => { setimageVisible(false) }}><Text style={{ color: 'white', backgroundColor: '#3b7dfc', padding: 10, fontSize: 20 }}>Close</Text></TouchableOpacity>
+          </View>
+          <Image
+            style={{ width: '100%', height: 'auto', flex: 1 }}
+            source={{ uri: showImage }}
+            resizeMode="contain"
+          />
+        </Modal>
       </ScrollView>
     </View>
   );

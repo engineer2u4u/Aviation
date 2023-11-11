@@ -1,13 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import ScreenMenues from '../../constants/flightdetailsmenuoptions';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 // import Icons from 'react-native-vector-icons/Ionicons';
 
 export default function FlightMenu(props) {
+  const [data, setData] = useState([])
+  useEffect(() => {
+    console.log(props.type)
+    let aData;
+    switch (props.type) {
+      case 'Arrival':
+        aData = ScreenMenues.filter(val => (val.type == 'ARRIVAL' || val.type == 'ALL'));
+        setData([...aData]);
+        break;
+      case 'Departure':
+        aData = ScreenMenues.filter(val => (val.type == 'DEPARTURE' || val.type == 'ALL'));
+        setData([...aData]);
+        break;
+      default:
+        setData([...ScreenMenues]);
+        break;
+
+    }
+  }, [])
+
   return (
     <View style={styles.container}>
-      {ScreenMenues.map((data, i) => {
+      {data.map((data, i) => {
         console.log(data);
         return (
           <TouchableOpacity
@@ -16,7 +36,7 @@ export default function FlightMenu(props) {
               props.navigation.navigate(data.route, { UID: props.uid })
             }
             style={styles.card}>
-            <Icons color="white" name="airplane" size={50} />
+            <Icons color="white" name={data.icon} size={50} />
             <Text style={{ color: 'white' }}>{data.name}</Text>
           </TouchableOpacity>
         );

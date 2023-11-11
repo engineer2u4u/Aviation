@@ -6,7 +6,7 @@
  * @flow
  */
 
-import React, {Component, useState, useEffect, useContext, useRef} from 'react';
+import React, { Component, useState, useEffect, useContext, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -19,14 +19,16 @@ import {
   StatusBar,
 } from 'react-native';
 import Icons from 'react-native-vector-icons/MaterialIcons';
-import {UserContext} from './context/userContext';
-import {UserDetails} from './context/userDetailsContext';
-const {width, height} = Dimensions.get('window');
+import { UserContext } from './context/userContext';
+import { UserDetails } from './context/userDetailsContext';
+const { width, height } = Dimensions.get('window');
 import NotifService from '../components/methods/notifService';
 import getData from './methods/read';
 import storeData from './methods/store';
 import auth from '@react-native-firebase/auth';
 import functions from '@react-native-firebase/functions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // const MrzScanner = NativeModules.RNMrzscannerlib;
 // // import MrzScanner from 'react-native-mrzscannerlib';
 // MrzScanner.registerWithLicenseKey(
@@ -60,13 +62,13 @@ const requestCameraPermission = async () => {
 
 const DEV = true;
 
-export default function Home({navigation}) {
+export default function Home({ navigation }) {
   const nf = useRef(null);
 
   const [prompt, setprompt] = useState(false);
   const [details, setdetails] = useState(null);
-  const {loggedIn, setloggedIn} = useContext(UserContext);
-  const {user, setUser} = useContext(UserDetails);
+  const { loggedIn, setloggedIn } = useContext(UserContext);
+  const { user, setUser } = useContext(UserDetails);
 
   const onRegister = token => {
     console.log('OKOK');
@@ -81,6 +83,8 @@ export default function Home({navigation}) {
 
   const logOut = async () => {
     try {
+      AsyncStorage.removeItem('username');
+      AsyncStorage.removeItem('password');
       var data = await getData('@token');
       if (data.login === false) {
         data.login = false;
@@ -88,22 +92,26 @@ export default function Home({navigation}) {
       }
       console.log(data);
 
-      const sayHello = functions().httpsCallable('addUserToken');
-      sayHello({deviceRegisteration: data, user: uid})
-        .then(data => {
-          console.log(data.data);
-        })
-        .catch(e => {
-          console.log(e);
-        });
+      // const sayHello = functions().httpsCallable('addUserToken');
+      // sayHello({ deviceRegisteration: data, user: uid })
+      //   .then(data => {
+      //     console.log(data.data);
+      //   })
+      //   .catch(e => {
+      //     console.log(e);
+      //   });
     } catch (error) {
       console.log(error);
     }
 
-    return auth()
+    auth()
       .signOut()
       .then(() => {
         setloggedIn(false);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
       });
   };
 
@@ -117,7 +125,7 @@ export default function Home({navigation}) {
       console.log(data);
 
       const sayHello = functions().httpsCallable('addUserToken');
-      sayHello({deviceRegisteration: data, user: uid})
+      sayHello({ deviceRegisteration: data, user: uid })
         .then(data => {
           console.log(data.data);
         })
@@ -130,11 +138,11 @@ export default function Home({navigation}) {
   };
 
   useEffect(() => {
-    const uid = auth().currentUser.uid;
-    nf.current = new NotifService(onRegister, onNotif);
+    // const uid = auth().currentUser.uid;
+    // nf.current = new NotifService(onRegister, onNotif);
     console.log(nf.current);
     //console.log('asdsd',nf.current);
-    requestNotificationAndFunctions(uid);
+    // requestNotificationAndFunctions(uid);
     requestCameraPermission();
     // var subscription;
     // subscription = EventEmitter.addListener(
@@ -173,20 +181,20 @@ export default function Home({navigation}) {
   }, []);
 
   const onChange = (key, value) => {
-    var detailsData = {...details};
+    var detailsData = { ...details };
     console.log(detailsData);
 
     detailsData[key] = value;
     console.log(detailsData);
-    setdetails({...detailsData});
+    setdetails({ ...detailsData });
   };
   return (
     <ScrollView
-      contentContainerStyle={{minHeight: Dimensions.get('window').height}}>
+      contentContainerStyle={{ minHeight: Dimensions.get('window').height }}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
       <View style={styles.container}>
-        <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
-          <View style={{flex: 1, justifyContent: 'center'}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+          <View style={{ flex: 1, justifyContent: 'center' }}>
             <Text
               style={{
                 textAlign: 'left',
@@ -197,7 +205,7 @@ export default function Home({navigation}) {
               Aviation
             </Text>
           </View>
-          <View
+          {user && user.email !== undefined && <View
             style={{
               flex: 1,
               justifyContent: 'flex-end',
@@ -215,19 +223,19 @@ export default function Home({navigation}) {
                 alignContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text style={{color: 'black', fontSize: 28}}>
+              <Text style={{ color: 'black', fontSize: 28 }}>
                 {typeof user === 'object' &&
                   user.email != undefined &&
                   user.email.charAt(0).toUpperCase()}
               </Text>
             </TouchableOpacity>
-          </View>
+          </View>}
         </View>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <View style={{backgroundColor: 'black', height: 5, flex: 1}}></View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ backgroundColor: 'black', height: 5, flex: 1 }}></View>
           <Image
             source={require('../assets/airplane.png')}
-            style={{height: 40, width: 40}}
+            style={{ height: 40, width: 40 }}
           />
         </View>
         <View
@@ -238,15 +246,15 @@ export default function Home({navigation}) {
           }}>
           <TouchableOpacity
             onPress={() => navigation.navigate('Scanner')}
-            style={[styles.card, {marginRight: 10}]}>
+            style={[styles.card, { marginRight: 10 }]}>
             <Icons color="white" name="qr-code-scanner" size={50} />
-            <Text style={{color: 'white'}}>Scan passport</Text>
+            <Text style={{ color: 'white' }}>Scan passport</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('GroundHandling')}
             style={styles.card}>
             <Icons color="white" name="flight-land" size={50} />
-            <Text style={{color: 'white'}}>Ground Handling</Text>
+            <Text style={{ color: 'white' }}>Ground Handling</Text>
           </TouchableOpacity>
         </View>
         <View
@@ -257,17 +265,18 @@ export default function Home({navigation}) {
           }}>
           <TouchableOpacity
             onPress={() => navigation.navigate('LogDetails')}
-            style={[styles.card, {marginRight: 10}]}>
+            style={[styles.card, { marginRight: 10 }]}>
             <Icons color="white" name="sticky-note-2" size={50} />
-            <Text style={{color: 'white'}}>Flight Log</Text>
+            <Text style={{ color: 'white' }}>Flight Log</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => navigation.navigate('LogDetails')}
-            style={[styles.card]}>
-            <Icons color="white" name="date-range" size={50} />
-            <Text style={{color: 'white'}}>Calender</Text>
+            onPress={() => navigation.navigate('Calendar')}
+            style={[styles.card, { marginRight: 10 }]}>
+            <Icons color="white" name="calendar-today" size={50} />
+            <Text style={{ color: 'white' }}>Agenda</Text>
           </TouchableOpacity>
-          
+
+
         </View>
       </View>
 
@@ -288,7 +297,7 @@ export default function Home({navigation}) {
               backgroundColor: '#FFF',
               padding: 10,
             }}>
-            <Text style={{color: '#000', fontSize: 25, fontWeight: '600'}}>
+            <Text style={{ color: '#000', fontSize: 25, fontWeight: '600' }}>
               Logout
             </Text>
             <Text
@@ -313,7 +322,7 @@ export default function Home({navigation}) {
                   logOut();
                   setprompt(false);
                 }}
-                style={{marginRight: 60}}>
+                style={{ marginRight: 60 }}>
                 <Text
                   style={{
                     color: 'cornflowerblue',
@@ -373,6 +382,6 @@ const styles = StyleSheet.create({
     shadowColor: '#ccc',
     shadowOpacity: 0.5,
     elevation: 10,
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: { width: 0, height: 3 },
   },
 });
