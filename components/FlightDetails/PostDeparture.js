@@ -285,7 +285,7 @@ export default function PostDeparture(props) {
       'data:image/jpeg;base64': '.jpg',
       'data:application/pdf;base64': '.pdf',
       'data:application/msword;base64': '.doc',
-      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/octet-stream;base64': '.docx',
       'data:application/vnd.ms-excel;base64': '.xls',
       'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
       'data:application/vnd.ms-powerpoint;base64': '.ppt',
@@ -497,20 +497,21 @@ export default function PostDeparture(props) {
             multiline={false}
             numberOfLines={1}
           />
+          <LabelledInput
+            label={'Remarks'}
+            data={postdeparture[3]}
+            index={3}
+            setText={(index, text) => {
+              var temp = [...postdeparture];
+              temp[3] = text;
+              setpostdeparture([...temp])
+            }}
+            multiline={true}
+            numberOfLines={2}
+          />
         </View>
         {/*   ------------------------------Services Verified end ----------- */}
-        <LabelledInput
-          label={'Additional Remarks'}
-          data={postdeparture[3]}
-          index={3}
-          setText={(index, text) => {
-            var temp = [...postdeparture];
-            temp[3] = text;
-            setpostdeparture([...temp])
-          }}
-          multiline={true}
-          numberOfLines={2}
-        />
+
       </View>
       <DateTimePickerModal
         isVisible={isDatePickerVisiblePostDepart}

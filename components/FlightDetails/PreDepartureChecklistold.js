@@ -537,7 +537,7 @@ export default function PreDepartureChecklist({ navigation }) {
             </View>
 
             {/*   ------------------------------Transport Operator Reminder	 End ----------- */}
-            <Text style={styleSheet.label}>Additional Remarks</Text>
+            <Text style={styleSheet.label}>Remarks</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 style={styleSheet.input}

@@ -466,7 +466,7 @@ export default function Departure(props) {
       'data:image/jpeg;base64': '.jpg',
       'data:application/pdf;base64': '.pdf',
       'data:application/msword;base64': '.doc',
-      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/octet-stream;base64': '.docx',
       'data:application/vnd.ms-excel;base64': '.xls',
       'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
       'data:application/vnd.ms-powerpoint;base64': '.ppt',
@@ -619,7 +619,7 @@ export default function Departure(props) {
             />
             <LabelledInput
               disabled={false}
-              label={'Number of Crew'} //mark
+              label={'No. of Crew'} //mark
               data={aDeparture.DES_CREW}
               datatype={'text'}
               index={12}
@@ -631,7 +631,7 @@ export default function Departure(props) {
             />
           </View>
 
-          {/* <Text style={styleSheet.label}>Number of Crew</Text>
+          {/* <Text style={styleSheet.label}>No. of Crew</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TextInput
               style={styleSheet.input}
@@ -796,7 +796,74 @@ export default function Departure(props) {
               ]}>
               At Airport
             </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({ ...aDeparture, DES_CRM_FDHC_C: aDeparture.DES_CRM_FDHC_C == 1 ? 0 : 1, DES_CRM_FDHC: "", DES_CRM_TCCIQ: "", DES_CRM_TCCAS: "", DES_CRM_TCBTA: "", DES_CRM_TCBA: "", })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_CRM_FDHC_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_CRM_FDHC_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({ ...aDeparture, DES_CRM_C: aDeparture.DES_CRM_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_CRM_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_CRM_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View>
+            {/* <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({ ...aDeparture, DES_CRM_FDHC_C: aDeparture.DES_CRM_FDHC_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_CRM_FDHC_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_CRM_FDHC_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View> */}
             <DateTimeInput
+              disabled={aDeparture.DES_CRM_FDHC_C}
               label={'Flight Documents Handover to Crew (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePickerDepart('time', 0, 'aDeparture', "DES_CRM_FDHC");
@@ -806,19 +873,20 @@ export default function Departure(props) {
                 tcheckList.DES_CRM_FDHC = x
                 setaDeparture({ ...tcheckList });
               }}
-              notrequiredSection={true}
-              isnotrequired={aDeparture.DES_CRM_FDHC_C == 1 ? true : false}
-              setnotrequired={value => {
-                var tcheckList = { ...aDeparture };
-                tcheckList.DES_CRM_FDHC_C = value ? 1 : 0;
-                setaDeparture({ ...tcheckList });
-              }}
+              // notrequiredSection={true}
+              // isnotrequired={aDeparture.DES_CRM_FDHC_C == 1 ? true : false}
+              // setnotrequired={value => {
+              //   var tcheckList = { ...aDeparture };
+              //   tcheckList.DES_CRM_FDHC_C = value ? 1 : 0;
+              //   setaDeparture({ ...tcheckList });
+              // }}
               size={12}
               type={'time'}
               data={aDeparture.DES_CRM_FDHC}
               index={12}
             />
             <DateTimeInput
+              disabled={aDeparture.DES_CRM_FDHC_C}
               label={'Time Crew Cleared CIQ (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePickerDepart('time', 0, 'aDeparture', "DES_CRM_TCCIQ");
@@ -834,6 +902,7 @@ export default function Departure(props) {
               index={12}
             />
             <DateTimeInput
+              disabled={aDeparture.DES_CRM_FDHC_C}
               label={'Time Crew Cleared Airport Security (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePickerDepart('time', 0, 'aDeparture', "DES_CRM_TCCAS");
@@ -849,6 +918,7 @@ export default function Departure(props) {
               index={12}
             />
             <DateTimeInput
+              disabled={aDeparture.DES_CRM_FDHC_C}
               label={'Time Crew Boarded Transport to Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePickerDepart('time', 0, 'aDeparture', "DES_CRM_TCBTA");
@@ -864,6 +934,7 @@ export default function Departure(props) {
               index={12}
             />
             <DateTimeInput
+              disabled={aDeparture.DES_CRM_FDHC_C}
               label={'Time Crew Boarded Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePickerDepart('time', 0, 'aDeparture', "DES_CRM_TCBA");
@@ -928,6 +999,28 @@ export default function Departure(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({ ...aDeparture, DES_GPU_C: aDeparture.DES_GPU_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_GPU_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_GPU_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               disabled={aDeparture.DES_GPU_REQ == 1 ? true : false}
@@ -997,6 +1090,28 @@ export default function Departure(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({ ...aDeparture, DES_FOD_C: aDeparture.DES_FOD_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_FOD_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_FOD_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               disabled={aDeparture.DES_FOD_REQ == 1 ? true : false}
@@ -1170,6 +1285,34 @@ export default function Departure(props) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({
+                    ...aDeparture, DES_WAS_C
+                      : aDeparture.DES_WAS_C
+                        == 1 ? 0 : 1
+                  })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_WAS_C
+                      == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_WAS_C
+                    == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View>
             <DateTimeInput
               disabled={aDeparture.DES_WAS_REQ == 1 ? true : false}
               label={'Start Time (Local Time)'}
@@ -1252,6 +1395,34 @@ export default function Departure(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({
+                    ...aDeparture, DES_LAS_C
+                      : aDeparture.DES_LAS_C
+                        == 1 ? 0 : 1
+                  })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_LAS_C
+                      == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_LAS_C
+                    == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               disabled={aDeparture.DES_LAS_REQ == 1 ? true : false}
@@ -1336,6 +1507,34 @@ export default function Departure(props) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({
+                    ...aDeparture, DES_RUS_C
+                      : aDeparture.DES_RUS_C
+                        == 1 ? 0 : 1
+                  })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_RUS_C
+                      == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_RUS_C
+                    == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View>
             <DateTimeInput
               disabled={aDeparture.DES_RUS_REQ == 1 ? true : false}
               label={'Completion Time (Local Time)'}
@@ -1400,6 +1599,28 @@ export default function Departure(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaDeparture({ ...aDeparture, DES_CRM_C: aDeparture.DES_CRM_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aDeparture.DES_CRM_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aDeparture.DES_CRM_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <LabelledInput
               label={'Catering Equipment Loaded'} //mark
@@ -1539,7 +1760,7 @@ export default function Departure(props) {
             index={12}
           />
           <LabelledInput
-            label={'Number of Pax'} //mark
+            label={'No. of Pax'} //mark
             data={aDeparture.DES_PAX}
             datatype={'text'}
             index={20}
@@ -1562,7 +1783,7 @@ export default function Departure(props) {
               marginVertical: 10,
             }}>
             <LabelledInput
-              label={'Number of Baggage Offloaded'} //mark
+              label={'No. of Baggage Offloaded'} //mark
               data={aDeparture.DES_BAG_OFFLOAD}
               datatype={'text'}
               index={20}
@@ -1958,7 +2179,7 @@ export default function Departure(props) {
               index={12}
             />
             <LabelledInput
-              label={'Additional Remarks'} //mark
+              label={'Remarks'} //mark
               data={aDeparture.DES_MVN_REM}
               datatype={'text'}
               index={20}

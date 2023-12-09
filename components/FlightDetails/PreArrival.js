@@ -85,7 +85,7 @@ export default function PreArrival(props) {
           var packet = JSON.parse(result);
 
           var res = packet.Table[0];
-          console.log('arrivalPre', res);
+          // console.log('arrivalPre', res);
           if (res) {
             setpacheck(res)
             setuid(res.UID);
@@ -134,7 +134,7 @@ export default function PreArrival(props) {
       .then(response => response.text())
       .then(response => {
         var packet = JSON.parse(response);
-        console.log('Hotel', response);
+        // console.log('Hotel', response);
         if (packet && packet.ds.Table) {
           var res = packet.ds.Table;
           var resFile = packet.PCH_MRH_Files;
@@ -144,11 +144,13 @@ export default function PreArrival(props) {
             res.forEach((val, index) => {
               val.PCH_DATE_CHECKIN = mConvert(val.PCH_DATE_CHECKIN, 'date');
               val.PCH_DATE_CHECKOUT = mConvert(val.PCH_DATE_CHECKOUT, 'date');
+              console.log('Hotel', JSON.stringify(packet.Table1));
               if (packet.PCH_MRH_Files.length > 0) {
 
               }
-              if (packet.Table1 && packet.Table1.length > 0) {
-                val.GuestUser = packet.Table1.filter(value => value.HID == val.UID)
+              if (packet.ds.Table1 && packet.ds.Table1.length > 0) {
+
+                val.GuestUser = packet.ds.Table1.filter(value => value.HID == val.UID)
               }
               else {
                 val.GuestUser = []
@@ -167,7 +169,7 @@ export default function PreArrival(props) {
                 }
               }
             });
-            console.log('Hotel', paxHotelArr.concat(crewHotelArr));
+            // console.log('Hotel', paxHotelArr.concat(crewHotelArr));
 
             setpapaxHotel([...paxHotelArr]);
             setpacrewHotel([...crewHotelArr]);
@@ -189,7 +191,7 @@ export default function PreArrival(props) {
         //get pax & crew transport
         var packet = JSON.parse(response);
         var res = packet.Table;
-        console.log(res, 'Transport');
+        // console.log(res, 'Transport');
         if (res.length > 0) {
           var paxTransArr = [];
           var crewTransArr = [];
@@ -288,13 +290,26 @@ export default function PreArrival(props) {
       datetime
     );
   };
+
+  const changeFormat = (val) => {
+    console.log(val)
+    var dateSplit = val.split("/");
+    console.log(dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2])
+    return (
+      dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2]
+    );
+  }
+
   const mConvert = (val, type) => {
     var datetime = new Date(val).toLocaleString('en-US', {
       hour12: false,
     });
+
     if (type == 'date') {
+      var datee = datetime.split(',')[0];
+      var dateSplit = datee.split("/");
       return (
-        datetime.split(',')[0]
+        dateSplit[1] + "/" + dateSplit[0] + "/" + dateSplit[2]
       );
     }
     return (
@@ -658,7 +673,7 @@ export default function PreArrival(props) {
       'data:image/jpeg;base64': '.jpg',
       'data:application/pdf;base64': '.pdf',
       'data:application/msword;base64': '.doc',
-      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/octet-stream;base64': '.docx',
       'data:application/vnd.ms-excel;base64': '.xls',
       'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
       'data:application/vnd.ms-powerpoint;base64': '.ppt',
@@ -1516,10 +1531,10 @@ export default function PreArrival(props) {
                     </TouchableOpacity>
                   </View>
                   <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
-                    Pick-up Details:
+                    Pick Up Details:
                   </Text>
                   <LabelledInput
-                    label={'Pickup Location'} //mark
+                    label={'Pick Up Location'} //mark
                     data={val.PCT_PICKUP_LOCATION}
                     datatype={'text'}
                     index={12}
@@ -1548,7 +1563,7 @@ export default function PreArrival(props) {
 
 
                   <DateTimeInput
-                    label={'Scheduled Transport Arrival Time (Local Time)'}
+                    label={'Scheduled Transport Pick Up Time (Local Time)'}
                     showDatePickerPostDepart={() => {
                       showDatePicker('time', index, 'papaxTransport', "PCT_STAT");
                     }}
@@ -1637,7 +1652,7 @@ export default function PreArrival(props) {
                   />
                   <LabelledInput
 
-                    label={'Driver Contact Number'} //mark
+                    label={'Contact No'} //mark
                     data={val.PCT_DCN}
                     datatype={'text'}
                     index={12}
@@ -1909,7 +1924,7 @@ export default function PreArrival(props) {
                     </TouchableOpacity>)
                   })}
                   <LabelledInput
-                    label={'Travel Time (Approximate) Hrs'} //mark
+                    label={'Travel Time (Approximate) '} //mark
                     data={val.PCH_TT}
                     datatype={'text'}
                     index={92}
@@ -1932,6 +1947,7 @@ export default function PreArrival(props) {
                     }}
                     setNowPostDepart={(indexx, x) => {
                       var tcheckList = [...papaxHotel];
+                      console.log(x);
                       tcheckList[index] = { ...tcheckList[index], PCH_DATE_CHECKIN: x };
                       // tcheckList[index].PCH_DATE_CHECKIN = x
                       setpapaxHotel([...tcheckList]);
@@ -2122,10 +2138,10 @@ export default function PreArrival(props) {
                     </TouchableOpacity>
                   </View>
                   <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
-                    Pick-up Details:
+                    Pick Up Details:
                   </Text>
                   <LabelledInput
-                    label={'Pickup Location'} //mark
+                    label={'Pick Up Location'} //mark
                     data={val.PCT_PICKUP_LOCATION}
                     datatype={'text'}
                     index={12}
@@ -2154,7 +2170,7 @@ export default function PreArrival(props) {
 
 
                   <DateTimeInput
-                    label={'Scheduled Transport Arrival Time (Local Time)'}
+                    label={'Scheduled Transport Pick Up Time (Local Time)'}
                     showDatePickerPostDepart={() => {
                       showDatePicker('time', index, 'pacrewTransport', "PCT_STAT");
                     }}
@@ -2243,7 +2259,7 @@ export default function PreArrival(props) {
                   />
                   <LabelledInput
 
-                    label={'Driver Contact Number'} //mark
+                    label={'Contact No'} //mark
                     data={val.PCT_DCN}
                     datatype={'text'}
                     index={12}
@@ -2517,7 +2533,7 @@ export default function PreArrival(props) {
                     </TouchableOpacity>)
                   })}
                   <LabelledInput
-                    label={'Travel Time (Approximate) Hrs'} //mark
+                    label={'Travel Time (Approximate) '} //mark
                     data={val.PCH_TT}
                     datatype={'text'}
                     index={13}

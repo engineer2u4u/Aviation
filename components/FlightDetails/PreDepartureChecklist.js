@@ -243,16 +243,18 @@ export default function PreDepartureChecklist(props) {
   const hideDatePickerDeparture = () => {
     setDatePickerVisibilityDeparture(false);
   };
-  const tConvert = datetime => {
+  const tConvert = (datetime, type) => {
+    console.log(datetime);
     var date = datetime.split(',')[0].split('/');
     var time24 = datetime.split(', ')[1];
     var time = time24.split(':');
-    if (mode == 'date') {
+    var check = type || mode;
+    if (check == 'date') {
       return (
         datetime.split(',')[0]
       );
     }
-    else if (mode == 'time') {
+    else if (check == 'time') {
       return (
         time[0] + ':' + time[1]
       );
@@ -261,11 +263,14 @@ export default function PreDepartureChecklist(props) {
       datetime
     );
   };
-  const setNow = (index, arr, pos) => {
+  const setNow = (index, arr, pos, type) => {
     currentPicker.current = [index, arr, pos];
-    handleConfirmDeparture(new Date());
+    if (type) {
+      setMode(type);
+    }
+    handleConfirmDeparture(new Date(), type);
   };
-  const handleConfirmDeparture = date => {
+  const handleConfirmDeparture = (date, type) => {
     switch (currentPicker.current[1]) {
       case 'pdchecklist':
         var tcheckList = {
@@ -273,6 +278,7 @@ export default function PreDepartureChecklist(props) {
             new Date(date).toLocaleString('en-US', {
               hour12: false,
             }),
+            type
           )
         };
         setpdchecklist({ ...tcheckList }); break;
@@ -578,7 +584,7 @@ export default function PreDepartureChecklist(props) {
       'data:image/jpeg;base64': '.jpg',
       'data:application/pdf;base64': '.pdf',
       'data:application/msword;base64': '.doc',
-      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/octet-stream;base64': '.docx',
       'data:application/vnd.ms-excel;base64': '.xls',
       'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
       'data:application/vnd.ms-powerpoint;base64': '.ppt',
@@ -674,8 +680,390 @@ export default function PreDepartureChecklist(props) {
           onSubmitFeedback={onSubmitFeedback}
         />
         <Loader visible={loading} />
+        <View style={[{ paddingHorizontal: 20 }]}>
+          <DateTimeInput
+            label={'Confirm Catering Delivery Date'}
+            showDatePickerPostDepart={() => {
+              showDatePicker('date', 0, 'pdchecklist', "PDC_CCDD");
+            }}
+            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_CCDD", 'date')}
+            size={12}
+            type={'date'}
+            data={pdchecklist.PDC_CCDD?.split('T')[0]}
+            index={12}
+          />
+          <DateTimeInput
+            label={'Confirm Catering Delivery Time (Local Time)'}
+            showDatePickerPostDepart={() => {
+              showDatePicker('time', 0, 'pdchecklist', "PDC_CCDT");
+            }}
+            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_CCDT", 'time')}
+            size={12}
+            type={'time'}
+            data={pdchecklist.PDC_CCDT}
+            index={12}
+          />
+          <DateTimeInput
+            label={'Fueling Date'}
+            showDatePickerPostDepart={() => {
+              showDatePicker('date', 0, 'pdchecklist', "PDC_FD");
+            }}
+            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD", 'date')}
+            size={12}
+            type={'date'}
+            data={pdchecklist.PDC_FD?.split('T')[0]}
+            index={12}
+          />
+          <DateTimeInput
+            label={'Fueling Time (Local Time)'}
+            showDatePickerPostDepart={() => {
+              showDatePicker('time', 0, 'pdchecklist', "PDC_FT");
+            }}
+            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FT", 'time')}
+            size={12}
+            type={'time'}
+            data={pdchecklist.PDC_FT}
+            index={12}
+          />
 
+
+          <View style={styleSheet.toggleContainer}>
+            <TouchableOpacity
+              onPress={event => setpdchecklist({ ...pdchecklist, PDC_PAGD: pdchecklist.PDC_PAGD ? 0 : 1 })}
+              style={[
+                styleSheet.toggleButton,
+                {
+                  backgroundColor: pdchecklist.PDC_PAGD
+                    ? 'green'
+                    : 'white',
+                },
+              ]}>
+              <Text
+                style={[
+                  styleSheet.label,
+                  {
+                    textAlign: 'center',
+                    color: pdchecklist.PDC_PAGD ? 'white' : 'black',
+                  },
+                ]}>
+                Prepared Departure GenDec
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => getFeedback('PDC_PAGD_REM')}>
+              <Icons
+                style={{ marginLeft: 10 }}
+                name="comment-processing-outline"
+                color="green"
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
+          {pdchecklist.PDC_PAGD_REM && (
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+              <View style={styleSheet.remarks}>
+                <Text style={{ color: 'black' }}>{pdchecklist.PDC_PAGD_REM}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFeedback('PDC_PAGD_REM')}>
+                <Icons
+                  style={{ marginLeft: 10 }}
+                  name="delete-circle-outline"
+                  color="red"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 10,
+              marginBottom: 10,
+            }}>
+            <Text style={styleSheet.label}>
+              Upload Departure GenDec
+            </Text>
+            <TouchableOpacity
+              //onPress={event => onPressDocPreA(16)}
+              onPress={() => {
+                setuploadSection('PDC_UDGD_String');
+                refRBSheet.current.open();
+              }}
+              style={{
+                marginLeft: 10,
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+                borderWidth: 1,
+                borderRadius: 8,
+                backgroundColor: 'white',
+              }}>
+              <Text style={{ color: 'green' }}>Take Camera</Text>
+            </TouchableOpacity>
+          </View>
+          {pdchecklist.PDC_UDGD_String && pdchecklist.PDC_UDGD_String.map((val, indexxx) => {
+            return (<TouchableOpacity
+              onPress={() => {
+                if (val.split(",")[0].startsWith('data:image')) {
+                  setimageVisible(true);
+                  setshowImage(val);
+                }
+                else {
+                  saveFile(val, `PDC_UDGD_DOCUMENT` + indexxx)
+
+                }
+              }}
+              key={indexxx}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 8,
+                padding: 10,
+                marginVertical: 10,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                ...Platform.select({
+                  ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.8,
+                    shadowRadius: 2,
+                  },
+                  android: {
+                    elevation: 3,
+                  },
+                }),
+              }}>
+              <Text style={{ color: 'black' }}>{`PDC_UDGD_DOCUMENT` + indexxx}</Text>
+              <TouchableOpacity onPress={() => removeFilePreA('PDC_UDGD_String', null, null, indexxx)}>
+                <Icons
+                  style={{ color: 'green', marginLeft: 10 }}
+                  name="close"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </TouchableOpacity>)
+          })}
+          {/*   ------------------------------Flight Documents/Admin ----------- */}
+          <Text style={styleSheet.label}>Flight Documents / Admin:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setpdchecklist({ ...pdchecklist, ARS_FOA_C: pdchecklist.ARS_FOA_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    pdchecklist.ARS_FOA_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pdchecklist.ARS_FOA_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Flight Documents Received (Local Time)</Text>
+            </View>
+            <DateTimeInput
+              label={''}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_FDR");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_FDR")}
+              size={12}
+              type={'time'}
+              data={pdchecklist.PDC_FD_FDR}
+              index={12}
+              mV={0}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setpdchecklist({ ...pdchecklist, PDC_FD_FDP_C: pdchecklist.PDC_FD_FDP_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    pdchecklist.PDC_FD_FDP_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pdchecklist.PDC_FD_FDP_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Flight Documents Printed (Local Time)</Text>
+            </View>
+            <DateTimeInput
+              label={''}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_FDP");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_FDP")}
+              size={12}
+              type={'time'}
+              data={pdchecklist.PDC_FD_FDP}
+              index={12}
+              mV={0}
+            />
+
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setpdchecklist({ ...pdchecklist, PDC_FD_NOTAMS_C: pdchecklist.PDC_FD_NOTAMS_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    pdchecklist.PDC_FD_NOTAMS_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pdchecklist.PDC_FD_NOTAMS_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Notams Updated (Local Time)</Text>
+            </View>
+            <DateTimeInput
+              label={''}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_NOTAMS");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_NOTAMS")}
+              size={12}
+              type={'time'}
+              data={pdchecklist.PDC_FD_NOTAMS}
+              index={12}
+              mV={0}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setpdchecklist({ ...pdchecklist, PDC_FD_WIU_C: pdchecklist.PDC_FD_WIU_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    pdchecklist.PDC_FD_WIU_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pdchecklist.PDC_FD_WIU_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Weather Information Updated (Local Time)</Text>
+            </View>
+            <DateTimeInput
+              label={''}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_WIU");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_WIU")}
+              size={12}
+              type={'time'}
+              data={pdchecklist.PDC_FD_WIU}
+              index={12}
+              mV={0}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setpdchecklist({ ...pdchecklist, PDC_FD_ATC_C: pdchecklist.PDC_FD_ATC_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    pdchecklist.PDC_FD_ATC_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pdchecklist.PDC_FD_ATC_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>ATC Flight Plan Filed (Local Time)</Text>
+            </View>
+            <DateTimeInput
+              label={''}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_ATC");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_ATC")}
+              size={12}
+              type={'time'}
+              data={pdchecklist.PDC_FD_ATC}
+              index={12}
+              mV={0}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setpdchecklist({ ...pdchecklist, PDC_FD_SLOTS_C: pdchecklist.PDC_FD_SLOTS_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    pdchecklist.PDC_FD_SLOTS_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={pdchecklist.PDC_FD_SLOTS_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Slots Confirmed (Local Time)</Text>
+            </View>
+            <DateTimeInput
+              label={''}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_SLOTS");
+              }}
+              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_SLOTS")}
+              size={12}
+              type={'time'}
+              data={pdchecklist.PDC_FD_SLOTS}
+              index={12}
+              mV={0}
+            />
+          </View>
+          {/*   ------------------------------Flight Documents/Admin End ----------- */}
+        </View>
         <View style={[styleSheet.toggleContainer, { paddingHorizontal: 20 }]}>
+
           <TouchableOpacity
             onPress={event => setpdchecklist({ ...pdchecklist, PDC_CTA: pdchecklist.PDC_CTA ? 0 : 1 })}
             style={[
@@ -858,7 +1246,7 @@ export default function PreDepartureChecklist(props) {
                     </TouchableOpacity>
                   </View>
                   <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
-                    Pick-up Details:
+                    Pick Up Details:
                   </Text>
                   <View
                     style={{
@@ -887,7 +1275,7 @@ export default function PreDepartureChecklist(props) {
                   </View>
                   <LabelledInput
                     disabled={val.PDCT_PD_NR}
-                    label={'Pickup Location'} //mark
+                    label={'Pick Up Location'} //mark
                     data={val.PDCT_PL}
                     datatype={'text'}
                     index={12}
@@ -1095,7 +1483,7 @@ export default function PreDepartureChecklist(props) {
                   />
                   <LabelledInput
                     disabled={val.PDCT_DD_NR}
-                    label={'Driver Contact Number'} //mark
+                    label={'Contact No'} //mark
                     data={val.PDCT_DCN}
                     datatype={'text'}
                     index={12}
@@ -1109,7 +1497,7 @@ export default function PreDepartureChecklist(props) {
                   />
                   <LabelledInput
                     disabled={val.PDCT_DD_NR}
-                    label={'Vehicle Number'} //mark
+                    label={'Vehicle No.'} //mark
                     data={val.PDCT_VEHICLE_NO}
                     datatype={'text'}
                     index={12}
@@ -1354,7 +1742,7 @@ export default function PreDepartureChecklist(props) {
                     </TouchableOpacity>
                   </View>
                   <Text style={[styleSheet.label, { fontWeight: "bold", marginBottom: 10 }]}>
-                    Pick-up Details:
+                    Pick Up Details:
                   </Text>
                   <View
                     style={{
@@ -1383,7 +1771,7 @@ export default function PreDepartureChecklist(props) {
                   </View>
                   <LabelledInput
                     disabled={val.PDCT_PD_NR}
-                    label={'Pickup Location'} //mark
+                    label={'Pick Up Location'} //mark
                     data={val.PDCT_PL}
                     datatype={'text'}
                     index={12}
@@ -1619,7 +2007,7 @@ export default function PreDepartureChecklist(props) {
                   />
                   <LabelledInput
                     disabled={val.PDCT_DD_NR}
-                    label={'Driver Contact Number'} //mark
+                    label={'Contact No'} //mark
                     data={val.PDCT_DCN}
                     datatype={'text'}
                     index={12}
@@ -1633,7 +2021,7 @@ export default function PreDepartureChecklist(props) {
                   />
                   <LabelledInput
                     disabled={val.PDCT_DD_NR}
-                    label={'Vehicle Number'} //mark
+                    label={'Vehicle No.'} //mark
                     data={val.PDCT_VEHICLE_NO}
                     datatype={'text'}
                     index={12}
@@ -1709,228 +2097,10 @@ export default function PreDepartureChecklist(props) {
             })}
           </View>
           {/**PAX TRANS END //catering.delivery=data */}
-          <DateTimeInput
-            label={'Confirm Catering Delivery Time (Local Time)'}
-            showDatePickerPostDepart={() => {
-              showDatePicker('time', 0, 'pdchecklist', "PDC_CCDT");
-            }}
-            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_CCDT")}
-            size={12}
-            type={'time'}
-            data={pdchecklist.PDC_CCDT}
-            index={12}
-          />
-          <DateTimeInput
-            label={'Fueling Time (Local Time)'}
-            showDatePickerPostDepart={() => {
-              showDatePicker('time', 0, 'pdchecklist', "PDC_FT");
-            }}
-            setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FT")}
-            size={12}
-            type={'time'}
-            data={pdchecklist.PDC_FT}
-            index={12}
-          />
 
 
-          <View style={styleSheet.toggleContainer}>
-            <TouchableOpacity
-              onPress={event => setpdchecklist({ ...pdchecklist, PDC_PAGD: pdchecklist.PDC_PAGD ? 0 : 1 })}
-              style={[
-                styleSheet.toggleButton,
-                {
-                  backgroundColor: pdchecklist.PDC_PAGD
-                    ? 'green'
-                    : 'white',
-                },
-              ]}>
-              <Text
-                style={[
-                  styleSheet.label,
-                  {
-                    textAlign: 'center',
-                    color: pdchecklist.PDC_PAGD ? 'white' : 'black',
-                  },
-                ]}>
-                Prepared Departure GenDec
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => getFeedback('PDC_PAGD_REM')}>
-              <Icons
-                style={{ marginLeft: 10 }}
-                name="comment-processing-outline"
-                color="green"
-                size={30}
-              />
-            </TouchableOpacity>
-          </View>
-          {pdchecklist.PDC_PAGD_REM && (
-            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-              <View style={styleSheet.remarks}>
-                <Text style={{ color: 'black' }}>{pdchecklist.PDC_PAGD_REM}</Text>
-              </View>
-              <TouchableOpacity onPress={() => removeFeedback('PDC_PAGD_REM')}>
-                <Icons
-                  style={{ marginLeft: 10 }}
-                  name="delete-circle-outline"
-                  color="red"
-                  size={30}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: 10,
-              marginBottom: 10,
-            }}>
-            <Text style={styleSheet.label}>
-              Upload Departure GenDec
-            </Text>
-            <TouchableOpacity
-              //onPress={event => onPressDocPreA(16)}
-              onPress={() => {
-                setuploadSection('PDC_UDGD_String');
-                refRBSheet.current.open();
-              }}
-              style={{
-                marginLeft: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderWidth: 1,
-                borderRadius: 8,
-                backgroundColor: 'white',
-              }}>
-              <Text style={{ color: 'green' }}>Take Camera</Text>
-            </TouchableOpacity>
-          </View>
-          {pdchecklist.PDC_UDGD_String && pdchecklist.PDC_UDGD_String.map((val, indexxx) => {
-            return (<TouchableOpacity
-              onPress={() => {
-                if (val.split(",")[0].startsWith('data:image')) {
-                  setimageVisible(true);
-                  setshowImage(val);
-                }
-                else {
-                  saveFile(val, `PDC_UDGD_DOCUMENT` + indexxx)
-
-                }
-              }}
-              key={indexxx}
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 8,
-                padding: 10,
-                marginVertical: 10,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                ...Platform.select({
-                  ios: {
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.8,
-                    shadowRadius: 2,
-                  },
-                  android: {
-                    elevation: 3,
-                  },
-                }),
-              }}>
-              <Text style={{ color: 'black' }}>{`PDC_UDGD_DOCUMENT` + indexxx}</Text>
-              <TouchableOpacity onPress={() => removeFilePreA('PDC_UDGD_String', null, null, indexxx)}>
-                <Icons
-                  style={{ color: 'green', marginLeft: 10 }}
-                  name="close"
-                  size={30}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>)
-          })}
 
 
-          {/*   ------------------------------Flight Documents/Admin ----------- */}
-          <Text style={styleSheet.label}>Flight Documents / Admin:</Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: 'rgba(0,0,0,0.5)',
-              padding: 10,
-              borderRadius: 10,
-              marginVertical: 10,
-            }}>
-            <DateTimeInput
-              label={'Flight Documents Received (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_FDR");
-              }}
-              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_FDR")}
-              size={12}
-              type={'time'}
-              data={pdchecklist.PDC_FD_FDR}
-              index={12}
-            />
-            <DateTimeInput
-              label={'Flight Documents Printed (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_FDP");
-              }}
-              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_FDP")}
-              size={12}
-              type={'time'}
-              data={pdchecklist.PDC_FD_FDP}
-              index={12}
-            />
-            <DateTimeInput
-              label={'Notams Updated (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_NOTAMS");
-              }}
-              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_NOTAMS")}
-              size={12}
-              type={'time'}
-              data={pdchecklist.PDC_FD_NOTAMS}
-              index={12}
-            />
-            <DateTimeInput
-              label={'Weather Information Updated (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_WIU");
-              }}
-              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_WIU")}
-              size={12}
-              type={'time'}
-              data={pdchecklist.PDC_FD_WIU}
-              index={12}
-            />
-            <DateTimeInput
-              label={'ATC Flight Plan Filed (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_ATC");
-              }}
-              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_ATC")}
-              size={12}
-              type={'time'}
-              data={pdchecklist.PDC_FD_ATC}
-              index={12}
-            />
-            <DateTimeInput
-              label={'Slots Confirmed (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'pdchecklist', "PDC_FD_SLOTS");
-              }}
-              setNowPostDepart={() => setNow(0, 'pdchecklist', "PDC_FD_SLOTS")}
-              size={12}
-              type={'time'}
-              data={pdchecklist.PDC_FD_SLOTS}
-              index={12}
-            />
-          </View>
-          {/*   ------------------------------Flight Documents/Admin End ----------- */}
 
           <View style={styleSheet.toggleContainer}>
             <TouchableOpacity

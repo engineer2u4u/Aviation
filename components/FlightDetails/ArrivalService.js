@@ -459,7 +459,7 @@ export default function ArrivalService(props) {
       'data:image/jpeg;base64': '.jpg',
       'data:application/pdf;base64': '.pdf',
       'data:application/msword;base64': '.doc',
-      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
+      'data:application/octet-stream;base64': '.docx',
       'data:application/vnd.ms-excel;base64': '.xls',
       'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
       'data:application/vnd.ms-powerpoint;base64': '.ppt',
@@ -587,38 +587,46 @@ export default function ArrivalService(props) {
               numberOfLines={1}
             />
           </View>
-          <DateTimeInput
-            label={'Movement (AC Landed) (Local Time)'}
-            showDatePickerPostDepart={() => {
-              showDatePicker('time', 0, 'aService', "ARS_MOVACLANDED");
-            }}
-            setNowPostDepart={(indexx, x) => {
-              var tcheckList = { ...aService };
-              tcheckList.ARS_MOVACLANDED = x
-              setaService({ ...tcheckList });
-            }}
-            size={12}
-            type={'time'}
-            data={aService.ARS_MOVACLANDED}
-            index={12}
-          />
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <DateTimeInput
+              label={'Movement (AC Landed) (Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_MOVACLANDED");
+              }}
+              setNowPostDepart={(indexx, x) => {
+                var tcheckList = { ...aService };
+                tcheckList.ARS_MOVACLANDED = x
+                setaService({ ...tcheckList });
+              }}
+              size={12}
+              type={'time'}
+              data={aService.ARS_MOVACLANDED}
+              index={12}
+            />
 
-          <DateTimeInput
-            label={'Movement (Checks In) (Local Time)'}
-            showDatePickerPostDepart={() => {
-              showDatePicker('time', 0, 'aService', "ARS_MOVCHOCKIN");
-            }}
-            setNowPostDepart={(indexx, x) => {
-              var tcheckList = { ...aService };
-              tcheckList.ARS_MOVCHOCKIN = x
-              setaService({ ...tcheckList });
-            }}
-            size={12}
-            type={'time'}
-            data={aService.ARS_MOVCHOCKIN}
-            index={12}
-          />
-
+            <DateTimeInput
+              label={'Movement (Chocks In)(Local Time)'}
+              showDatePickerPostDepart={() => {
+                showDatePicker('time', 0, 'aService', "ARS_MOVCHOCKIN");
+              }}
+              setNowPostDepart={(indexx, x) => {
+                var tcheckList = { ...aService };
+                tcheckList.ARS_MOVCHOCKIN = x
+                setaService({ ...tcheckList });
+              }}
+              size={12}
+              type={'time'}
+              data={aService.ARS_MOVCHOCKIN}
+              index={12}
+            />
+          </View>
           <Text style={styleSheet.label}>Ground Power Unit (GPU):</Text>
           <View
             style={{
@@ -682,30 +690,39 @@ export default function ArrivalService(props) {
               data={aService.ARS_GPU_STOP}
             />
           </View>
+          <Text style={styleSheet.label}>Persons on Board</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <LabelledInput
+              label={'No. of Pax'} //mark
+              data={aService.ARS_PAX}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_PAX: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
 
-          <LabelledInput
-            label={'Number of Pax'} //mark
-            data={aService.ARS_PAX}
-            datatype={'text'}
-            index={12}
-            setText={(i, text, type, section) => {
-              setaService({ ...aService, ARS_PAX: text });
-            }}
-            multiline={false}
-            numberOfLines={1}
-          />
-
-          <LabelledInput
-            label={'Number of Crew'} //mark
-            data={aService.ARS_CREW}
-            datatype={'text'}
-            index={5}
-            setText={(i, text, type, section) => {
-              setaService({ ...aService, ARS_CREW: text });
-            }}
-            multiline={false}
-            numberOfLines={1}
-          />
+            <LabelledInput
+              label={'No. of Crew'} //mark
+              data={aService.ARS_CREW}
+              datatype={'text'}
+              index={5}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_CREW: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
           <Text style={styleSheet.label}>Baggage:</Text>
           <View
             style={{
@@ -716,7 +733,7 @@ export default function ArrivalService(props) {
               marginVertical: 10,
             }}>
             <LabelledInput
-              label={'Number of Baggage Offloaded'} //mark
+              label={'No. of Baggage Offloaded'} //mark
               data={aService.ARS_BAGGAGE}
               datatype={'text'}
               index={20}
@@ -937,7 +954,7 @@ export default function ArrivalService(props) {
                     index={12}
                   />
                   <DateTimeInput
-                    label={' Left Terminal (Local Time)'}
+                    label={' Pax Left Terminal (Local Time)'}
                     showDatePickerPostDepart={() => {
                       showDatePicker('time', index, 'paxmovement', "ARS_PM_PDFT");
                     }}
@@ -1002,6 +1019,28 @@ export default function ArrivalService(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_CTR_C: aService.ARS_CTR_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_CTR_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_CTR_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <Text style={styleSheet.label}>Catering Equipment Offloaded</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1191,6 +1230,286 @@ export default function ArrivalService(props) {
               numberOfLines={1}
             />
           </View>
+          {/* ---------------------------Catering Equipment Cleaning-----------------------*/}
+
+          <Text style={styleSheet.label}>Catering Equipment Cleaning:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_CEC_REQ: aService.ARS_CEC_REQ == 1 ? 0 : 1, ARS_CEC_REM: "" })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_CEC_REQ == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_CEC_REQ == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_CEC_C: aService.ARS_CEC_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_CEC_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_CEC_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
+              }}>
+              <Text style={styleSheet.label}>Photo (if required)</Text>
+              <TouchableOpacity
+                disabled={aService.ARS_CEC_REQ ? true : false}
+                //onPress={event => onPressDocPreA(40)}
+                onPress={() => {
+                  setuploadSection('ARS_CEC_PHOTO_STring');
+                  refRBSheet.current.open();
+                }}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                  backgroundColor: aService.ARS_CEC_REQ == 1
+                    ? 'rgba(0,0,0,0.1)'
+                    : 'white',
+                }}>
+                <Text style={{ color: 'green' }}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+            {aService.ARS_CEC_PHOTO_STring && aService.ARS_CEC_PHOTO_STring.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_CEC_PHOTO_DOCUMENT` + indexxx)
+
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_CEC_PHOTO_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_CEC_PHOTO_STring', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
+            <LabelledInput
+              disabled={aService.ARS_CEC_REQ}
+              label={'Remarks'} //mark
+              data={aService.ARS_CEC_REMARKS}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_CEC_REMARKS: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
+
+          {/* ---------------------------Laundry Cleaning-----------------------*/}
+
+          <Text style={styleSheet.label}>Laundry Cleaning:</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.5)',
+              padding: 10,
+              borderRadius: 10,
+              marginVertical: 10,
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_LC_NR: aService.ARS_LC_NR == 1 ? 0 : 1, ARS_LC_REM: "" })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_LC_NR == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_LC_NR == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_LC_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_LC_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginVertical: 20,
+              }}>
+              <Text style={styleSheet.label}>Photo (if required)</Text>
+              <TouchableOpacity
+                disabled={aService.ARS_LC_NR == 1 ? true : false}
+                //onPress={event => onPressDocPreA(40)}
+                onPress={() => {
+                  setuploadSection('ARS_LC_PHOTO_STring');
+                  refRBSheet.current.open();
+                }}
+                style={{
+                  marginLeft: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderRadius: 8,
+                  backgroundColor: aService.ARS_LC_NR == 1
+                    ? 'rgba(0,0,0,0.1)'
+                    : 'white',
+                }}>
+                <Text style={{ color: 'green' }}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+            {aService.ARS_LC_PHOTO_STring && aService.ARS_LC_PHOTO_STring.map((val, indexxx) => {
+              return (<TouchableOpacity
+                onPress={() => {
+                  if (val.split(",")[0].startsWith('data:image')) {
+                    setimageVisible(true);
+                    setshowImage(val);
+                  }
+                  else {
+                    saveFile(val, `ARS_LC_PHOTO_DOCUMENT` + indexxx)
+                  }
+                }}
+                key={indexxx}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 8,
+                  padding: 10,
+                  marginVertical: 10,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 2,
+                    },
+                    android: {
+                      elevation: 3,
+                    },
+                  }),
+                }}>
+                <Text style={{ color: 'black' }}>{`ARS_LC_PHOTO_DOCUMENT` + indexxx}</Text>
+                <TouchableOpacity onPress={() => removeFilePreA('ARS_LC_PHOTO_STring', indexxx)}>
+                  <Icons
+                    style={{ color: 'green', marginLeft: 10 }}
+                    name="close"
+                    size={30}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>)
+            })}
+            <LabelledInput
+              disabled={aService.ARS_LC_NR == 1 ? true : false}
+              label={'Remarks'} //mark
+              data={aService.ARS_LC_REMARKS}
+              datatype={'text'}
+              index={12}
+              setText={(i, text, type, section) => {
+                setaService({ ...aService, ARS_LC_REMARKS: text });
+              }}
+              multiline={false}
+              numberOfLines={1}
+            />
+          </View>
           <Text style={styleSheet.label}>Water Service:</Text>
           <View
             style={{
@@ -1227,6 +1546,28 @@ export default function ArrivalService(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_WAS_C: aService.ARS_WAS_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_WAS_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_WAS_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               disabled={aService.ARS_WAS_REQ}
@@ -1295,6 +1636,28 @@ export default function ArrivalService(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_LC_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_LC_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               notrequiredtext={'Completed'}
@@ -1393,6 +1756,28 @@ export default function ArrivalService(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_RUS_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_RUS_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               disabled={aService.ARS_RUS_REQ}
@@ -1503,6 +1888,28 @@ export default function ArrivalService(props) {
                 />
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_FOA_C: aService.ARS_FOA_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_FOA_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_FOA_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
               disabled={aService.ARS_FOA_REQ}
@@ -1657,6 +2064,28 @@ export default function ArrivalService(props) {
               </TouchableOpacity>
               <Text style={styleSheet.label}>Not Required</Text>
             </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <TouchableOpacity
+                onPress={event => {
+                  setaService({ ...aService, ARS_TOS_C: aService.ARS_TOS_C == 1 ? 0 : 1 })
+                }}>
+                <Icons
+                  name={
+                    aService.ARS_TOS_C == 1
+                      ? 'checkbox-marked-outline'
+                      : 'checkbox-blank-outline'
+                  }
+                  color={aService.ARS_TOS_C == 1 ? 'green' : 'black'}
+                  size={40}
+                />
+              </TouchableOpacity>
+              <Text style={styleSheet.label}>Completed</Text>
+            </View>
             <DateTimeInput
               disabled={aService.ARS_TOS_REQ}
               label={'Start Time (Local Time)'}
@@ -1801,7 +2230,7 @@ export default function ArrivalService(props) {
             </View>
             <LabelledInput
               disabled={aService.ARS_OVB_REQ}
-              label={'Number'} //mark
+              label={'Bay Number'} //mark
               data={aService.ARS_OVB_NUMBER}
               datatype={'text'}
               index={12}
@@ -1813,244 +2242,7 @@ export default function ArrivalService(props) {
             />
           </View>
 
-          {/* ---------------------------Catering Equipment Cleaning-----------------------*/}
 
-          <Text style={styleSheet.label}>Catering Equipment Cleaning:</Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: 'rgba(0,0,0,0.5)',
-              padding: 10,
-              borderRadius: 10,
-              marginVertical: 10,
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}>
-              <TouchableOpacity
-                onPress={event => {
-                  setaService({ ...aService, ARS_CEC_REQ: aService.ARS_CEC_REQ == 1 ? 0 : 1, ARS_CEC_REM: "" })
-                }}>
-                <Icons
-                  name={
-                    aService.ARS_CEC_REQ == 1
-                      ? 'checkbox-marked-outline'
-                      : 'checkbox-blank-outline'
-                  }
-                  color={aService.ARS_CEC_REQ == 1 ? 'green' : 'black'}
-                  size={40}
-                />
-              </TouchableOpacity>
-              <Text style={styleSheet.label}>Not Required</Text>
-            </View>
-
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginVertical: 20,
-              }}>
-              <Text style={styleSheet.label}>Photo (if required)</Text>
-              <TouchableOpacity
-                disabled={aService.ARS_CEC_REQ ? true : false}
-                //onPress={event => onPressDocPreA(40)}
-                onPress={() => {
-                  setuploadSection('ARS_CEC_PHOTO_STring');
-                  refRBSheet.current.open();
-                }}
-                style={{
-                  marginLeft: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  borderWidth: 1,
-                  borderRadius: 8,
-                  backgroundColor: aService.ARS_CEC_REQ == 1
-                    ? 'rgba(0,0,0,0.1)'
-                    : 'white',
-                }}>
-                <Text style={{ color: 'green' }}>Upload</Text>
-              </TouchableOpacity>
-            </View>
-            {aService.ARS_CEC_PHOTO_STring && aService.ARS_CEC_PHOTO_STring.map((val, indexxx) => {
-              return (<TouchableOpacity
-                onPress={() => {
-                  if (val.split(",")[0].startsWith('data:image')) {
-                    setimageVisible(true);
-                    setshowImage(val);
-                  }
-                  else {
-                    saveFile(val, `ARS_CEC_PHOTO_DOCUMENT` + indexxx)
-
-                  }
-                }}
-                key={indexxx}
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 8,
-                  padding: 10,
-                  marginVertical: 10,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  ...Platform.select({
-                    ios: {
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.8,
-                      shadowRadius: 2,
-                    },
-                    android: {
-                      elevation: 3,
-                    },
-                  }),
-                }}>
-                <Text style={{ color: 'black' }}>{`ARS_CEC_PHOTO_DOCUMENT` + indexxx}</Text>
-                <TouchableOpacity onPress={() => removeFilePreA('ARS_CEC_PHOTO_STring', indexxx)}>
-                  <Icons
-                    style={{ color: 'green', marginLeft: 10 }}
-                    name="close"
-                    size={30}
-                  />
-                </TouchableOpacity>
-              </TouchableOpacity>)
-            })}
-            <LabelledInput
-              disabled={aService.ARS_CEC_REQ}
-              label={'Remarks'} //mark
-              data={aService.ARS_CEC_REMARKS}
-              datatype={'text'}
-              index={12}
-              setText={(i, text, type, section) => {
-                setaService({ ...aService, ARS_CEC_REMARKS: text });
-              }}
-              multiline={false}
-              numberOfLines={1}
-            />
-          </View>
-
-          {/* ---------------------------Laundry Cleaning-----------------------*/}
-
-          <Text style={styleSheet.label}>Laundry Cleaning:</Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: 'rgba(0,0,0,0.5)',
-              padding: 10,
-              borderRadius: 10,
-              marginVertical: 10,
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}>
-              <TouchableOpacity
-                onPress={event => {
-                  setaService({ ...aService, ARS_LC_NR: aService.ARS_LC_NR == 1 ? 0 : 1, ARS_LC_REM: "" })
-                }}>
-                <Icons
-                  name={
-                    aService.ARS_LC_NR == 1
-                      ? 'checkbox-marked-outline'
-                      : 'checkbox-blank-outline'
-                  }
-                  color={aService.ARS_LC_NR == 1 ? 'green' : 'black'}
-                  size={40}
-                />
-              </TouchableOpacity>
-              <Text style={styleSheet.label}>Not Required</Text>
-            </View>
-
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginVertical: 20,
-              }}>
-              <Text style={styleSheet.label}>Photo (if required)</Text>
-              <TouchableOpacity
-                disabled={aService.ARS_LC_NR == 1 ? true : false}
-                //onPress={event => onPressDocPreA(40)}
-                onPress={() => {
-                  setuploadSection('ARS_LC_PHOTO_STring');
-                  refRBSheet.current.open();
-                }}
-                style={{
-                  marginLeft: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  borderWidth: 1,
-                  borderRadius: 8,
-                  backgroundColor: aService.ARS_LC_NR == 1
-                    ? 'rgba(0,0,0,0.1)'
-                    : 'white',
-                }}>
-                <Text style={{ color: 'green' }}>Upload</Text>
-              </TouchableOpacity>
-            </View>
-            {aService.ARS_LC_PHOTO_STring && aService.ARS_LC_PHOTO_STring.map((val, indexxx) => {
-              return (<TouchableOpacity
-                onPress={() => {
-                  if (val.split(",")[0].startsWith('data:image')) {
-                    setimageVisible(true);
-                    setshowImage(val);
-                  }
-                  else {
-                    saveFile(val, `ARS_LC_PHOTO_DOCUMENT` + indexxx)
-                  }
-                }}
-                key={indexxx}
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 8,
-                  padding: 10,
-                  marginVertical: 10,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  ...Platform.select({
-                    ios: {
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.8,
-                      shadowRadius: 2,
-                    },
-                    android: {
-                      elevation: 3,
-                    },
-                  }),
-                }}>
-                <Text style={{ color: 'black' }}>{`ARS_LC_PHOTO_DOCUMENT` + indexxx}</Text>
-                <TouchableOpacity onPress={() => removeFilePreA('ARS_LC_PHOTO_STring', indexxx)}>
-                  <Icons
-                    style={{ color: 'green', marginLeft: 10 }}
-                    name="close"
-                    size={30}
-                  />
-                </TouchableOpacity>
-              </TouchableOpacity>)
-            })}
-            <LabelledInput
-              disabled={aService.ARS_LC_NR == 1 ? true : false}
-              label={'Remarks'} //mark
-              data={aService.ARS_LC_REMARKS}
-              datatype={'text'}
-              index={12}
-              setText={(i, text, type, section) => {
-                setaService({ ...aService, ARS_LC_REMARKS: text });
-              }}
-              multiline={false}
-              numberOfLines={1}
-            />
-          </View>
 
 
           {/* ---------------------------Crew Movement	-----------------------*/}
@@ -2065,7 +2257,7 @@ export default function ArrivalService(props) {
               marginVertical: 10,
             }}>
             <DateTimeInput
-              label={'Left Aircraft (Local Time)'}
+              label={'Crew Left Aircraft (Local Time)'}
               showDatePickerPostDepart={() => {
                 showDatePicker('time', 0, 'aService', "ARS_CRM_CDA");
               }}
@@ -2182,7 +2374,7 @@ export default function ArrivalService(props) {
                     index={12}
                   />
                   <DateTimeInput
-                    label={'Left Terminal (Local Time)'}
+                    label={'Crew Left Terminal (Local Time)'}
                     showDatePickerPostDepart={() => {
                       showDatePicker('time', index, 'crewmovement', "ARS_PM_PDFT");
                     }}

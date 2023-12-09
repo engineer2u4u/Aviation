@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   ActivityIndicator,
@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 export default function Feedback({
   visible,
   onCloseFeedback,
@@ -45,7 +45,7 @@ export default function Feedback({
               fontSize: Dimensions.get('window').width / 18,
               color: 'black',
             }}>
-            Feedback
+            Remarks
           </Text>
           <TextInput
             value={textInput}
@@ -55,10 +55,10 @@ export default function Feedback({
             onChangeText={text => settextInput(text)}
             placeholder="Give your feedback"
           />
-          <View style={{flexDirection: 'row', marginTop: 10}}>
+          <View style={{ flexDirection: 'row', marginTop: 10 }}>
             <TouchableOpacity
               onPress={onCloseFeedback}
-              style={[styles.button, {marginRight: 10}]}>
+              style={[styles.button, { marginRight: 10 }]}>
               <Text
                 style={{
                   color: 'white',
@@ -70,7 +70,7 @@ export default function Feedback({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => onSubmitFeedback(textInput)}
-              style={[styles.button, {marginLeft: 10}]}>
+              style={[styles.button, { marginLeft: 10 }]}>
               <Text
                 style={{
                   color: 'white',

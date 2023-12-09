@@ -21,7 +21,8 @@ const DateTimeInput = ({
   added = false,
   setflightdoc = null,
   showTimeNow = true,
-  notrequiredtext = null
+  notrequiredtext = null,
+  mV = 10
 }) => {
   const [date, setdate] = useState(data);
   const [notreq, setnotreq] = useState(isnotrequired);
@@ -99,7 +100,7 @@ const DateTimeInput = ({
   return (
     <>
       {showLabel && (
-        <Text style={s.label}>{label || 'Time Verified (Local Time)'}</Text>
+        <Text style={s.label}>{label}</Text>
       )}
       {notrequiredSection && (
         <TouchableOpacity
@@ -142,7 +143,7 @@ const DateTimeInput = ({
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity
           disabled={touchableactive}
-          style={[s.picker, { backgroundColor: color }]}
+          style={[s.picker, { backgroundColor: color, marginVertical: mV }]}
           onPress={() => showDatePickerPostDepart(type, index)}>
           <Text style={{ fontSize: 20, color: 'black' }}>
             {date != null ? date : (type == 'date' ? 'dd/mm/yy' : type == 'time' ? '-- : --' : 'dd/mm/yy, -- : --')}

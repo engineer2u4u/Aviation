@@ -75,7 +75,7 @@ export default function InterimService(props) {
   }
 
   const onAddServices = () => {
-    setIservices([...Iservices, { service: null, remarks: null }]);
+    setIservices([...Iservices, { service: '', remarks: '' }]);
   };
   const [deleteService, setdeleteService] = useState([]);
   const onRemoveService = index => {
@@ -113,35 +113,43 @@ export default function InterimService(props) {
         "UPDATE_BY": email
       };
       Iservices.map(val => {
-        sendData.UID.push(val.UID ? val.UID : "");
-        sendData.INS_SERVICE.push(val.service);
-        sendData.INS_REM.push(val.remarks);
+        if (val.service || val.remarks) {
+          sendData.UID.push(val.UID ? val.UID : "");
+          sendData.INS_SERVICE.push(val.service);
+          sendData.INS_REM.push(val.remarks);
+        }
       })
       console.log(sendData);
       // Iservices.map(val => {
 
 
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: JSON.stringify(sendData)
-      };
-      fetch(
-        `${domain}/PostInterimServices`,
-        requestOptions,
-      )
-        .then(response => response.text())
-        .then(response => {
-          Alert.alert('Success');
-          setcallLoad(false);
-          console.log(response);
-          readData();
-        })
-        .catch(error => {
-          Alert.alert('Error in updation');
-          setcallLoad(false);
-          console.log(error, 'Function error');
-        });
+      if (sendData.INS_SERVICE.length > 0 || sendData.INS_REM.length > 0) {
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: JSON.stringify(sendData)
+        };
+        fetch(
+          `${domain}/PostInterimServices`,
+          requestOptions,
+        )
+          .then(response => response.text())
+          .then(response => {
+            Alert.alert('Success');
+            setcallLoad(false);
+            console.log(response);
+            readData();
+          })
+          .catch(error => {
+            Alert.alert('Error in updation');
+            setcallLoad(false);
+            console.log(error, 'Function error');
+          });
+      }
+      else {
+        Alert.alert('No data to update');
+        setcallLoad(false);
+      }
       // });
     }
     else {
@@ -167,6 +175,9 @@ export default function InterimService(props) {
             setcallLoad(false);
             console.log(error, 'Function error');
           });
+      }
+      else {
+        setcallLoad(false);
       }
 
     }
@@ -257,7 +268,7 @@ export default function InterimService(props) {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                         }}>
-                        <Text style={styleSheet.label}>Services Provided</Text>
+                        <Text style={styleSheet.label}>Services Provided:</Text>
                         <TouchableOpacity
                           style={styleSheet.label}
                           onPress={() => onRemoveService(index)}>
@@ -278,7 +289,7 @@ export default function InterimService(props) {
                           }
                         />
                       </View>
-                      <Text style={styleSheet.label}>Additional Remarks</Text>
+                      <Text style={styleSheet.label}>Additional Remarks:</Text>
                       <View
                         style={{
                           flexDirection: 'row',

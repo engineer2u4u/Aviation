@@ -34,8 +34,8 @@ const { width, height } = Dimensions.get('window');
 const HeadingTextSize = width / 15;
 const labelTextSize = width / 25;
 const uploadMenu = [
-  { id: 1, name: 'Slots', textId: 3 },
-  { id: 2, name: 'Parking', textId: 4 },
+  { id: 1, name: 'Slots:', textId: 3 },
+  { id: 2, name: 'Parking:', textId: 4 },
   { id: 3, name: 'Landing Permit', textId: 5 },
 ];
 
@@ -71,12 +71,12 @@ export default function FlightPreparation(props) {
       'data:image/jpeg;base64': '.jpg',
       'data:application/pdf;base64': '.pdf',
       'data:application/msword;base64': '.doc',
-      'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64': '.docx',
       'data:application/vnd.ms-excel;base64': '.xls',
       'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64': '.xlsx',
       'data:application/vnd.ms-powerpoint;base64': '.ppt',
       'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64': '.pptx',
       'data:application/zip;base64': '.zip',
+      'data:application/octet-stream;base64': '.docx',
       // Add more checks for other file types as needed
     };
     var type = headers[val.split(",")[0]];
@@ -84,61 +84,66 @@ export default function FlightPreparation(props) {
     var pdfLocation = DownloadDir + '/' + fileName + type;
     // console.log(pdfLocation);
     // console.log(val)
-    RNFetchBlob.fs
-      .isDir(DownloadDir)
-      .then(isDir => {
-        if (isDir) {
-          console.log('iSDir');
-          RNFetchBlob.fs
-            .writeFile(pdfLocation, bs64, 'base64')
-            .then(res => {
-              // console.log('saved', res);
-              Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
-                {
-                  text: 'View', onPress: () => {
-                    // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
-                    RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
-                  }
-                },
-                { text: 'OK' },
-              ])
-            })
-            .catch(err => {
-              console.log(err)
-              Alert.alert('Error in saving file')
-            });
-        } else {
-          RNFetchBlob.fs
-            .mkdir(DownloadDir)
-            .then(() => {
-              console.log('Created Folder');
-              RNFetchBlob.fs
-                .writeFile(pdfLocation, bs64, 'base64')
-                .then(res => {
-                  console.log('saved');
-                  Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
-                    {
-                      text: 'View', onPress: () => {
-                        // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
-                        RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
-                      }
-                    },
-                    { text: 'OK' },
-                  ])
-                })
-                .catch(err => {
-                  Alert.alert('Error in saving file')
-                });
-            })
-            .catch(err => {
-              console.log('is Not dir', err);
-              Alert.alert('Error in saving file')
-            });
-        }
-      })
-      .catch(err => {
-        Alert.alert('Error in saving file')
-      });
+    if (type) {
+      RNFetchBlob.fs
+        .isDir(DownloadDir)
+        .then(isDir => {
+          if (isDir) {
+            console.log('iSDir');
+            RNFetchBlob.fs
+              .writeFile(pdfLocation, bs64, 'base64')
+              .then(res => {
+                // console.log('saved', res);
+                Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                  {
+                    text: 'View', onPress: () => {
+                      // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                      RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                    }
+                  },
+                  { text: 'OK' },
+                ])
+              })
+              .catch(err => {
+                console.log(err)
+                Alert.alert('Error in saving file')
+              });
+          } else {
+            RNFetchBlob.fs
+              .mkdir(DownloadDir)
+              .then(() => {
+                console.log('Created Folder');
+                RNFetchBlob.fs
+                  .writeFile(pdfLocation, bs64, 'base64')
+                  .then(res => {
+                    console.log('saved');
+                    Alert.alert('Saved', 'Document has been saved in Downloads/Aviation folder', [
+                      {
+                        text: 'View', onPress: () => {
+                          // console.log(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1])
+                          RNFetchBlob.android.actionViewIntent(pdfLocation, val.split(',')[0].split(';')[0].split(':')[1]);
+                        }
+                      },
+                      { text: 'OK' },
+                    ])
+                  })
+                  .catch(err => {
+                    Alert.alert('Error in saving file')
+                  });
+              })
+              .catch(err => {
+                console.log('is Not dir', err);
+                Alert.alert('Error in saving file')
+              });
+          }
+        })
+        .catch(err => {
+          Alert.alert('Error in saving file')
+        });
+    }
+    else {
+      Alert.alert('Unsupported format.')
+    }
   }
 
   const onPressDocPreA_New = async (index, res) => {
@@ -459,7 +464,7 @@ export default function FlightPreparation(props) {
         <View style={{ padding: 20 }}>
           <BroadTextInput
             type={0}
-            label={'Airport Information'}
+            label={'Airport Information:'}
             labelSize={labelTextSize}
             text={airinfo}
             textSeeker={textSeeker}
@@ -472,7 +477,7 @@ export default function FlightPreparation(props) {
             textSeeker={textSeeker}
           /> */}
           <View>
-            <Text style={s.label}>{'NOTAMs'}</Text>
+            <Text style={s.label}>{'NOTAMs:'}</Text>
             <View style={[m.row, m.alighItemCenter]}>
               <TextInput
                 style={s.input}
@@ -527,7 +532,7 @@ export default function FlightPreparation(props) {
           </View>
           <BroadTextInput
             type={2}
-            label={'Special Procedures'}
+            label={'Special Procedures:'}
             labelSize={labelTextSize}
             text={specialproc}
             textSeeker={textSeeker}
