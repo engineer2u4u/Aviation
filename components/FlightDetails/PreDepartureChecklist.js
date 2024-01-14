@@ -56,7 +56,7 @@ export default function PreDepartureChecklist(props) {
 
   const [mode, setMode] = useState('time');
   const currentDeparture = useRef(0);
-  const [pdchecklist, setpdchecklist] = useState({ "CREATED_BY": "", "CREATED_DATE": "", "FUID": "", "LAST_UPDATE": "", "PDC_AFR": 0, "PDC_AFR_REM": "", "PDC_ASR": 0, "PDC_ASR_REM": "", "PDC_CAR": 0, "PDC_CAR_REM": "", "PDC_CCDD": null, "PDC_CCDT": "", "PDC_CIQ": 0, "PDC_CIQ_REM": "", "PDC_CML": "", "PDC_CML_PHOTO": "", "PDC_CNML": 0, "PDC_CNML_REM": "", "PDC_CTA": 0, "PDC_CTA_REM": "", "PDC_CTNR": 0, "PDC_CTPD": "", "PDC_CTPT": "", "PDC_FBO": 0, "PDC_FBO_REM": "", "PDC_FD": null, "PDC_FD_ATC": "", "PDC_FD_FDP": "", "PDC_FD_FDR": "", "PDC_FD_NOTAMS": "", "PDC_FD_SLOTS": "", "PDC_FD_WIU": "", "PDC_FT": "", "PDC_HAR": 0, "PDC_HAR_REM": "", "PDC_PAGD": 0, "PDC_PAGD_REM": "", "PDC_PNML": 0, "PDC_PNML_REM": "", "PDC_PTA": 0, "PDC_PTA_REM": "", "PDC_PTNR": 0, "PDC_REM": "", "PDC_TOR_CONTACT": "", "PDC_TOR_DRIVER": "", "PDC_TOR_REM": "", "PDC_TOR_TIME": "", "PDC_UDGD": "", "STATUS": 0, "UID": "", "UPDATE_BY": "", 'PDC_UDGD_String': [], PDC_FD_NOTAMS_C: 0, PDC_FD_WIU_C: 0 })
+  const [pdchecklist, setpdchecklist] = useState({ "CREATED_BY": "", "CREATED_DATE": "", "FUID": "", "LAST_UPDATE": "", "PDC_AFR": 0, "PDC_AFR_REM": "", "PDC_ASR": 0, "PDC_ASR_REM": "", "PDC_CAR": 0, "PDC_CAR_REM": "", "PDC_CCDD": null, "PDC_CCDT": "", "PDC_CIQ": 0, "PDC_CIQ_REM": "", "PDC_CML": "", "PDC_CML_PHOTO": "", "PDC_CNML": 0, "PDC_CNML_REM": "", "PDC_CTA": 0, "PDC_CTA_REM": "", "PDC_CTNR": 0, "PDC_CTPD": "", "PDC_CTPT": "", "PDC_FBO": 0, "PDC_FBO_REM": "", "PDC_FD": null, "PDC_FD_ATC": "", "PDC_FD_FDP": "", "PDC_FD_FDR": "", "PDC_FD_FDR_C": '', "PDC_FD_NOTAMS": "", "PDC_FD_SLOTS": "", "PDC_FD_WIU": "", "PDC_FT": "", "PDC_HAR": 0, "PDC_HAR_REM": "", "PDC_PAGD": 0, "PDC_PAGD_REM": "", "PDC_PNML": 0, "PDC_PNML_REM": "", "PDC_PTA": 0, "PDC_PTA_REM": "", "PDC_PTNR": 0, "PDC_REM": "", "PDC_TOR_CONTACT": "", "PDC_TOR_DRIVER": "", "PDC_TOR_REM": "", "PDC_TOR_TIME": "", "PDC_UDGD": "", "STATUS": 0, "UID": "", "UPDATE_BY": "", 'PDC_UDGD_String': [], PDC_FD_NOTAMS_C: 0, PDC_FD_WIU_C: 0 })
   const [crewtransport, setcrewtransport] = useState([]);
   const [paxtransport, setpaxtransport] = useState([]);
 
@@ -862,15 +862,15 @@ export default function PreDepartureChecklist(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setpdchecklist({ ...pdchecklist, ARS_FOA_C: pdchecklist.ARS_FOA_C == 1 ? 0 : 1 })
+                  setpdchecklist({ ...pdchecklist, PDC_FD_FDR_C: pdchecklist.PDC_FD_FDR_C == 1 ? 0 : 1 })
                 }}>
                 <Icons
                   name={
-                    pdchecklist.ARS_FOA_C == 1
+                    pdchecklist.PDC_FD_FDR_C == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={pdchecklist.ARS_FOA_C == 1 ? 'green' : 'black'}
+                  color={pdchecklist.PDC_FD_FDR_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>

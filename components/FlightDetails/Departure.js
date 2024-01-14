@@ -1653,14 +1653,14 @@ export default function Departure(props) {
                   setuploadSection('POD_CT_CEL_String');
                   refRBSheet.current.open();
                 }}
-                disabled={!aDeparture.DES_FOD_REQ ? false : true}
+                disabled={!aDeparture.DES_CTR_REQ ? false : true}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: aDeparture.DES_FOD_REQ == 1
+                  backgroundColor: aDeparture.DES_CTR_REQ == 1
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
@@ -1812,14 +1812,14 @@ export default function Departure(props) {
                   setuploadSection('POD_BG_PHOTO_String');
                   refRBSheet.current.open();
                 }}
-                disabled={!aDeparture.DES_FOD_REQ ? false : true}
+                disabled={!aDeparture.DES_CTR_REQ ? false : true}
                 style={{
                   marginLeft: 10,
                   paddingVertical: 5,
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderRadius: 8,
-                  backgroundColor: aDeparture.DES_FOD_REQ == 1
+                  backgroundColor: aDeparture.DES_CTR_REQ == 1
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
