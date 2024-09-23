@@ -27,7 +27,7 @@ import auth from '@react-native-firebase/auth';
 import s from '../subcomponents/Forms/FlightPreparation/form.styles';
 import m from '../styles/layouts/main.style';
 import { SERVER_URL, getDomain } from '../constants/env';
-
+import DocumentPicker from 'react-native-document-picker';
 // if (true) functions().useEmulator('192.168.29.75', 5001);
 const { width, height } = Dimensions.get('window');
 
@@ -156,6 +156,7 @@ export default function FlightPreparation(props) {
         setloading(false);
         var tfpreparation = [...fpreparation];
         tfpreparation[index].file.push('data:' + res.type + ';base64,' + encoded);
+        console.log('data:' + res.type + ';base64,' + encoded)
         setfpreparation([...tfpreparation]);
       })
       .catch(error => {
@@ -180,11 +181,16 @@ export default function FlightPreparation(props) {
     switch (type) {
       case true:
         try {
-          options.mediaType = 'photo';
-          const result = await ImagePicker.launchImageLibrary(options);
-          const file = result.assets[0];
-          console.log(file)
-          onPressDocPreA_New(uploadSection, file);
+          // options.mediaType = 'photo';
+          // const result = await ImagePicker.launchImageLibrary(options);
+          // const file = result.assets[0];
+          // console.log(file)
+          const res = await DocumentPicker.pickSingle({
+            type: [DocumentPicker.types.images, DocumentPicker.types.pdf],
+          });
+
+          // console.log("doc", res);
+          onPressDocPreA_New(uploadSection, res);
         } catch (error) {
           console.log(error);
         }
@@ -632,7 +638,7 @@ export default function FlightPreparation(props) {
                   }}>
                   <Icons name="image-outline" size={25} color={'black'} />
                   <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
-                    Upload from Gallery
+                    Upload from Files
                   </Text>
                 </TouchableOpacity>
               </View>

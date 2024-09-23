@@ -57,29 +57,29 @@ const UserLogin = ({ navigation }) => {
   };
 
   const loginStart = () => {
-    // setloading(true);
-    // const url = `${domain.current}/GetUserLogin?username=${encodeURIComponent(email)}&pw=${encodeURIComponent(pword)}&_token=b95909e1-d33f-469f-90c6-5a2fb1e5627c&_opco=`;
-    // console.log(url);
-    // fetch(url)
-    //   .then(res => res.json())
-    //   .then(data => {
-    //     if (data.length > 0 && data[0].ACCESS_RIGHT !== null && data[0].CID !== null) {
-    //       setloading(false);
-    AsyncStorage.setItem('username', email);
-    AsyncStorage.setItem('password', pword);
-    navigation.navigate('Home')
-    //   }
-    //   else {
-    //     Alert.alert('Wrong credentials!')
-    //     setloading(false);
-    //   }
-    // })
-    // .catch(e => {
-    //   console.log('error:', e)
-    //   Alert.alert('Access Denied!');
-    //   // navigation.navigate('Home');
-    //   setloading(false);
-    // })
+    setloading(true);
+    const url = `${domain.current}/GetUserLogin?username=${encodeURIComponent(email)}&pw=${encodeURIComponent(pword)}&_token=b95909e1-d33f-469f-90c6-5a2fb1e5627c&_opco=`;
+    console.log(url);
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.length > 0 && data[0].ACCESS_RIGHT !== null && data[0].CID !== null) {
+          setloading(false);
+          AsyncStorage.setItem('username', email);
+          AsyncStorage.setItem('password', pword);
+          navigation.navigate('Home')
+        }
+        else {
+          Alert.alert('Wrong credentials!')
+          setloading(false);
+        }
+      })
+      .catch(e => {
+        console.log('error:', e)
+        Alert.alert('Access Denied!');
+        // navigation.navigate('Home');
+        setloading(false);
+      })
   }
   const checkLogin = async () => {
     var username = await AsyncStorage.getItem('username');

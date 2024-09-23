@@ -313,11 +313,17 @@ export default function ArrivalService(props) {
     switch (type) {
       case true:
         try {
-          options.mediaType = 'photo';
-          const result = await ImagePicker.launchImageLibrary(options);
-          console.log(result);
-          const file = result.assets[0];
-          onPressDocPreA_New(uploadSection, file);
+          // options.mediaType = 'photo';
+          // const result = await ImagePicker.launchImageLibrary(options);
+          // console.log(result);
+          // const file = result.assets[0];
+          // onPressDocPreA_New(uploadSection, file);
+          const res = await DocumentPicker.pickSingle({
+            type: [DocumentPicker.types.images, DocumentPicker.types.pdf],
+          });
+
+          // console.log("doc", res);
+          onPressDocPreA_New(uploadSection, res);
         } catch (error) {
           console.log(error);
         }
@@ -2457,7 +2463,7 @@ export default function ArrivalService(props) {
                 }}>
                 <Icons name="image-outline" size={25} color={'black'} />
                 <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
-                  Upload from Gallery
+                  Upload from Files
                 </Text>
               </TouchableOpacity>
             </View>

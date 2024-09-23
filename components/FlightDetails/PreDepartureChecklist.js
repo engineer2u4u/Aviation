@@ -428,11 +428,17 @@ export default function PreDepartureChecklist(props) {
     switch (type) {
       case true:
         try {
-          options.mediaType = 'photo';
-          const result = await ImagePicker.launchImageLibrary(options);
-          const file = result.assets[0];
+          // options.mediaType = 'photo';
+          // const result = await ImagePicker.launchImageLibrary(options);
+          // const file = result.assets[0];
 
-          onPressDocPreA_New(uploadSection, file);
+          // onPressDocPreA_New(uploadSection, file);
+          const res = await DocumentPicker.pickSingle({
+            type: [DocumentPicker.types.images, DocumentPicker.types.pdf],
+          });
+
+          // console.log("doc", res);
+          onPressDocPreA_New(uploadSection, res);
         } catch (error) {
           console.log(error);
         }
@@ -2420,7 +2426,7 @@ export default function PreDepartureChecklist(props) {
                   }}>
                   <Icons name="image-outline" size={25} color={'black'} />
                   <Text style={{ color: 'black', fontSize: 18, paddingLeft: 20 }}>
-                    Upload from Gallery
+                    Upload from Files
                   </Text>
                 </TouchableOpacity>
               </View>
