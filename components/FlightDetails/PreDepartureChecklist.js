@@ -704,7 +704,7 @@ export default function PreDepartureChecklist(props) {
             index={12}
           />
           <DateTimeInput
-            label={'Fueling Date'}
+            label={'fuelling Date'}
             showDatePickerPostDepart={() => {
               showDatePicker('date', 0, 'pdchecklist', "PDC_FD");
             }}
@@ -715,7 +715,7 @@ export default function PreDepartureChecklist(props) {
             index={12}
           />
           <DateTimeInput
-            label={'Fueling Time (Local Time)'}
+            label={'fuelling Time (Local Time)'}
             showDatePickerPostDepart={() => {
               showDatePicker('time', 0, 'pdchecklist', "PDC_FT");
             }}
@@ -799,7 +799,7 @@ export default function PreDepartureChecklist(props) {
                 borderRadius: 8,
                 backgroundColor: 'white',
               }}>
-              <Text style={{ color: 'green' }}>Take Camera</Text>
+              <Text style={{ color: 'green' }}>Upload</Text>
             </TouchableOpacity>
           </View>
           {pdchecklist.PDC_UDGD_String && pdchecklist.PDC_UDGD_String.map((val, indexxx) => {

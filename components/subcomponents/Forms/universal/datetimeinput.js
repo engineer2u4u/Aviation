@@ -7,6 +7,8 @@ const DateTimeInput = ({
   label,
   showLabel = true,
   notrequiredSection = false,
+  isCompleted,
+  setIsCompleted,
   isnotrequired,
   setnotrequired,
   disabled,
@@ -22,30 +24,68 @@ const DateTimeInput = ({
   setflightdoc = null,
   showTimeNow = true,
   notrequiredtext = null,
-  mV = 10
+  mV = 10,
+  completedSection = false,
 }) => {
   const [date, setdate] = useState(data);
   const [notreq, setnotreq] = useState(isnotrequired);
   const [color, setcolor] = useState('white');
   const [touchableactive, setdisabletouchable] = useState(true);
 
+  // const setTime = () => {
+  //   if (type == 'date') {
+  //     var x = new Date().toLocaleString('en-US', {
+  //       hour12: false,
+  //     });
+  //     x = x.split(',')[0];
+  //   }
+  //   else if (type == 'time') {
+  //     var x = new Date().toLocaleString('en-US', {
+  //       hour12: false,
+  //     });
+  //     var time24 = x.split(', ')[1];
+  //     var time = time24.split(':');
+  //     x = time[0] + ':' + time[1];
+  //   }
+  //   else {
+  //     var x = new Date().toLocaleString('en-US', {
+  //       hour12: false,
+  //     });
+  //   }
+
+  //   if (typeof setflightdoc === 'function') {
+  //     console.log('setflight');
+  //     setflightdoc(x);
+  //   } else {
+  //     // console.log('setnow', x);
+
+  //     setNowPostDepart(index, x, 'time', sectionName);
+  //   }
+
+  //   setdate(x);
+  // };
+
   const setTime = () => {
-    if (type == 'date') {
-      var x = new Date().toLocaleString('en-US', {
-        hour12: false,
-      });
-      x = x.split(',')[0];
+    let x;
+
+    if (type === 'date') {
+      // Get the current date
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, '0'); // Get day and pad single digit
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month and pad single digit (months are 0-indexed)
+      const year = date.getFullYear(); // Get full year
+
+      x = `${day}/${month}/${year}`; // Format as dd/mm/yyyy
     }
-    else if (type == 'time') {
-      var x = new Date().toLocaleString('en-US', {
+    else if (type === 'time') {
+      const time24 = new Date().toLocaleTimeString('en-US', {
         hour12: false,
       });
-      var time24 = x.split(', ')[1];
-      var time = time24.split(':');
-      x = time[0] + ':' + time[1];
+      const time = time24.split(':');
+      x = time[0] + ':' + time[1]; // Format time as hh:mm
     }
     else {
-      var x = new Date().toLocaleString('en-US', {
+      x = new Date().toLocaleString('en-US', {
         hour12: false,
       });
     }
@@ -54,16 +94,18 @@ const DateTimeInput = ({
       console.log('setflight');
       setflightdoc(x);
     } else {
-      // console.log('setnow', x);
-
       setNowPostDepart(index, x, 'time', sectionName);
     }
 
-    setdate(x);
+    setdate(x); // Update the date
   };
 
+
   useEffect(() => {
-    setdate(data);
+    let split = data ? data.split('-') : ''
+    let reverse = split ? split.reverse().join('-') : []
+    console.log(reverse)
+    setdate(reverse);
   }, [data]);
   useEffect(() => {
     setnotreq(isnotrequired)
@@ -136,6 +178,48 @@ const DateTimeInput = ({
           />
           <Text style={[{ fontSize: 15, paddingLeft: 10, color: 'black' }]}>
             {notrequiredtext ? notrequiredtext : 'Not Required'}
+          </Text>
+        </TouchableOpacity>
+      )}
+      
+      {completedSection && (
+        <TouchableOpacity
+          onPress={event => {
+            // var x = paxhotelactivesections;
+            // setpaxhotelactivesections(!x);
+            // console.log(x);
+            //setpaxboardedtimeactive
+            // setnotrequired(!notreq);
+            // setnotreq(!notreq);
+            //come here
+            //setpaxarrivaltimeaddedactive(x);
+            if(isCompleted === 1) {
+              setIsCompleted(0)
+            }else {
+              setIsCompleted(1)
+            }
+          }}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            marginBottom: 5,
+            marginTop: 10,
+          }}>
+          <Icons
+            name={
+              // paxhotelactivesections
+              isCompleted
+                ? //val.arrivaActive
+
+                'checkbox-marked-outline'
+                : 'checkbox-blank-outline'
+            }
+            color={isCompleted ? 'green' : 'black'}
+            size={35}
+          />
+          <Text style={[{ fontSize: 15, paddingLeft: 10, color: 'black' }]}>
+            {notrequiredtext ? notrequiredtext : 'Completed'}
           </Text>
         </TouchableOpacity>
       )}

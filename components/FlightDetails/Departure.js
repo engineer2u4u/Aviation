@@ -100,6 +100,10 @@ export default function Departure(props) {
     readData();
   }, []);
 
+  useEffect(() => {
+    console.log(paxTransport)
+  },[paxTransport])
+
   const readData = () => {
     setcallLoad(true);
 
@@ -1823,7 +1827,7 @@ export default function Departure(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{ color: 'green' }}>Take Camera</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
             {aDeparture.POD_BG_PHOTO_String && aDeparture.POD_BG_PHOTO_String.map((val, indexxx) => {
@@ -1916,6 +1920,13 @@ export default function Departure(props) {
                     label={
                       'Actual Transport Arrival Time at Pickup Location (Local Time)'
                     }
+                    completedSection
+                    isCompleted={paxTransport[index].DES_CRM_TAT_C == 1 ? 1 : 0}
+                    setIsCompleted={value => {
+                      var tcheckList = [...paxTransport];
+                      tcheckList[index].DES_CRM_TAT_C = value ? 1 : 0;
+                      setpaxTransport([...tcheckList]);
+                    }}
                     notrequiredSection={true}
                     isnotrequired={paxTransport[index].DES_CRM_NRTAT == 1 ? true : false}
                     setnotrequired={value => {
@@ -1923,6 +1934,7 @@ export default function Departure(props) {
                       tcheckList[index].DES_CRM_NRTAT = value ? 1 : 0;
                       setpaxTransport([...tcheckList]);
                     }}
+                    completedSection
                     showLabel={true}
                     disabled={paxarrivaltimeaddedactive.includes(index)}
                     showDatePickerPostDepart={() =>
@@ -1944,6 +1956,13 @@ export default function Departure(props) {
                     label={
                       'Time Pax Boarded Transport at Pickup Location (Local Time)'
                     }
+                    // completedSection
+                    // isCompleted={paxTransport[index].DES_CRM_TAT_C == 1 ? 1 : 0}
+                    // setIsCompleted={value => {
+                    //   var tcheckList = [...paxTransport];
+                    //   tcheckList[index].DES_CRM_TAT_C = value ? 1 : 0;
+                    //   setpaxTransport([...tcheckList]);
+                    // }}
                     notrequiredSection={true}
                     isnotrequired={paxTransport[index].DES_CRM_NRTCBT == 1 ? true : false}
                     setnotrequired={value => {

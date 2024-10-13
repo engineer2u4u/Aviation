@@ -1068,6 +1068,7 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 marginTop: 10,
+                flexWrap: 'wrap'
               }}>
               <Text style={styleSheet.label}>
                 Catering Equipment List / Photo
@@ -2490,7 +2491,7 @@ const styleSheet = StyleSheet.create({
     backgroundColor: 'red',
   },
   label: {
-    fontSize: Dimensions.get('window').width / 25,
+    fontSize: 16,
     color: 'black',
   },
   button: {
