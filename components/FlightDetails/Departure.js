@@ -102,7 +102,7 @@ export default function Departure(props) {
 
   useEffect(() => {
     console.log(paxTransport)
-  },[paxTransport])
+  }, [paxTransport])
 
   const readData = () => {
     setcallLoad(true);
@@ -1193,7 +1193,7 @@ export default function Departure(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{ color: 'green' }}>Take Camera</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
             {aDeparture.POD_FOD_FR_String && aDeparture.POD_FOD_FR_String.map((val, indexxx) => {
@@ -1612,15 +1612,15 @@ export default function Departure(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaDeparture({ ...aDeparture, DES_CRM_C: aDeparture.DES_CRM_C == 1 ? 0 : 1 })
+                  setaDeparture({ ...aDeparture, DES_CTR_C: aDeparture.DES_CTR_C == 1 ? 0 : 1 })
                 }}>
                 <Icons
                   name={
-                    aDeparture.DES_CRM_C == 1
+                    aDeparture.DES_CTR_C == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={aDeparture.DES_CRM_C == 1 ? 'green' : 'black'}
+                  color={aDeparture.DES_CTR_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -1668,7 +1668,7 @@ export default function Departure(props) {
                     ? 'rgba(0,0,0,0.1)'
                     : 'white',
                 }}>
-                <Text style={{ color: 'green' }}>Take Camera</Text>
+                <Text style={{ color: 'green' }}>Upload</Text>
               </TouchableOpacity>
             </View>
             {aDeparture.POD_CT_CEL_String && aDeparture.POD_CT_CEL_String.map((val, indexxx) => {
@@ -1934,7 +1934,6 @@ export default function Departure(props) {
                       tcheckList[index].DES_CRM_NRTAT = value ? 1 : 0;
                       setpaxTransport([...tcheckList]);
                     }}
-                    completedSection
                     showLabel={true}
                     disabled={paxarrivaltimeaddedactive.includes(index)}
                     showDatePickerPostDepart={() =>
