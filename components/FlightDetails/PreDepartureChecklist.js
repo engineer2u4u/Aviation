@@ -859,6 +859,7 @@ export default function PreDepartureChecklist(props) {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                flexWrap: 'wrap'
               }}>
               <TouchableOpacity
                 onPress={event => {
@@ -893,6 +894,7 @@ export default function PreDepartureChecklist(props) {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                flexWrap: 'wrap'
               }}>
               <TouchableOpacity
                 onPress={event => {
@@ -928,6 +930,7 @@ export default function PreDepartureChecklist(props) {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                flexWrap: 'wrap'
               }}>
               <TouchableOpacity
                 onPress={event => {
@@ -962,6 +965,7 @@ export default function PreDepartureChecklist(props) {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                flexWrap: 'wrap'
               }}>
               <TouchableOpacity
                 onPress={event => {
@@ -977,7 +981,7 @@ export default function PreDepartureChecklist(props) {
                   size={40}
                 />
               </TouchableOpacity>
-              <Text style={styleSheet.label}>Weather Information Updated (Local Time)</Text>
+              <Text numberOfLines={2} style={styleSheet.label}>Weather Information Updated (Local Time)</Text>
             </View>
             <DateTimeInput
               label={''}
@@ -996,6 +1000,7 @@ export default function PreDepartureChecklist(props) {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                flexWrap: 'wrap'
               }}>
               <TouchableOpacity
                 onPress={event => {
