@@ -958,6 +958,7 @@ export default function Departure(props) {
               data={aDeparture.DES_CRM_REM}
               datatype={'text'}
               index={57}
+              disabled={aDeparture.DES_CRM_FDHC_C === 1}
               setText={(index, text, type, section) => {
                 var tcheckList = { ...aDeparture };
                 tcheckList.DES_CRM_REM = text

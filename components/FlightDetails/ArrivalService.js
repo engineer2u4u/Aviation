@@ -1250,7 +1250,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_CEC_REQ: aService.ARS_CEC_REQ == 1 ? 0 : 1, ARS_CEC_REM: "", ARS_CEC_C: aService.ARS_CEC_REQ == 1 ? aService.ARS_CEC_C : 0 })
+                  // setaService({ ...aService, ARS_CEC_REQ: aService.ARS_CEC_REQ == 1 ? 0 : 1, ARS_CEC_REM: "", ARS_CEC_C: aService.ARS_CEC_REQ == 1 ? aService.ARS_CEC_C : 0 })
+                  setaService({ ...aService, ARS_CEC_REQ: aService.ARS_CEC_REQ == 1 ? 0 : 1, ARS_CEC_REM: "", })
                 }}>
                 <Icons
                   name={
@@ -1272,7 +1273,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_CEC_C: aService.ARS_CEC_C == 1 ? 0 : 1, ARS_CEC_REQ: aService.ARS_CEC_C == 1 ? aService.ARS_CEC_REQ : 0 })
+                  // setaService({ ...aService, ARS_CEC_C: aService.ARS_CEC_C == 1 ? 0 : 1, ARS_CEC_REQ: aService.ARS_CEC_C == 1 ? aService.ARS_CEC_REQ : 0 })
+                  setaService({ ...aService, ARS_CEC_C: aService.ARS_CEC_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
@@ -1391,7 +1393,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_LC_NR: aService.ARS_LC_NR == 1 ? 0 : 1, ARS_LC_REM: "", ARS_LC_C: aService.ARS_LC_NR == 1 ? aService.ARS_LC_C : 0 })
+                  // setaService({ ...aService, ARS_LC_NR: aService.ARS_LC_NR == 1 ? 0 : 1, ARS_LC_REM: "", ARS_LC_C: aService.ARS_LC_NR == 1 ? aService.ARS_LC_C : 0 })
+                  setaService({ ...aService, ARS_LC_NR: aService.ARS_LC_NR == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
@@ -1413,7 +1416,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LC_NR: aService.ARS_LC_C == 1 ? aService.ARS_LC_NR : 0 })
+                  // setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LC_NR: aService.ARS_LC_C == 1 ? aService.ARS_LC_NR : 0 })
+                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
@@ -1528,7 +1532,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_WAS_REQ: aService.ARS_WAS_REQ == 1 ? 0 : 1, ARS_WAS_CT: "", ARS_WAS_ET: "", ARS_WAS_REM: "", ARS_WAS_C: aService.ARS_WAS_REQ == 1 ? aService.ARS_WAS_C : 0 })
+                  // setaService({ ...aService, ARS_WAS_REQ: aService.ARS_WAS_REQ == 1 ? 0 : 1, ARS_WAS_CT: "", ARS_WAS_ET: "", ARS_WAS_REM: "", ARS_WAS_C: aService.ARS_WAS_REQ == 1 ? aService.ARS_WAS_C : 0 })
+                  setaService({ ...aService, ARS_WAS_REQ: aService.ARS_WAS_REQ == 1 ? 0 : 1, ARS_WAS_CT: "", ARS_WAS_ET: "", ARS_WAS_REM: "", })
                   // setArrivalcheck(24);
                   // var x = [...arrival];
                   // x[21] = null;
@@ -1556,7 +1561,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_WAS_C: aService.ARS_WAS_C == 1 ? 0 : 1, ARS_WAS_REQ: aService.ARS_WAS_C == 1 ? aService.ARS_WAS_REQ : 0 })
+                  // setaService({ ...aService, ARS_WAS_C: aService.ARS_WAS_C == 1 ? 0 : 1, ARS_WAS_REQ: aService.ARS_WAS_C == 1 ? aService.ARS_WAS_REQ : 0 })
+                  setaService({ ...aService, ARS_WAS_C: aService.ARS_WAS_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
@@ -1624,7 +1630,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_LAS_REQ: aService.ARS_LAS_REQ == 1 ? 0 : 1, ARS_LAS_CT: "", ARS_LAS_ET: "", ARS_LAS_REM: "", ARS_LC_C: aService.ARS_LAS_REQ == 1 ? aService.ARS_LC_C : 0 })
+                  // setaService({ ...aService, ARS_LAS_REQ: aService.ARS_LAS_REQ == 1 ? 0 : 1, ARS_LAS_CT: "", ARS_LAS_ET: "", ARS_LAS_REM: "", ARS_LC_C: aService.ARS_LAS_REQ == 1 ? aService.ARS_LC_C : 0 })
+                  setaService({ ...aService, ARS_LAS_REQ: aService.ARS_LAS_REQ == 1 ? 0 : 1, ARS_LAS_CT: "", ARS_LAS_ET: "", ARS_LAS_REM: "", })
                 }}>
                 <Icons
                   name={
@@ -1646,7 +1653,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LAS_ST: null, ARS_LAS_ET: null, ARS_LAS_REQ: aService.ARS_LC_C == 1 ? aService.ARS_LAS_REQ : 0 })
+                  // setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LAS_ST: null, ARS_LAS_ET: null, ARS_LAS_REQ: aService.ARS_LC_C == 1 ? aService.ARS_LAS_REQ : 0 })
+                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LAS_ST: null, ARS_LAS_ET: null, })
                 }}>
                 <Icons
                   name={
@@ -1744,7 +1752,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_RUS_REQ: aService.ARS_RUS_REQ == 1 ? 0 : 1, ARS_RUS_CT: "", ARS_RUS_REM: "", ARS_RUS_C: aService.ARS_RUS_REQ == 1 ? aService.ARS_RUS_C : 0 })
+                  // setaService({ ...aService, ARS_RUS_REQ: aService.ARS_RUS_REQ == 1 ? 0 : 1, ARS_RUS_CT: "", ARS_RUS_REM: "", ARS_RUS_C: aService.ARS_RUS_REQ == 1 ? aService.ARS_RUS_C : 0 })
+                  setaService({ ...aService, ARS_RUS_REQ: aService.ARS_RUS_REQ == 1 ? 0 : 1, ARS_RUS_CT: "", ARS_RUS_REM: "", })
                 }}>
                 <Icons
                   name={
@@ -1766,7 +1775,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, ARS_RUS_REQ: aService.ARS_RUS_C == 1 ? aService.ARS_RUS_REQ : 0 })
+                  // setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, ARS_RUS_REQ: aService.ARS_RUS_C == 1 ? aService.ARS_RUS_REQ : 0 })
+                  setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
@@ -1876,7 +1886,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_FOA_REQ: aService.ARS_FOA_REQ == 1 ? 0 : 1, ARS_FOA_FTAT: "", ARS_FOA_START: "", ARS_FOA_END: "", ARS_FOA_REM: "", ARS_FOA_C: aService.ARS_FOA_REQ == 1 ? aService.ARS_FOA_C : 0 })
+                  // setaService({ ...aService, ARS_FOA_REQ: aService.ARS_FOA_REQ == 1 ? 0 : 1, ARS_FOA_FTAT: "", ARS_FOA_START: "", ARS_FOA_END: "", ARS_FOA_REM: "", ARS_FOA_C: aService.ARS_FOA_REQ == 1 ? aService.ARS_FOA_C : 0 })
+                  setaService({ ...aService, ARS_FOA_REQ: aService.ARS_FOA_REQ == 1 ? 0 : 1, ARS_FOA_FTAT: "", ARS_FOA_START: "", ARS_FOA_END: "", ARS_FOA_REM: "", })
                 }}>
                 <Icons
                   name={
@@ -1898,7 +1909,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_FOA_C: aService.ARS_FOA_C == 1 ? 0 : 1, ARS_FOA_REQ: aService.ARS_FOA_C == 1 ? aService.ARS_FOA_REQ : 0 })
+                  // setaService({ ...aService, ARS_FOA_C: aService.ARS_FOA_C == 1 ? 0 : 1, ARS_FOA_REQ: aService.ARS_FOA_C == 1 ? aService.ARS_FOA_REQ : 0 })
+                  setaService({ ...aService, ARS_FOA_C: aService.ARS_FOA_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
@@ -2051,7 +2063,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_TOS_REQ: aService.ARS_TOS_REQ == 1 ? 0 : 1, ARS_TOS_START: "", ARS_TOS_END: "", ARS_TOS_REM: "", ARS_TOS_C: aService.ARS_TOS_REQ == 1 ? aService.ARS_TOS_C : 0 })
+                  // setaService({ ...aService, ARS_TOS_REQ: aService.ARS_TOS_REQ == 1 ? 0 : 1, ARS_TOS_START: "", ARS_TOS_END: "", ARS_TOS_REM: "", ARS_TOS_C: aService.ARS_TOS_REQ == 1 ? aService.ARS_TOS_C : 0 })
+                  setaService({ ...aService, ARS_TOS_REQ: aService.ARS_TOS_REQ == 1 ? 0 : 1, ARS_TOS_START: "", ARS_TOS_END: "", ARS_TOS_REM: "", })
                 }}>
                 <Icons
                   name={
@@ -2073,7 +2086,8 @@ export default function ArrivalService(props) {
               }}>
               <TouchableOpacity
                 onPress={event => {
-                  setaService({ ...aService, ARS_TOS_C: aService.ARS_TOS_C == 1 ? 0 : 1, ARS_TOS_REQ: aService.ARS_TOS_C == 1 ? aService.ARS_TOS_REQ : 0 })
+                  // setaService({ ...aService, ARS_TOS_C: aService.ARS_TOS_C == 1 ? 0 : 1, ARS_TOS_REQ: aService.ARS_TOS_C == 1 ? aService.ARS_TOS_REQ : 0 })
+                  setaService({ ...aService, ARS_TOS_C: aService.ARS_TOS_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
