@@ -1655,15 +1655,15 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 onPress={event => {
                   // setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LAS_ST: null, ARS_LAS_ET: null, ARS_LAS_REQ: aService.ARS_LC_C == 1 ? aService.ARS_LAS_REQ : 0 })
-                  setaService({ ...aService, ARS_LC_C: aService.ARS_LC_C == 1 ? 0 : 1, ARS_LAS_ST: null, ARS_LAS_ET: null, })
+                  setaService({ ...aService, ARS_LAS_ST_C: aService.ARS_LAS_ST_C == 1 ? 0 : 1, ARS_LAS_ST: null, ARS_LAS_ET: null, })
                 }}>
                 <Icons
                   name={
-                    aService.ARS_LC_C == 1
+                    aService.ARS_LAS_ST_C == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={aService.ARS_LC_C == 1 ? 'green' : 'black'}
+                  color={aService.ARS_LAS_ST_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -1687,13 +1687,14 @@ export default function ArrivalService(props) {
               data={aService.ARS_LAS_CT}
               index={12}
             /> */}
+
             <DateTimeInput
               notrequiredtext={'Completed'}
-              isnotrequired={aService.ARS_LAS_ST_C == 1 ? true : false}
+              notrequiredSection={false}
+              isnotrequired={aService.ARS_LAS_ST_C == 1} // this is unambiguous thing if set to 1 then its not good
               setnotrequired={value => {
                 setaService({ ...aService, ARS_LAS_ST_C: value ? 1 : 0 })
               }}
-              notrequiredSection={false}
               disabled={aService.ARS_LAS_REQ}
               label={'Start Time (Local Time)'}
               showDatePickerPostDepart={() => {
@@ -1705,24 +1706,6 @@ export default function ArrivalService(props) {
               data={aService.ARS_LAS_ST}
               index={12}
             />
-            {/* <DateTimeInput
-              notrequiredtext={'Completed'}
-              notrequiredSection={false}
-              isnotrequired={aService.ARS_LAS_ST_C == 1 ? true : false}
-              setnotrequired={value => {
-                setaService({ ...aService, ARS_LAS_ST_C: value ? 1 : 0 })
-              }}
-              disabled={aService.ARS_LAS_REQ}
-              label={'Start Time (Local Time)'}
-              showDatePickerPostDepart={() => {
-                showDatePicker('time', 0, 'aService', "ARS_LAS_ST");
-              }}
-              setNowPostDepart={() => setNow(0, 'aService', "ARS_LAS_ST")}
-              size={12}
-              type={'time'}
-              data={aService.ARS_LAS_ST}
-              index={12}
-            /> */}
             <DateTimeInput
               notrequiredtext={'Completed'}
               notrequiredSection={false}
@@ -1792,8 +1775,8 @@ export default function ArrivalService(props) {
                 alignItems: 'center',
                 marginBottom: 10,
               }}>
-                {/* New one */}
-              <TouchableOpacity
+              {/* New one */}
+              {/* <TouchableOpacity
                 onPress={event => {
                   // setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, ARS_RUS_REQ: aService.ARS_RUS_C == 1 ? aService.ARS_RUS_REQ : 0 })
                   setaService({ ...aService, ARS_RUS_CT_C: aService.ARS_RUS_CT_C == 1 ? 0 : 1, })
@@ -1807,9 +1790,9 @@ export default function ArrivalService(props) {
                   color={aService.ARS_RUS_CT_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               {/* old one */}
-              {/* <TouchableOpacity
+              <TouchableOpacity
                 onPress={event => {
                   // setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, ARS_RUS_REQ: aService.ARS_RUS_C == 1 ? aService.ARS_RUS_REQ : 0 })
                   setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, })
@@ -1823,7 +1806,7 @@ export default function ArrivalService(props) {
                   color={aService.ARS_RUS_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
-              </TouchableOpacity> */}
+              </TouchableOpacity>
               <Text style={styleSheet.label}>Completed</Text>
             </View>
             <DateTimeInput
