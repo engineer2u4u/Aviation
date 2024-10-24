@@ -90,6 +90,8 @@ export default function ArrivalService(props) {
     ARS_LAS_CT_C: 0,
     ARS_LAS_ET_C: 0,
     ARS_LAS_ST_C: 0,
+    ARS_TOS_START_C: 0,
+    ARS_RUS_CT_C: 0,
   })
   const [paxmovement, setpaxmovement] = useState([]);
   const [crewmovement, setcrewmovement] = useState([]);
@@ -1795,15 +1797,15 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 onPress={event => {
                   // setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, ARS_RUS_REQ: aService.ARS_RUS_C == 1 ? aService.ARS_RUS_REQ : 0 })
-                  setaService({ ...aService, ARS_RUS_C: aService.ARS_RUS_C == 1 ? 0 : 1, })
+                  setaService({ ...aService, ARS_RUS_CT_C: aService.ARS_RUS_CT_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
-                    aService.ARS_RUS_C == 1
+                    aService.ARS_RUS_CT_C == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={aService.ARS_RUS_C == 1 ? 'green' : 'black'}
+                  color={aService.ARS_RUS_CT_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
@@ -2106,15 +2108,15 @@ export default function ArrivalService(props) {
               <TouchableOpacity
                 onPress={event => {
                   // setaService({ ...aService, ARS_TOS_C: aService.ARS_TOS_C == 1 ? 0 : 1, ARS_TOS_REQ: aService.ARS_TOS_C == 1 ? aService.ARS_TOS_REQ : 0 })
-                  setaService({ ...aService, ARS_TOS_C: aService.ARS_TOS_C == 1 ? 0 : 1, })
+                  setaService({ ...aService, ARS_TOS_START_C: aService.ARS_TOS_START_C == 1 ? 0 : 1, })
                 }}>
                 <Icons
                   name={
-                    aService.ARS_TOS_C == 1
+                    aService.ARS_TOS_START_C == 1
                       ? 'checkbox-marked-outline'
                       : 'checkbox-blank-outline'
                   }
-                  color={aService.ARS_TOS_C == 1 ? 'green' : 'black'}
+                  color={aService.ARS_TOS_START_C == 1 ? 'green' : 'black'}
                   size={40}
                 />
               </TouchableOpacity>
